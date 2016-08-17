@@ -12,7 +12,7 @@ Beautiful javascript scales and axes.
 If you use NPM, `npm install d3plus-axis`. Otherwise, download the [latest release](https://github.com/d3plus/d3plus-axis/releases/latest). The released bundle supports AMD, CommonJS, and vanilla environments. Create a [custom bundle using Rollup](https://github.com/rollup/rollup) or your preferred bundler. You can also load directly from [d3plus.org](https://d3plus.org):
 
 ```html
-<script src="https://d3plus.org/js/d3plus-axis.v0.4.full.min.js"></script>
+<script src="https://d3plus.org/js/d3plus-axis.v0.1.full.min.js"></script>
 ```
 
 
@@ -291,4 +291,4 @@ Shorthand method for creating an axis where the ticks are drawn above the vertic
 
 
 
-###### <sub>Documentation generated on Wed, 17 Aug 2016 22:55:35 GMT</sub>
+###### <sub>Documentation generated on Wed, 17 Aug 2016 22:56:16 GMT</sub>
