@@ -1,4 +1,4 @@
-import {BaseClass, constant} from "d3plus-common";
+import {BaseClass, constant, elem} from "d3plus-common";
 import {TextBox, textWidth, textWrap} from "d3plus-text";
 
 import {max} from "d3-array";
@@ -189,7 +189,8 @@ export default class Axis extends BaseClass {
 
     if (this._select === void 0) this.select(select("body").append("svg").attr("width", `${this._width}px`).attr("height", `${this._height}px`).node());
 
-    const t = transition().duration(this._duration);
+    const parent = this._select,
+          t = transition().duration(this._duration);
 
     if (this._lineHeight === void 0) this._lineHeight = (d, i) => this._textBoxConfig.fontSize(d, i) * 1.1;
 
@@ -304,20 +305,9 @@ export default class Axis extends BaseClass {
                          : this._align === "end" ? this[`_${height}`] - this._outerBounds[height]
                          : this[`_${height}`] / 2 - this._outerBounds[height] / 2;
 
-    let group = this._select.selectAll(`g#d3plus-Axis-${clipId}`)
-      .data([0]);
-
-    group = group.enter().append("g")
-        .attr("id", `d3plus-Axis-${clipId}`)
-      .merge(group);
-
-    let defs = group.selectAll("defs").data([null]);
-    defs = defs.enter().append("defs").merge(defs);
-
-    let clip = defs.selectAll(`clipPath#${clipId}`).data([null]);
-    clip = clip.enter().append("clipPath")
-        .attr("id", clipId)
-      .merge(clip);
+    const group = elem(`g#d3plus-Axis-${clipId}`, {parent});
+    const defs = elem("defs", {parent: group});
+    const clip = elem(`clipPath#${clipId}`, {parent: defs});
 
     const axisClip = clip.selectAll("rect").data([null]);
     axisClip.enter().append("rect")
@@ -356,15 +346,12 @@ export default class Axis extends BaseClass {
     const maxTextHeight = max(textData, t => t.height) || 0,
           maxTextWidth = max(textData, t => t.width + t.fS) || 0;
 
-    let titleGroup = group.selectAll("g.d3plus-Axis-title").data([null]);
-    titleGroup = titleGroup.enter().append("g").attr("class", "d3plus-Axis-title").merge(titleGroup);
-
     new TextBox()
       .data(this._title ? [{text: this._title}] : [])
       .duration(this._duration)
       .height(this._outerBounds.height)
       .rotate(this._orient === "left" ? -90 : this._orient === "right" ? 90 : 0)
-      .select(titleGroup.node())
+      .select(elem("g.d3plus-Axis-title", {parent: group}).node())
       .text(d => d.text)
       .textAnchor("middle")
       .verticalAlign(this._orient === "bottom" ? "bottom" : "top")
@@ -374,14 +361,11 @@ export default class Axis extends BaseClass {
       .config(this._titleConfig)
       .render();
 
-    let tickGroup = group.selectAll("g.d3plus-Axis-ticks").data([null]);
-    tickGroup = tickGroup.enter().append("g").attr("class", "d3plus-Axis-ticks").merge(tickGroup);
-
     new TextBox()
       .data(values.filter((d, i) => textData[i].lines.length).map(d => ({id: d})))
       .duration(this._duration)
       .height(maxTextHeight)
-      .select(tickGroup.node())
+      .select(elem("g.d3plus-Axis-ticks", {parent: group}).node())
       .text(d => tickFormat(d.id))
       .textAnchor(this._orient === "left" ? "end" : this._orient === "right" ? "start" : "middle")
       .verticalAlign(this._orient === "bottom" ? "top" : this._orient === "top" ? "bottom" : "middle")
