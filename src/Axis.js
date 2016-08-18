@@ -446,12 +446,12 @@ export default class Axis extends BaseClass {
     new TextBox()
       .data(values.filter((d, i) => textData[i].lines.length).map(d => ({id: d})))
       .duration(this._duration)
-      .height(maxTextHeight)
+      .height(["top", "bottom"].includes(this._orient) ? maxTextHeight + p : maxTextHeight)
       .select(elem("g.d3plus-Axis-ticks", {parent: group}).node())
       .text(d => tickFormat(d.id))
       .textAnchor(this._orient === "left" ? "end" : this._orient === "right" ? "start" : "middle")
       .verticalAlign(this._orient === "bottom" ? "top" : this._orient === "top" ? "bottom" : "middle")
-      .width(space)
+      .width(["top", "bottom"].includes(this._orient) ? space : this._width - this._gridLength - this._tickSize - p * 2 - this._titleHeight)
       .x((d, i) => {
         if (["top", "bottom"].includes(this._orient)) return this._d3Scale(d.id) - space / 2;
         return this._orient === "left" ? this._titleHeight + this._outerBounds.x - this._textBoxConfig.fontSize(values[i], i) / 2 : this._outerBounds.x + this._tickSize + this._gridLength + this._padding;
