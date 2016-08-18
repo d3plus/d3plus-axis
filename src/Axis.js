@@ -18,6 +18,10 @@ export default class Axis extends BaseClass {
     super();
 
     this._align = "middle";
+    this._barConfig = {
+      "stroke": "#000",
+      "stroke-width": 1
+    };
     this._domain = [0, 10];
     this._duration = 600;
     this._gridConfig = {
@@ -60,6 +64,7 @@ export default class Axis extends BaseClass {
     const {height, x, y} = this._position;
     const position = ["top", "left"].includes(this._orient) ? this._outerBounds[y] + this._outerBounds[height] - this._gridLength : this._outerBounds[y] + this._gridLength;
     bar
+      .call(attrize, this._barConfig)
       .attr(`${x}1`, this._d3Scale(this._d3Scale.domain()[0]))
       .attr(`${x}2`, this._d3Scale(this._d3Scale.domain()[1]))
       .attr(`${y}1`, position)
@@ -130,6 +135,15 @@ export default class Axis extends BaseClass {
   */
   align(_) {
     return arguments.length ? (this._align = _, this) : this._align;
+  }
+
+  /**
+      @memberof Axis
+      @desc If *value* is specified, sets the axis line style and returns the current class instance. If *value* is not specified, returns the current axis line style.
+      @param {Object} [*value*]
+  */
+  barConfig(_) {
+    return arguments.length ? (this._barConfig = Object.assign(this._barConfig, _), this) : this._barConfig;
   }
 
   /**
@@ -406,7 +420,6 @@ export default class Axis extends BaseClass {
 
     bar.enter().append("line")
         .attr("class", "bar")
-        .attr("stroke", "#000")
         .attr("opacity", 0)
         .call(this._barPosition.bind(this))
       .merge(bar).transition(t)
