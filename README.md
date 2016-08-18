@@ -41,8 +41,12 @@ If you use NPM, `npm install d3plus-axis`. Otherwise, download the [latest relea
 * [Axis](#Axis) ⇐ <code>BaseClass</code>
     * [new Axis()](#new_Axis_new)
     * [.align([*value*])](#Axis.align)
+    * [.barConfig([*value*])](#Axis.barConfig)
     * [.domain([*value*])](#Axis.domain)
     * [.duration([*value*])](#Axis.duration)
+    * [.grid([*value*])](#Axis.grid)
+    * [.gridConfig([*value*])](#Axis.gridConfig)
+    * [.gridSize([*value*])](#Axis.gridSize)
     * [.height([*value*])](#Axis.height)
     * [.orient([*orient*])](#Axis.orient)
     * [.outerBounds()](#Axis.outerBounds)
@@ -51,6 +55,7 @@ If you use NPM, `npm install d3plus-axis`. Otherwise, download the [latest relea
     * [.render([*callback*])](#Axis.render)
     * [.scale([*value*])](#Axis.scale)
     * [.select([*selector*])](#Axis.select)
+    * [.tickConfig([*value*])](#Axis.tickConfig)
     * [.tickLabels([*value*])](#Axis.tickLabels)
     * [.ticks([*value*])](#Axis.ticks)
     * [.tickSize([*value*])](#Axis.tickSize)
@@ -74,10 +79,21 @@ If *value* is specified, sets the horizontal alignment to the specified value an
 | --- | --- | --- | --- |
 | [*value*] | <code>String</code> | <code>&quot;center&quot;</code> | Supports `"left"` and `"center"` and `"right"`. |
 
+<a name="Axis.barConfig"></a>
+
+#### Axis.barConfig([*value*])
+If *value* is specified, sets the axis line style and returns the current class instance. If *value* is not specified, returns the current axis line style.
+
+**Kind**: static method of <code>[Axis](#Axis)</code>  
+
+| Param | Type |
+| --- | --- |
+| [*value*] | <code>Object</code> | 
+
 <a name="Axis.domain"></a>
 
 #### Axis.domain([*value*])
-If *value* is specified, sets the scale domain of the legend and returns the current class instance. If *value* is not specified, returns the current scale domain.
+If *value* is specified, sets the scale domain of the axis and returns the current class instance. If *value* is not specified, returns the current scale domain.
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
 
@@ -88,7 +104,7 @@ If *value* is specified, sets the scale domain of the legend and returns the cur
 <a name="Axis.duration"></a>
 
 #### Axis.duration([*value*])
-If *value* is specified, sets the transition duration of the legend and returns the current class instance. If *value* is not specified, returns the current duration.
+If *value* is specified, sets the transition duration of the axis and returns the current class instance. If *value* is not specified, returns the current duration.
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
 
@@ -96,10 +112,43 @@ If *value* is specified, sets the transition duration of the legend and returns 
 | --- | --- | --- |
 | [*value*] | <code>Number</code> | <code>600</code> | 
 
+<a name="Axis.grid"></a>
+
+#### Axis.grid([*value*])
+If *value* is specified, sets the grid values of the axis and returns the current class instance. If *value* is not specified, returns the current grid values, which by default are interpreted based on the [domain](#Axis.domain) and the available [width](#Axis.width).
+
+**Kind**: static method of <code>[Axis](#Axis)</code>  
+
+| Param | Type |
+| --- | --- |
+| [*value*] | <code>Array</code> | 
+
+<a name="Axis.gridConfig"></a>
+
+#### Axis.gridConfig([*value*])
+If *value* is specified, sets the grid style of the axis and returns the current class instance. If *value* is not specified, returns the current grid style.
+
+**Kind**: static method of <code>[Axis](#Axis)</code>  
+
+| Param | Type |
+| --- | --- |
+| [*value*] | <code>Object</code> | 
+
+<a name="Axis.gridSize"></a>
+
+#### Axis.gridSize([*value*])
+If *value* is specified, sets the grid size of the axis and returns the current class instance. If *value* is not specified, returns the current grid size, which defaults to taking up as much space as available.
+
+**Kind**: static method of <code>[Axis](#Axis)</code>  
+
+| Param | Type |
+| --- | --- |
+| [*value*] | <code>Number</code> | 
+
 <a name="Axis.height"></a>
 
 #### Axis.height([*value*])
-If *value* is specified, sets the overall height of the legend and returns the current class instance. If *value* is not specified, returns the current height value.
+If *value* is specified, sets the overall height of the axis and returns the current class instance. If *value* is not specified, returns the current height value.
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
 
@@ -121,7 +170,7 @@ If *orient* is specified, sets the orientation of the shape and returns the curr
 <a name="Axis.outerBounds"></a>
 
 #### Axis.outerBounds()
-If called after the elements have been drawn to DOM, will returns the outer bounds of the legend content.
+If called after the elements have been drawn to DOM, will returns the outer bounds of the axis content.
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
 **Example**  
@@ -142,7 +191,7 @@ If *value* is specified, sets the padding between each key to the specified numb
 <a name="Axis.range"></a>
 
 #### Axis.range([*value*])
-If *value* is specified, sets the scale range (in pixels) of the legend and returns the current class instance. The given array must have 2 values, but one may be `undefined` to allow the default behavior for that value. If *value* is not specified, returns the current scale range.
+If *value* is specified, sets the scale range (in pixels) of the axis and returns the current class instance. The given array must have 2 values, but one may be `undefined` to allow the default behavior for that value. If *value* is not specified, returns the current scale range.
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
 
@@ -164,7 +213,7 @@ Renders the current Axis to the page. If a *callback* is specified, it will be c
 <a name="Axis.scale"></a>
 
 #### Axis.scale([*value*])
-If *value* is specified, sets the scale of the legend and returns the current class instance. If *value* is not specified, returns the current this._d3Scale
+If *value* is specified, sets the scale of the axis and returns the current class instance. If *value* is not specified, returns the current this._d3Scale
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
 
@@ -183,10 +232,21 @@ If *selector* is specified, sets the SVG container element to the specified d3 s
 | --- | --- | --- |
 | [*selector*] | <code>String</code> &#124; <code>HTMLElement</code> | <code>d3.select(&quot;body&quot;).append(&quot;svg&quot;)</code> | 
 
+<a name="Axis.tickConfig"></a>
+
+#### Axis.tickConfig([*value*])
+If *value* is specified, sets the tick style of the axis and returns the current class instance. If *value* is not specified, returns the current tick style.
+
+**Kind**: static method of <code>[Axis](#Axis)</code>  
+
+| Param | Type |
+| --- | --- |
+| [*value*] | <code>Object</code> | 
+
 <a name="Axis.tickLabels"></a>
 
 #### Axis.tickLabels([*value*])
-If *value* is specified, sets the visible tick labels of the legend and returns the current class instance. If *value* is not specified, returns the current visible tick labels, which defaults to showing all labels.
+If *value* is specified, sets the visible tick labels of the axis and returns the current class instance. If *value* is not specified, returns the current visible tick labels, which defaults to showing all labels.
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
 
@@ -197,7 +257,7 @@ If *value* is specified, sets the visible tick labels of the legend and returns 
 <a name="Axis.ticks"></a>
 
 #### Axis.ticks([*value*])
-If *value* is specified, sets the tick values of the legend and returns the current class instance. If *value* is not specified, returns the current tick values, which by default are interpreted based on the [domain](#Axis.domain) and the available [width](#Axis.width).
+If *value* is specified, sets the tick values of the axis and returns the current class instance. If *value* is not specified, returns the current tick values, which by default are interpreted based on the [domain](#Axis.domain) and the available [width](#Axis.width).
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
 
@@ -208,7 +268,7 @@ If *value* is specified, sets the tick values of the legend and returns the curr
 <a name="Axis.tickSize"></a>
 
 #### Axis.tickSize([*value*])
-If *value* is specified, sets the tick size of the legend and returns the current class instance. If *value* is not specified, returns the current tick size.
+If *value* is specified, sets the tick size of the axis and returns the current class instance. If *value* is not specified, returns the current tick size.
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
 
@@ -219,7 +279,7 @@ If *value* is specified, sets the tick size of the legend and returns the curren
 <a name="Axis.title"></a>
 
 #### Axis.title([*value*])
-If *value* is specified, sets the title of the legend and returns the current class instance. If *value* is not specified, returns the current title.
+If *value* is specified, sets the title of the axis and returns the current class instance. If *value* is not specified, returns the current title.
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
 
@@ -230,7 +290,7 @@ If *value* is specified, sets the title of the legend and returns the current cl
 <a name="Axis.titleConfig"></a>
 
 #### Axis.titleConfig([*value*])
-If *value* is specified, sets the title configuration of the legend and returns the current class instance. If *value* is not specified, returns the current title configuration.
+If *value* is specified, sets the title configuration of the axis and returns the current class instance. If *value* is not specified, returns the current title configuration.
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
 
@@ -241,7 +301,7 @@ If *value* is specified, sets the title configuration of the legend and returns 
 <a name="Axis.width"></a>
 
 #### Axis.width([*value*])
-If *value* is specified, sets the overall width of the legend and returns the current class instance. If *value* is not specified, returns the current width value.
+If *value* is specified, sets the overall width of the axis and returns the current class instance. If *value* is not specified, returns the current width value.
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
 
@@ -291,4 +351,4 @@ Shorthand method for creating an axis where the ticks are drawn above the vertic
 
 
 
-###### <sub>Documentation generated on Wed, 17 Aug 2016 23:10:49 GMT</sub>
+###### <sub>Documentation generated on Thu, 18 Aug 2016 18:28:15 GMT</sub>
