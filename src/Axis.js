@@ -426,8 +426,7 @@ export default class Axis extends BaseClass {
         .attr("opacity", 1)
         .call(this._barPosition.bind(this));
 
-    const maxTextHeight = max(textData, t => t.height) || 0,
-          maxTextWidth = max(textData, t => t.width + t.fS) || 0;
+    const maxTextHeight = max(textData, t => t.height) || 0;
 
     new TextBox()
       .data(this._title ? [{text: this._title}] : [])
@@ -452,9 +451,9 @@ export default class Axis extends BaseClass {
       .text(d => tickFormat(d.id))
       .textAnchor(this._orient === "left" ? "end" : this._orient === "right" ? "start" : "middle")
       .verticalAlign(this._orient === "bottom" ? "top" : this._orient === "top" ? "bottom" : "middle")
-      .width(maxTextWidth)
+      .width(space)
       .x((d, i) => {
-        if (["top", "bottom"].includes(this._orient)) return this._d3Scale(d.id) - maxTextWidth / 2;
+        if (["top", "bottom"].includes(this._orient)) return this._d3Scale(d.id) - space / 2;
         return this._orient === "left" ? this._titleHeight + this._outerBounds.x - this._textBoxConfig.fontSize(values[i], i) / 2 : this._outerBounds.x + this._tickSize + this._gridLength + this._padding;
       })
       .y(d => {
