@@ -15,6 +15,40 @@ If you use NPM, `npm install d3plus-axis`. Otherwise, download the [latest relea
 <script src="https://d3plus.org/js/d3plus-axis.v0.1.full.min.js"></script>
 ```
 
+[width]: 600
+[height]: 200
+
+## Getting Started
+
+d3plus-axis extrapolates on the ideas presented in [d3-axis](https://github.com/d3/d3-axis), most notably by adding grid lines and fitting the axis within the allotted space. To create an axis in an SVG group defined like this:
+
+```html
+<svg width=600 height=200>
+  <g id="my-axis"></g>
+</svg>
+```
+
+Here is the javascript needed:
+
+```js
+var bottom = new d3plus.AxisBottom()
+  .select("#my-axis")
+  .domain([3.14, 9.34])
+  .height(200)
+  .width(600)
+  .render();
+```
+
+These axes are the brains behind [d3plus-plot](https://github.com/d3plus/d3plus-plot).
+
+
+[Click here](https://d3plus.org/examples/d3plus-axis/getting-started/) to view this example live on the web.
+
+[![Getting Started](/example/getting-started.png)](https://d3plus.org/examples/d3plus-axis/getting-started/)
+
+
+
+
 
 ## API Reference
 ### Classes
@@ -351,4 +385,4 @@ Shorthand method for creating an axis where the ticks are drawn above the vertic
 
 
 
-###### <sub>Documentation generated on Thu, 18 Aug 2016 18:40:43 GMT</sub>
+###### <sub>Documentation generated on Thu, 18 Aug 2016 20:01:15 GMT</sub>
