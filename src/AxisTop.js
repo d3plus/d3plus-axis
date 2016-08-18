@@ -9,9 +9,7 @@ export default class AxisTop extends Axis {
 
   constructor() {
     super();
-    this._height = 100;
     this.orient("top");
-    this._width = 400;
   }
 
 }

@@ -9,9 +9,7 @@ export default class AxisLeft extends Axis {
 
   constructor() {
     super();
-    this._height = 400;
     this.orient("left");
-    this._width = 100;
   }
 
 }

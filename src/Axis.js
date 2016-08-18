@@ -20,7 +20,7 @@ export default class Axis extends BaseClass {
     this._align = "middle";
     this._domain = [0, 10];
     this._duration = 600;
-    this._height = 100;
+    this._height = 400;
     this.orient("bottom");
     this._outerBounds = {width: 0, height: 0, x: 0, y: 0};
     this._padding = 5;
@@ -51,7 +51,7 @@ export default class Axis extends BaseClass {
   */
   _barPosition(bar) {
     const {height, x, y} = this._position;
-    const position = ["top", "left"].includes(this._orient) ? this._outerBounds[y] + this._outerBounds[height] : this._outerBounds[y];
+    const position = ["top", "left"].includes(this._orient) ? this._outerBounds[y] + this._outerBounds[height] - this._gridLength : this._outerBounds[y] + this._gridLength;
     bar
       .attr(`${x}1`, this._d3Scale(this._d3Scale.domain()[0]))
       .attr(`${x}2`, this._d3Scale(this._d3Scale.domain()[1]))
@@ -70,12 +70,31 @@ export default class Axis extends BaseClass {
     const d = this._d3Scale.domain(),
           p = this._strokeWidth,
           s = this._d3Scale(d[1]) - this._d3Scale(d[0]);
-    const position = ["top", "left"].includes(this._orient) ? this._outerBounds[y] + this._outerBounds[height] - this._tickSize : this._outerBounds[y];
+    const position = ["top", "left"].includes(this._orient) ? this._outerBounds[y] + this._outerBounds[height] - this._tickSize - this._gridLength : this._outerBounds[y];
     clip
       .attr(x, this._d3Scale(this._d3Scale.domain()[0]) - p)
       .attr(y, position)
       .attr(width, s + p * 2)
-      .attr(height, this._tickSize + p);
+      .attr(height, this._gridLength + this._tickSize + p);
+  }
+
+  /**
+      @memberof Axis
+      @desc Sets positioning for the grid lines.
+      @param {D3Selection} *lines*
+      @private
+  */
+  _gridPosition(lines, last = false) {
+    const {height, x, y} = this._position;
+    const position = ["top", "left"].includes(this._orient) ? this._outerBounds[y] + this._outerBounds[height] - this._gridLength : this._outerBounds[y] + this._gridLength,
+          scale = last ? this._lastScale || this._d3Scale : this._d3Scale,
+          size = ["top", "left"].includes(this._orient) ? this._gridLength : -this._gridLength;
+    lines
+      .attr("stroke-width", this._strokeWidth)
+      .attr(`${x}1`, d => scale(d.id))
+      .attr(`${x}2`, d => scale(d.id))
+      .attr(`${y}1`, position)
+      .attr(`${y}2`, last ? position : position + size);
   }
 
   /**
@@ -86,7 +105,7 @@ export default class Axis extends BaseClass {
   */
   _tickPosition(ticks, last = false) {
     const {height, x, y} = this._position;
-    const position = ["top", "left"].includes(this._orient) ? this._outerBounds[y] + this._outerBounds[height] : this._outerBounds[y],
+    const position = ["top", "left"].includes(this._orient) ? this._outerBounds[y] + this._outerBounds[height] - this._gridLength : this._outerBounds[y] + this._gridLength,
           scale = last ? this._lastScale || this._d3Scale : this._d3Scale,
           size = ["top", "left"].includes(this._orient) ? -this._tickSize : this._tickSize;
     ticks
@@ -108,7 +127,7 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
-      @desc If *value* is specified, sets the scale domain of the legend and returns the current class instance. If *value* is not specified, returns the current scale domain.
+      @desc If *value* is specified, sets the scale domain of the axis and returns the current class instance. If *value* is not specified, returns the current scale domain.
       @param {Array} [*value* = [0, 10]]
   */
   domain(_) {
@@ -117,7 +136,7 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
-      @desc If *value* is specified, sets the transition duration of the legend and returns the current class instance. If *value* is not specified, returns the current duration.
+      @desc If *value* is specified, sets the transition duration of the axis and returns the current class instance. If *value* is not specified, returns the current duration.
       @param {Number} [*value* = 600]
   */
   duration(_) {
@@ -126,7 +145,25 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
-      @desc If *value* is specified, sets the overall height of the legend and returns the current class instance. If *value* is not specified, returns the current height value.
+      @desc If *value* is specified, sets the grid values of the axis and returns the current class instance. If *value* is not specified, returns the current grid values, which by default are interpreted based on the [domain](#Axis.domain) and the available [width](#Axis.width).
+      @param {Array} [*value*]
+  */
+  grid(_) {
+    return arguments.length ? (this._grid = _, this) : this._grid;
+  }
+
+  /**
+      @memberof Axis
+      @desc If *value* is specified, sets the grid size of the axis and returns the current class instance. If *value* is not specified, returns the current grid size, which defaults to taking up as much space as available.
+      @param {Number} [*value* = undefined]
+  */
+  gridSize(_) {
+    return arguments.length ? (this._gridSize = _, this) : this._gridSize;
+  }
+
+  /**
+      @memberof Axis
+      @desc If *value* is specified, sets the overall height of the axis and returns the current class instance. If *value* is not specified, returns the current height value.
       @param {Number} [*value* = 100]
   */
   height(_) {
@@ -154,7 +191,7 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
-      @desc If called after the elements have been drawn to DOM, will returns the outer bounds of the legend content.
+      @desc If called after the elements have been drawn to DOM, will returns the outer bounds of the axis content.
       @example
 {"width": 180, "height": 24, "x": 10, "y": 20}
   */
@@ -173,7 +210,7 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
-      @desc If *value* is specified, sets the scale range (in pixels) of the legend and returns the current class instance. The given array must have 2 values, but one may be `undefined` to allow the default behavior for that value. If *value* is not specified, returns the current scale range.
+      @desc If *value* is specified, sets the scale range (in pixels) of the axis and returns the current class instance. The given array must have 2 values, but one may be `undefined` to allow the default behavior for that value. If *value* is not specified, returns the current scale range.
       @param {Array} [*value*]
   */
   range(_) {
@@ -301,6 +338,8 @@ export default class Axis extends BaseClass {
       [width]: rangeInit[1] - rangeInit[0],
       [x]: rangeInit[0]
     };
+    this._gridLength = this._gridSize || this[`_${height}`] - this._outerBounds[height] - p * 2;
+    this._outerBounds[height] += this._gridLength;
     this._outerBounds[y] = this._align === "start" ? this._padding
                          : this._align === "end" ? this[`_${height}`] - this._outerBounds[height]
                          : this[`_${height}`] / 2 - this._outerBounds[height] / 2;
@@ -315,16 +354,22 @@ export default class Axis extends BaseClass {
       .merge(axisClip).transition(t)
         .call(this._clipPosition.bind(this));
 
-    const bar = group.selectAll("line.bar").data([null]);
+    const grid = elem("g.grid", {parent: group}).selectAll("line")
+      .data((this._grid || ticks).map(d => ({id: d})), d => d.id);
 
-    bar.enter().append("line")
-        .attr("class", "bar")
-        .attr("stroke", "#000")
+    grid.exit().transition(t)
+      .attr("opacity", 0)
+      .call(this._gridPosition.bind(this))
+      .remove();
+
+    grid.enter().append("line")
+        .attr("stroke", "#ccc")
         .attr("opacity", 0)
-        .call(this._barPosition.bind(this))
-      .merge(bar).transition(t)
+        .attr("clip-path", `url(#${clipId})`)
+        .call(this._gridPosition.bind(this), true)
+      .merge(grid).transition(t)
         .attr("opacity", 1)
-        .call(this._barPosition.bind(this));
+        .call(this._gridPosition.bind(this));
 
     const lines = group.selectAll("line.tick").data(ticks.map(d => ({id: d})), d => d.id);
 
@@ -342,6 +387,17 @@ export default class Axis extends BaseClass {
       .merge(lines).transition(t)
         .attr("opacity", 1)
         .call(this._tickPosition.bind(this));
+
+    const bar = group.selectAll("line.bar").data([null]);
+
+    bar.enter().append("line")
+        .attr("class", "bar")
+        .attr("stroke", "#000")
+        .attr("opacity", 0)
+        .call(this._barPosition.bind(this))
+      .merge(bar).transition(t)
+        .attr("opacity", 1)
+        .call(this._barPosition.bind(this));
 
     const maxTextHeight = max(textData, t => t.height) || 0,
           maxTextWidth = max(textData, t => t.width + t.fS) || 0;
@@ -372,11 +428,11 @@ export default class Axis extends BaseClass {
       .width(maxTextWidth)
       .x((d, i) => {
         if (["top", "bottom"].includes(this._orient)) return this._d3Scale(d.id) - maxTextWidth / 2;
-        return this._orient === "left" ? this._titleHeight + this._outerBounds.x - this._textBoxConfig.fontSize(values[i], i) / 2 : this._outerBounds.x + this._tickSize + this._padding;
+        return this._orient === "left" ? this._titleHeight + this._outerBounds.x - this._textBoxConfig.fontSize(values[i], i) / 2 : this._outerBounds.x + this._tickSize + this._gridLength + this._padding;
       })
       .y(d => {
         if (["left", "right"].includes(this._orient)) return this._d3Scale(d.id) - maxTextHeight / 2;
-        return this._orient === "bottom" ? this._outerBounds.y + this._tickSize + p : this._titleHeight + this._outerBounds.y;
+        return this._orient === "bottom" ? this._outerBounds.y + this._gridLength + this._tickSize + p : this._titleHeight + this._outerBounds.y;
       })
       .config(this._textBoxConfig)
       .render();
@@ -391,7 +447,7 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
-      @desc If *value* is specified, sets the scale of the legend and returns the current class instance. If *value* is not specified, returns the current this._d3Scale
+      @desc If *value* is specified, sets the scale of the axis and returns the current class instance. If *value* is not specified, returns the current this._d3Scale
       @param {String} [*value* = "linear"]
   */
   scale(_) {
@@ -418,7 +474,7 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
-      @desc If *value* is specified, sets the visible tick labels of the legend and returns the current class instance. If *value* is not specified, returns the current visible tick labels, which defaults to showing all labels.
+      @desc If *value* is specified, sets the visible tick labels of the axis and returns the current class instance. If *value* is not specified, returns the current visible tick labels, which defaults to showing all labels.
       @param {Array} [*value*]
   */
   tickLabels(_) {
@@ -427,7 +483,7 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
-      @desc If *value* is specified, sets the tick values of the legend and returns the current class instance. If *value* is not specified, returns the current tick values, which by default are interpreted based on the [domain](#Axis.domain) and the available [width](#Axis.width).
+      @desc If *value* is specified, sets the tick values of the axis and returns the current class instance. If *value* is not specified, returns the current tick values, which by default are interpreted based on the [domain](#Axis.domain) and the available [width](#Axis.width).
       @param {Array} [*value*]
   */
   ticks(_) {
@@ -436,7 +492,7 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
-      @desc If *value* is specified, sets the tick size of the legend and returns the current class instance. If *value* is not specified, returns the current tick size.
+      @desc If *value* is specified, sets the tick size of the axis and returns the current class instance. If *value* is not specified, returns the current tick size.
       @param {Number} [*value* = 5]
   */
   tickSize(_) {
@@ -445,7 +501,7 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
-      @desc If *value* is specified, sets the title of the legend and returns the current class instance. If *value* is not specified, returns the current title.
+      @desc If *value* is specified, sets the title of the axis and returns the current class instance. If *value* is not specified, returns the current title.
       @param {String} [*value*]
   */
   title(_) {
@@ -454,7 +510,7 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
-      @desc If *value* is specified, sets the title configuration of the legend and returns the current class instance. If *value* is not specified, returns the current title configuration.
+      @desc If *value* is specified, sets the title configuration of the axis and returns the current class instance. If *value* is not specified, returns the current title configuration.
       @param {Object} [*value*]
   */
   titleConfig(_) {
@@ -463,7 +519,7 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
-      @desc If *value* is specified, sets the overall width of the legend and returns the current class instance. If *value* is not specified, returns the current width value.
+      @desc If *value* is specified, sets the overall width of the axis and returns the current class instance. If *value* is not specified, returns the current width value.
       @param {Number} [*value* = 400]
   */
   width(_) {
