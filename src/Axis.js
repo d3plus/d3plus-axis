@@ -1,4 +1,4 @@
-import {BaseClass, constant, elem} from "d3plus-common";
+import {attrize, BaseClass, constant, elem} from "d3plus-common";
 import {TextBox, textWidth, textWrap} from "d3plus-text";
 
 import {max} from "d3-array";
@@ -20,16 +20,23 @@ export default class Axis extends BaseClass {
     this._align = "middle";
     this._domain = [0, 10];
     this._duration = 600;
+    this._gridConfig = {
+      "stroke": "#ccc",
+      "stroke-width": 1
+    };
     this._height = 400;
     this.orient("bottom");
     this._outerBounds = {width: 0, height: 0, x: 0, y: 0};
     this._padding = 5;
     this._scale = "linear";
-    this._strokeWidth = 1;
     this._textBoxConfig = {
       fontFamily: new TextBox().fontFamily(),
       fontResize: false,
       fontSize: constant(10)
+    };
+    this._tickConfig = {
+      "stroke": "#000",
+      "stroke-width": 1
     };
     this._tickScale = scales.scaleSqrt().domain([10, 400]).range([10, 50]);
     this._tickSize = 5;
@@ -68,7 +75,7 @@ export default class Axis extends BaseClass {
   _clipPosition(clip) {
     const {width, height, x, y} = this._position;
     const d = this._d3Scale.domain(),
-          p = this._strokeWidth,
+          p = max([this._gridConfig["stroke-width"], this._tickConfig["stroke-width"]]),
           s = this._d3Scale(d[1]) - this._d3Scale(d[0]);
     const position = ["top", "left"].includes(this._orient) ? this._outerBounds[y] + this._outerBounds[height] - this._tickSize - this._gridLength : this._outerBounds[y];
     clip
@@ -90,7 +97,7 @@ export default class Axis extends BaseClass {
           scale = last ? this._lastScale || this._d3Scale : this._d3Scale,
           size = ["top", "left"].includes(this._orient) ? this._gridLength : -this._gridLength;
     lines
-      .attr("stroke-width", this._strokeWidth)
+      .call(attrize, this._gridConfig)
       .attr(`${x}1`, d => scale(d.id))
       .attr(`${x}2`, d => scale(d.id))
       .attr(`${y}1`, position)
@@ -109,7 +116,7 @@ export default class Axis extends BaseClass {
           scale = last ? this._lastScale || this._d3Scale : this._d3Scale,
           size = ["top", "left"].includes(this._orient) ? -this._tickSize : this._tickSize;
     ticks
-      .attr("stroke-width", this._strokeWidth)
+      .call(attrize, this._tickConfig)
       .attr(`${x}1`, d => scale(d.id))
       .attr(`${x}2`, d => scale(d.id))
       .attr(`${y}1`, position)
@@ -150,6 +157,15 @@ export default class Axis extends BaseClass {
   */
   grid(_) {
     return arguments.length ? (this._grid = _, this) : this._grid;
+  }
+
+  /**
+      @memberof Axis
+      @desc If *value* is specified, sets the grid style of the axis and returns the current class instance. If *value* is not specified, returns the current grid style.
+      @param {Object} [*value*]
+  */
+  gridConfig(_) {
+    return arguments.length ? (this._gridConfig = Object.assign(this._gridConfig, _), this) : this._gridConfig;
   }
 
   /**
@@ -363,7 +379,6 @@ export default class Axis extends BaseClass {
       .remove();
 
     grid.enter().append("line")
-        .attr("stroke", "#ccc")
         .attr("opacity", 0)
         .attr("clip-path", `url(#${clipId})`)
         .call(this._gridPosition.bind(this), true)
@@ -371,7 +386,8 @@ export default class Axis extends BaseClass {
         .attr("opacity", 1)
         .call(this._gridPosition.bind(this));
 
-    const lines = group.selectAll("line.tick").data(ticks.map(d => ({id: d})), d => d.id);
+    const lines = elem("g.ticks", {parent: group}).selectAll("line")
+      .data(ticks.map(d => ({id: d})), d => d.id);
 
     lines.exit().transition(t)
       .attr("opacity", 0)
@@ -379,8 +395,6 @@ export default class Axis extends BaseClass {
       .remove();
 
     lines.enter().append("line")
-        .attr("class", "tick")
-        .attr("stroke", "#000")
         .attr("opacity", 0)
         .attr("clip-path", `url(#${clipId})`)
         .call(this._tickPosition.bind(this), true)
@@ -470,6 +484,15 @@ export default class Axis extends BaseClass {
   */
   textBoxConfig(_) {
     return arguments.length ? (this._textBoxConfig = Object.assign(this._textBoxConfig, _), this) : this._textBoxConfig;
+  }
+
+  /**
+      @memberof Axis
+      @desc If *value* is specified, sets the tick style of the axis and returns the current class instance. If *value* is not specified, returns the current tick style.
+      @param {Object} [*value*]
+  */
+  tickConfig(_) {
+    return arguments.length ? (this._tickConfig = Object.assign(this._tickConfig, _), this) : this._tickConfig;
   }
 
   /**
