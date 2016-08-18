@@ -385,4 +385,4 @@ Shorthand method for creating an axis where the ticks are drawn above the vertic
 
 
 
-###### <sub>Documentation generated on Thu, 18 Aug 2016 20:01:15 GMT</sub>
+###### <sub>Documentation generated on Thu, 18 Aug 2016 20:17:37 GMT</sub>
