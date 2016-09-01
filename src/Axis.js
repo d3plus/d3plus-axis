@@ -383,7 +383,7 @@ export default class Axis extends BaseClass {
       const first = textData[0],
             last = textData[textData.length - 1];
 
-      const firstB = this._d3Scale(first.d) - first[width] / 2 - p;
+      const firstB = this._d3Scale(first.d) - first[width] / 2;
       if (firstB < range[0]) {
         const d = range[0] - firstB;
         if (this._range === void 0 || this._range[0] === void 0) {
@@ -395,7 +395,7 @@ export default class Axis extends BaseClass {
         }
       }
 
-      const lastB = this._d3Scale(last.d) + last[width] / 2 + p;
+      const lastB = this._d3Scale(last.d) + last[width] / 2;
       if (lastB > range[1]) {
         const d = lastB - range[1];
         if (this._range === void 0 || this._range[1] === void 0) {
@@ -412,7 +412,7 @@ export default class Axis extends BaseClass {
     }
 
     this._outerBounds = {
-      [height]: this._margin[this._orient] + this._tickSize + (max(textData, t => t[height]) || 0) + (textData.length ? p * 2 : 0),
+      [height]: this._margin[this._orient] + this._tickSize + (max(textData, t => t[height]) || 0) + (textData.length ? p : 0),
       [width]: rangeOuter[1] - rangeOuter[0],
       [x]: rangeOuter[0]
     };
@@ -489,8 +489,7 @@ export default class Axis extends BaseClass {
       .config(this._titleConfig)
       .render();
 
-    let labelHeight = max(textData, t => t.height) || 0;
-    labelHeight += p;
+    const labelHeight = max(textData, t => t.height) || 0;
 
     new TextBox()
       .data(labels.filter((d, i) => textData[i].lines.length).map(d => ({id: d})))
@@ -500,10 +499,10 @@ export default class Axis extends BaseClass {
       .text(d => tickFormat(d.id))
       .textAnchor(this._orient === "left" ? "end" : this._orient === "right" ? "start" : "middle")
       .verticalAlign(this._orient === "bottom" ? "top" : this._orient === "top" ? "bottom" : "middle")
-      .width(horizontal ? this._space : this._width - this._margin[this._position.opposite] - this._tickSize - p * 2 - this._margin[this._orient])
-      .x((d, i) => {
+      .width(horizontal ? this._space : this._outerBounds.width - this._margin[this._position.opposite] - this._tickSize - this._margin[this._orient] + p)
+      .x(d => {
         if (horizontal) return this._d3Scale(d.id) - this._space / 2;
-        return this._orient === "left" ? this._margin[this._orient] + this._outerBounds.x - this._labelConfig.fontSize(labels[i], i) / 2 : this._outerBounds.x + this._tickSize + this._margin[this._position.opposite] + this._padding;
+        return this._orient === "left" ? this._margin[this._orient] + this._outerBounds.x - p * 2 : this._outerBounds.x + this._tickSize + this._margin[this._position.opposite] + p;
       })
       .y(d => {
         if (horizontal) return this._orient === "bottom" ? this._outerBounds.y + this._margin[this._position.opposite] + this._tickSize + p : this._margin[this._orient] + this._outerBounds.y;
