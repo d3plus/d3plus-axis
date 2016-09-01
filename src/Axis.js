@@ -204,7 +204,7 @@ export default class Axis extends BaseClass {
   }
 
   /**
-      @memberof ShapeLegend
+      @memberof Axis
       @desc If *config* is specified, sets the methods that correspond to the key/value pairs for each label's textBox and returns the current class instance. If *config* is not specified, returns the current label textBox configuration.
       @param {Object} [*config* = {}]
   */
@@ -294,7 +294,7 @@ export default class Axis extends BaseClass {
     }
 
     const {width, height, x, y, horizontal} = this._position,
-          clipId = `d3plus-ShapeLegend-clip-${this._uuid}`,
+          clipId = `d3plus-Axis-clip-${this._uuid}`,
           p = this._padding,
           parent = this._select,
           range = this._range ? this._range.slice() : [undefined, undefined],
@@ -410,7 +410,7 @@ export default class Axis extends BaseClass {
                          : this._align === "end" ? this[`_${height}`] - this._outerBounds[height]
                          : this[`_${height}`] / 2 - this._outerBounds[height] / 2;
 
-    const group = elem(`g#d3plus-Axis-${clipId}`, {parent});
+    const group = elem(`g#d3plus-Axis-${this._uuid}`, {parent});
     const defs = elem("defs", {parent: group});
     const clip = elem(`clipPath#${clipId}`, {parent: defs});
 
