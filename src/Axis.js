@@ -113,6 +113,19 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
+      @desc Parses numbers and strings to valid Javascript Date obejcts.
+      @param {Date|Number|String} *date*
+      @private
+  */
+  _parseDate(d) {
+    if (d.constructor === Date) return d;
+    d = `${d}`;
+    if (d.length === 4 && `${parseInt(d, 10)}` === d) d = `${d}/01/01`;
+    return new Date(d);
+  }
+
+  /**
+      @memberof Axis
       @desc Sets positioning for the axis ticks.
       @param {D3Selection} *ticks*
       @private
@@ -319,13 +332,12 @@ export default class Axis extends BaseClass {
     }
 
     this._d3Scale = scales[`scale${this._scale.charAt(0).toUpperCase()}${this._scale.slice(1)}`]()
-      .domain(this._domain)
+      .domain(this._scale === "time" ? this._domain.map(this._parseDate) : this._domain)
       .rangeRound(range);
 
     const tickScale = scales.scaleSqrt().domain([10, 400]).range([10, 50]);
-    let ticks = this._ticks || this._d3Scale.ticks(Math.floor(this._size / tickScale(this._size)));
+    const ticks = this._ticks || this._d3Scale.ticks(Math.floor(this._size / tickScale(this._size)));
     const tickFormat = this._d3Scale.tickFormat(ticks.length - 1);
-    if (!this._ticks) ticks = ticks.map(tickFormat).map(Number);
     const labels = this._labels || ticks;
 
     this._space = 0;
@@ -351,7 +363,7 @@ export default class Axis extends BaseClass {
         .lineHeight(lh)
         .width(horizontal ? this._space : this._width - this._tickSize - p)
         .height(horizontal ? this._height - this._tickSize - p : this._space)
-        (d);
+        (tickFormat(d));
 
       res.lines = res.lines.filter(d => d !== "");
       res.d = d;
