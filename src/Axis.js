@@ -33,7 +33,7 @@ export default class Axis extends BaseClass {
     this._outerBounds = {width: 0, height: 0, x: 0, y: 0};
     this._padding = 5;
     this._scale = "linear";
-    this._textBoxConfig = {
+    this._labelConfig = {
       fontFamily: new TextBox().fontFamily(),
       fontResize: false,
       fontSize: constant(10)
@@ -42,7 +42,6 @@ export default class Axis extends BaseClass {
       "stroke": "#000",
       "stroke-width": 1
     };
-    this._tickScale = scales.scaleSqrt().domain([10, 400]).range([10, 50]);
     this._tickSize = 5;
     this._titleConfig = {
       fontFamily: "Verdana",
@@ -61,8 +60,9 @@ export default class Axis extends BaseClass {
       @private
   */
   _barPosition(bar) {
-    const {height, x, y} = this._position;
-    const position = ["top", "left"].includes(this._orient) ? this._outerBounds[y] + this._outerBounds[height] - this._gridLength : this._outerBounds[y] + this._gridLength;
+    const {height, x, y, opposite} = this._position,
+          offset = this._margin[opposite],
+          position = ["top", "left"].includes(this._orient) ? this._outerBounds[y] + this._outerBounds[height] - offset : this._outerBounds[y] + offset;
     bar
       .call(attrize, this._barConfig)
       .attr(`${x}1`, this._d3Scale(this._d3Scale.domain()[0]))
@@ -78,16 +78,17 @@ export default class Axis extends BaseClass {
       @private
   */
   _clipPosition(clip) {
-    const {width, height, x, y} = this._position;
+    const {width, height, x, y, opposite} = this._position;
     const d = this._d3Scale.domain(),
+          o = this._margin[opposite],
           p = max([this._gridConfig["stroke-width"], this._tickConfig["stroke-width"]]),
           s = this._d3Scale(d[1]) - this._d3Scale(d[0]);
-    const position = ["top", "left"].includes(this._orient) ? this._outerBounds[y] + this._outerBounds[height] - this._tickSize - this._gridLength : this._outerBounds[y];
+    const position = ["top", "left"].includes(this._orient) ? this._outerBounds[y] + this._outerBounds[height] - this._tickSize - o : this._outerBounds[y];
     clip
       .attr(x, this._d3Scale(this._d3Scale.domain()[0]) - p)
       .attr(y, position)
       .attr(width, s + p * 2)
-      .attr(height, this._gridLength + this._tickSize + p);
+      .attr(height, o + this._tickSize + p);
   }
 
   /**
@@ -97,10 +98,11 @@ export default class Axis extends BaseClass {
       @private
   */
   _gridPosition(lines, last = false) {
-    const {height, x, y} = this._position;
-    const position = ["top", "left"].includes(this._orient) ? this._outerBounds[y] + this._outerBounds[height] - this._gridLength : this._outerBounds[y] + this._gridLength,
+    const {height, x, y, opposite} = this._position,
+          offset = this._margin[opposite],
+          position = ["top", "left"].includes(this._orient) ? this._outerBounds[y] + this._outerBounds[height] - offset : this._outerBounds[y] + offset,
           scale = last ? this._lastScale || this._d3Scale : this._d3Scale,
-          size = ["top", "left"].includes(this._orient) ? this._gridLength : -this._gridLength;
+          size = ["top", "left"].includes(this._orient) ? offset : -offset;
     lines
       .call(attrize, this._gridConfig)
       .attr(`${x}1`, d => scale(d.id))
@@ -116,8 +118,9 @@ export default class Axis extends BaseClass {
       @private
   */
   _tickPosition(ticks, last = false) {
-    const {height, x, y} = this._position;
-    const position = ["top", "left"].includes(this._orient) ? this._outerBounds[y] + this._outerBounds[height] - this._gridLength : this._outerBounds[y] + this._gridLength,
+    const {height, x, y, opposite} = this._position,
+          offset = this._margin[opposite],
+          position = ["top", "left"].includes(this._orient) ? this._outerBounds[y] + this._outerBounds[height] - offset : this._outerBounds[y] + offset,
           scale = last ? this._lastScale || this._d3Scale : this._d3Scale,
           size = ["top", "left"].includes(this._orient) ? -this._tickSize : this._tickSize;
     ticks
@@ -201,20 +204,45 @@ export default class Axis extends BaseClass {
   }
 
   /**
+      @memberof ShapeLegend
+      @desc If *config* is specified, sets the methods that correspond to the key/value pairs for each label's textBox and returns the current class instance. If *config* is not specified, returns the current label textBox configuration.
+      @param {Object} [*config* = {}]
+  */
+  labelConfig(_) {
+    return arguments.length ? (this._labelConfig = Object.assign(this._labelConfig, _), this) : this._labelConfig;
+  }
+
+  /**
+      @memberof Axis
+      @desc If *value* is specified, sets the visible tick labels of the axis and returns the current class instance. If *value* is not specified, returns the current visible tick labels, which defaults to showing all labels.
+      @param {Array} [*value*]
+  */
+  labels(_) {
+    return arguments.length ? (this._labels = _, this) : this._labels;
+  }
+
+  /**
       @memberof Axis
       @desc If *orient* is specified, sets the orientation of the shape and returns the current class instance. If *orient* is not specified, returns the current orientation.
       @param {String} [*orient* = "bottom"] Supports `"top"`, `"right"`, `"bottom"`, and `"left"` orientations.
   */
   orient(_) {
     if (arguments.length) {
-      const horizontal = ["top", "bottom"].includes(_);
+
+      const horizontal = ["top", "bottom"].includes(_),
+            opps = {top: "bottom", right: "left", bottom: "top", left: "right"};
+
       this._position = {
+        horizontal,
         width: horizontal ? "width" : "height",
         height: horizontal ? "height" : "width",
         x: horizontal ? "x" : "y",
-        y: horizontal ? "y" : "x"
+        y: horizontal ? "y" : "x",
+        opposite: opps[_]
       };
+
       return this._orient = _, this;
+
     }
     return this._orient;
   }
@@ -231,7 +259,7 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
-      @desc If *value* is specified, sets the padding between each key to the specified number and returns the current class instance. If *value* is not specified, returns the current padding value.
+      @desc If *value* is specified, sets the padding between each tick label to the specified number and returns the current class instance. If *value* is not specified, returns the current padding value.
       @param {Number} [*value* = 10]
   */
   padding(_) {
@@ -254,67 +282,75 @@ export default class Axis extends BaseClass {
   */
   render(callback) {
 
-    if (this._select === void 0) this.select(select("body").append("svg").attr("width", `${this._width}px`).attr("height", `${this._height}px`).node());
+    if (this._select === void 0) {
+      this.select(select("body").append("svg")
+        .attr("width", `${this._width}px`)
+        .attr("height", `${this._height}px`)
+        .node());
+    }
 
-    const parent = this._select,
+    if (this._lineHeight === void 0) {
+      this._lineHeight = (d, i) => this._labelConfig.fontSize(d, i) * 1.1;
+    }
+
+    const {width, height, x, y, horizontal} = this._position,
+          clipId = `d3plus-ShapeLegend-clip-${this._uuid}`,
+          p = this._padding,
+          parent = this._select,
+          range = this._range ? this._range.slice() : [undefined, undefined],
           t = transition().duration(this._duration);
 
-    if (this._lineHeight === void 0) this._lineHeight = (d, i) => this._textBoxConfig.fontSize(d, i) * 1.1;
-
-    const {width, height, x, y} = this._position;
-
-    const clipId = `d3plus-ShapeLegend-clip-${this._uuid}`,
-          p = this._padding;
-
-    const range = this._range ? this._range.slice() : [undefined, undefined];
     if (range[0] === void 0) range[0] = p;
     if (range[1] === void 0) range[1] = this[`_${width}`] - p;
-    let size = range[1] - range[0];
+    this._size = range[1] - range[0];
 
-    this._titleHeight = 0;
+    this._margin = {top: 0, right: 0, bottom: 0, left: 0};
+
     if (this._title) {
       const lH = this._titleConfig.lineHeight ? this._titleConfig.lineHeight : this._titleConfig.fontSize * 1.1,
             titleWrap = textWrap()
               .fontFamily(this._titleConfig.fontFamily)
               .fontSize(this._titleConfig.fontSize)
               .lineHeight(lH)
-              .width(size)
-              .height(this._height - this._tickSize - p)
+              .width(this._size)
+              .height(this[`_${height}`] - this._tickSize - p)
               (this._title);
-      this._titleHeight = titleWrap.lines.length * lH + p;
+      this._margin[this._orient] = titleWrap.lines.length * lH + p;
     }
 
     this._d3Scale = scales[`scale${this._scale.charAt(0).toUpperCase()}${this._scale.slice(1)}`]()
       .domain(this._domain)
       .rangeRound(range);
 
-    let ticks = this._ticks || this._d3Scale.ticks(Math.floor(size / this._tickScale(size)));
+    const tickScale = scales.scaleSqrt().domain([10, 400]).range([10, 50]);
+    let ticks = this._ticks || this._d3Scale.ticks(Math.floor(this._size / tickScale(this._size)));
     const tickFormat = this._d3Scale.tickFormat(ticks.length - 1);
     if (!this._ticks) ticks = ticks.map(tickFormat).map(Number);
-    const values = this._tickLabels || ticks;
+    const labels = this._labels || ticks;
 
-    let space = 0;
-    if (values.length > 1) {
-      for (let i = 0; i < values.length; i++) {
-        const s = this._d3Scale(values[i + 1]) - this._d3Scale(values[i]);
-        if (s > space) space = s;
+    this._space = 0;
+    if (labels.length > 1) {
+      for (let i = 0; i < labels.length; i++) {
+        const s = this._d3Scale(labels[i + 1]) - this._d3Scale(labels[i]);
+        if (s > this._space) this._space = s;
       }
     }
-    else space = size;
+    else this._space = this._size;
 
-    const textData = values.map((d, i) => {
+    // Measures size of ticks
+    const textData = labels.map((d, i) => {
 
-      const f = this._textBoxConfig.fontFamily(d, i),
-            s = this._textBoxConfig.fontSize(d, i);
+      const f = this._labelConfig.fontFamily(d, i),
+            s = this._labelConfig.fontSize(d, i);
 
-      const lh = this._textBoxConfig.lineHeight ? this._textBoxConfig.lineHeight(d, i) : s * 1.1;
+      const lh = this._labelConfig.lineHeight ? this._labelConfig.lineHeight(d, i) : s * 1.1;
 
       const res = textWrap()
         .fontFamily(f)
         .fontSize(s)
         .lineHeight(lh)
-        .width(space)
-        .height(this._height - this._tickSize - p)
+        .width(horizontal ? this._space : this._width - this._tickSize - p)
+        .height(horizontal ? this._height - this._tickSize - p : this._space)
         (d);
 
       res.lines = res.lines.filter(d => d !== "");
@@ -328,7 +364,8 @@ export default class Axis extends BaseClass {
 
     });
 
-    const rangeInit = range.slice();
+    // Calculates new range, based on any text that may be overflowing.
+    const rangeOuter = range.slice();
     if (textData.length) {
 
       const first = textData[0],
@@ -338,11 +375,11 @@ export default class Axis extends BaseClass {
       if (firstB < range[0]) {
         const d = range[0] - firstB;
         if (this._range === void 0 || this._range[0] === void 0) {
-          size -= d;
+          this._size -= d;
           range[0] += d;
         }
         else if (this._range) {
-          rangeInit[0] -= d;
+          rangeOuter[0] -= d;
         }
       }
 
@@ -350,11 +387,11 @@ export default class Axis extends BaseClass {
       if (lastB > range[1]) {
         const d = lastB - range[1];
         if (this._range === void 0 || this._range[1] === void 0) {
-          size -= d;
+          this._size -= d;
           range[1] -= d;
         }
         else if (this._range) {
-          rangeInit[1] += d;
+          rangeOuter[1] += d;
         }
       }
 
@@ -362,14 +399,13 @@ export default class Axis extends BaseClass {
 
     }
 
-    const tPad = textData.length ? p * 2 : 0;
     this._outerBounds = {
-      [height]: this._titleHeight + this._tickSize + (max(textData, t => t[height]) || 0) + tPad,
-      [width]: rangeInit[1] - rangeInit[0],
-      [x]: rangeInit[0]
+      [height]: this._margin[this._orient] + this._tickSize + (max(textData, t => t[height]) || 0) + (textData.length ? p * 2 : 0),
+      [width]: rangeOuter[1] - rangeOuter[0],
+      [x]: rangeOuter[0]
     };
-    this._gridLength = this._gridSize !== void 0 ? this._gridSize : this[`_${height}`] - this._outerBounds[height] - p * 2;
-    this._outerBounds[height] += this._gridLength;
+    this._margin[this._position.opposite] = this._gridSize !== void 0 ? this._gridSize : this[`_${height}`] - this._outerBounds[height] - p * 2;
+    this._outerBounds[height] += this._margin[this._position.opposite];
     this._outerBounds[y] = this._align === "start" ? this._padding
                          : this._align === "end" ? this[`_${height}`] - this._outerBounds[height]
                          : this[`_${height}`] / 2 - this._outerBounds[height] / 2;
@@ -426,8 +462,6 @@ export default class Axis extends BaseClass {
         .attr("opacity", 1)
         .call(this._barPosition.bind(this));
 
-    const maxTextHeight = max(textData, t => t.height) || 0;
-
     new TextBox()
       .data(this._title ? [{text: this._title}] : [])
       .duration(this._duration)
@@ -438,29 +472,32 @@ export default class Axis extends BaseClass {
       .textAnchor("middle")
       .verticalAlign(this._orient === "bottom" ? "bottom" : "top")
       .width(this._outerBounds[width])
-      .x(["top", "bottom"].includes(this._orient) ? this._outerBounds.x : this._orient === "left" ? this._outerBounds.x + this._titleHeight / 2 - this._outerBounds[width] / 2 : this._outerBounds.x + this._outerBounds.width - this._titleHeight / 2 - this._outerBounds[width] / 2)
-      .y(["top", "bottom"].includes(this._orient) ? this._outerBounds.y : this._outerBounds.y - this._titleHeight / 2 + this._outerBounds[width] / 2)
+      .x(horizontal ? this._outerBounds.x : this._orient === "left" ? this._outerBounds.x + this._margin[this._orient] / 2 - this._outerBounds[width] / 2 : this._outerBounds.x + this._outerBounds.width - this._margin[this._orient] / 2 - this._outerBounds[width] / 2)
+      .y(horizontal ? this._outerBounds.y : this._outerBounds.y - this._margin[this._orient] / 2 + this._outerBounds[width] / 2)
       .config(this._titleConfig)
       .render();
 
+    let labelHeight = max(textData, t => t.height) || 0;
+    labelHeight += p;
+
     new TextBox()
-      .data(values.filter((d, i) => textData[i].lines.length).map(d => ({id: d})))
+      .data(labels.filter((d, i) => textData[i].lines.length).map(d => ({id: d})))
       .duration(this._duration)
-      .height(["top", "bottom"].includes(this._orient) ? maxTextHeight + p : maxTextHeight)
+      .height(labelHeight)
       .select(elem("g.d3plus-Axis-ticks", {parent: group}).node())
       .text(d => tickFormat(d.id))
       .textAnchor(this._orient === "left" ? "end" : this._orient === "right" ? "start" : "middle")
       .verticalAlign(this._orient === "bottom" ? "top" : this._orient === "top" ? "bottom" : "middle")
-      .width(["top", "bottom"].includes(this._orient) ? space : this._width - this._gridLength - this._tickSize - p * 2 - this._titleHeight)
+      .width(horizontal ? this._space : this._width - this._margin[this._position.opposite] - this._tickSize - p * 2 - this._margin[this._orient])
       .x((d, i) => {
-        if (["top", "bottom"].includes(this._orient)) return this._d3Scale(d.id) - space / 2;
-        return this._orient === "left" ? this._titleHeight + this._outerBounds.x - this._textBoxConfig.fontSize(values[i], i) / 2 : this._outerBounds.x + this._tickSize + this._gridLength + this._padding;
+        if (horizontal) return this._d3Scale(d.id) - this._space / 2;
+        return this._orient === "left" ? this._margin[this._orient] + this._outerBounds.x - this._labelConfig.fontSize(labels[i], i) / 2 : this._outerBounds.x + this._tickSize + this._margin[this._position.opposite] + this._padding;
       })
       .y(d => {
-        if (["left", "right"].includes(this._orient)) return this._d3Scale(d.id) - maxTextHeight / 2;
-        return this._orient === "bottom" ? this._outerBounds.y + this._gridLength + this._tickSize + p : this._titleHeight + this._outerBounds.y;
+        if (horizontal) return this._orient === "bottom" ? this._outerBounds.y + this._margin[this._position.opposite] + this._tickSize + p : this._margin[this._orient] + this._outerBounds.y;
+        return this._d3Scale(d.id) - labelHeight / 2;
       })
-      .config(this._textBoxConfig)
+      .config(this._labelConfig)
       .render();
 
     this._lastScale = this._d3Scale;
@@ -490,30 +527,12 @@ export default class Axis extends BaseClass {
   }
 
   /**
-      @memberof ShapeLegend
-      @desc If *config* is specified, sets the methods that correspond to the key/value pairs for each shape and returns the current class instance. If *config* is not specified, returns the current shape configuration.
-      @param {Object} [*config* = {}]
-  */
-  textBoxConfig(_) {
-    return arguments.length ? (this._textBoxConfig = Object.assign(this._textBoxConfig, _), this) : this._textBoxConfig;
-  }
-
-  /**
       @memberof Axis
       @desc If *value* is specified, sets the tick style of the axis and returns the current class instance. If *value* is not specified, returns the current tick style.
       @param {Object} [*value*]
   */
   tickConfig(_) {
     return arguments.length ? (this._tickConfig = Object.assign(this._tickConfig, _), this) : this._tickConfig;
-  }
-
-  /**
-      @memberof Axis
-      @desc If *value* is specified, sets the visible tick labels of the axis and returns the current class instance. If *value* is not specified, returns the current visible tick labels, which defaults to showing all labels.
-      @param {Array} [*value*]
-  */
-  tickLabels(_) {
-    return arguments.length ? (this._tickLabels = _, this) : this._tickLabels;
   }
 
   /**
