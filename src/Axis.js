@@ -338,9 +338,11 @@ export default class Axis extends BaseClass {
       .rangeRound(range);
 
     const tickScale = scales.scaleSqrt().domain([10, 400]).range([10, 50]);
-    const ticks = this._ticks || this._d3Scale.ticks(Math.floor(this._size / tickScale(this._size)));
+    const ticks = this._ticks
+                ? this._scale === "time" ? this._ticks.map(this._parseDate) : this._ticks
+                : this._d3Scale.ticks(Math.floor(this._size / tickScale(this._size)));
     const tickFormat = this._d3Scale.tickFormat(ticks.length - 1);
-    const labels = this._labels || ticks;
+    const labels = this._labels || this._d3Scale.ticks(Math.floor(this._size / tickScale(this._size)));
 
     this._space = 0;
     if (labels.length > 1) {
