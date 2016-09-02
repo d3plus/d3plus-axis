@@ -38,7 +38,9 @@ export default class Axis extends BaseClass {
       fontResize: false,
       fontSize: constant(10)
     };
-    this._tickConfig = {
+    this._tickShape = "line";
+    this._tickStyle = {
+      "fill": "#000",
       "stroke": "#000",
       "stroke-width": 1
     };
@@ -81,7 +83,7 @@ export default class Axis extends BaseClass {
     const {width, height, x, y, opposite} = this._position;
     const d = this._d3Scale.domain(),
           o = this._margin[opposite],
-          p = max([this._gridConfig["stroke-width"], this._tickConfig["stroke-width"]]),
+          p = max([this._gridConfig["stroke-width"], this._tickStyle["stroke-width"]]),
           s = this._d3Scale(d[1]) - this._d3Scale(d[0]);
     const position = ["top", "left"].includes(this._orient) ? this._outerBounds[y] + this._outerBounds[height] - this._tickSize - o : this._outerBounds[y];
     clip
@@ -137,7 +139,7 @@ export default class Axis extends BaseClass {
           scale = last ? this._lastScale || this._d3Scale : this._d3Scale,
           size = ["top", "left"].includes(this._orient) ? -this._tickSize : this._tickSize;
     ticks
-      .call(attrize, this._tickConfig)
+      .call(attrize, this._tickStyle)
       .attr(`${x}1`, d => scale(d.id))
       .attr(`${x}2`, d => scale(d.id))
       .attr(`${y}1`, position)
@@ -542,8 +544,8 @@ export default class Axis extends BaseClass {
       @desc If *value* is specified, sets the tick style of the axis and returns the current class instance. If *value* is not specified, returns the current tick style.
       @param {Object} [*value*]
   */
-  tickConfig(_) {
-    return arguments.length ? (this._tickConfig = Object.assign(this._tickConfig, _), this) : this._tickConfig;
+  tickStyle(_) {
+    return arguments.length ? (this._tickStyle = Object.assign(this._tickStyle, _), this) : this._tickStyle;
   }
 
   /**
