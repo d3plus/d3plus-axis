@@ -1,10 +1,11 @@
-import {attrize, BaseClass, constant, elem} from "d3plus-common";
-import {TextBox, textWidth, textWrap} from "d3plus-text";
-
-import {max} from "d3-array";
+import {max, min} from "d3-array";
 import * as scales from "d3-scale";
 import {select} from "d3-selection";
 import {transition} from "d3-transition";
+
+import {attrize, BaseClass, constant, elem} from "d3plus-common";
+import * as shapes from "d3plus-shape";
+import {TextBox, textWidth, textWrap} from "d3plus-text";
 
 /**
     @class Axis
@@ -33,16 +34,23 @@ export default class Axis extends BaseClass {
     this._outerBounds = {width: 0, height: 0, x: 0, y: 0};
     this._padding = 5;
     this._scale = "linear";
-    this._labelConfig = {
+    this._shape = "Line";
+    this._shapeConfig = {
+      fill: "#000",
+      fontColor: "#000",
       fontFamily: new TextBox().fontFamily(),
       fontResize: false,
-      fontSize: constant(10)
-    };
-    this._tickShape = "line";
-    this._tickStyle = {
-      "fill": "#000",
-      "stroke": "#000",
-      "stroke-width": 1
+      fontSize: constant(10),
+      height: 8,
+      label: d => d.text,
+      labelBounds: d => d.labelBounds,
+      labelPadding: 0,
+      r: 4,
+      stroke: "#000",
+      strokeWidth: 1,
+      textAnchor: () => this._orient === "left" ? "end" : this._orient === "right" ? "start" : "middle",
+      verticalAlign: () => this._orient === "bottom" ? "top" : this._orient === "top" ? "bottom" : "middle",
+      width: 8
     };
     this._tickSize = 5;
     this._titleConfig = {
@@ -71,26 +79,6 @@ export default class Axis extends BaseClass {
       .attr(`${x}2`, this._d3Scale(this._d3Scale.domain()[1]))
       .attr(`${y}1`, position)
       .attr(`${y}2`, position);
-  }
-
-  /**
-      @memberof Axis
-      @desc Sets positioning for the clip rectangle.
-      @param {D3Selection} *click*
-      @private
-  */
-  _clipPosition(clip) {
-    const {width, height, x, y, opposite} = this._position;
-    const d = this._d3Scale.domain(),
-          o = this._margin[opposite],
-          p = max([this._gridConfig["stroke-width"], this._tickStyle["stroke-width"]]),
-          s = this._d3Scale(d[1]) - this._d3Scale(d[0]);
-    const position = ["top", "left"].includes(this._orient) ? this._outerBounds[y] + this._outerBounds[height] - this._tickSize - o : this._outerBounds[y];
-    clip
-      .attr(x, this._d3Scale(this._d3Scale.domain()[0]) - p)
-      .attr(y, position)
-      .attr(width, s + p * 2)
-      .attr(height, o + this._tickSize + p);
   }
 
   /**
@@ -124,26 +112,6 @@ export default class Axis extends BaseClass {
     d = `${d}`;
     if (d.length === 4 && `${parseInt(d, 10)}` === d) d = `${d}/01/01`;
     return new Date(d);
-  }
-
-  /**
-      @memberof Axis
-      @desc Sets positioning for the axis ticks.
-      @param {D3Selection} *ticks*
-      @private
-  */
-  _tickPosition(ticks, last = false) {
-    const {height, x, y, opposite} = this._position,
-          offset = this._margin[opposite],
-          position = ["top", "left"].includes(this._orient) ? this._outerBounds[y] + this._outerBounds[height] - offset : this._outerBounds[y] + offset,
-          scale = last ? this._lastScale || this._d3Scale : this._d3Scale,
-          size = ["top", "left"].includes(this._orient) ? -this._tickSize : this._tickSize;
-    ticks
-      .call(attrize, this._tickStyle)
-      .attr(`${x}1`, d => scale(d.id))
-      .attr(`${x}2`, d => scale(d.id))
-      .attr(`${y}1`, position)
-      .attr(`${y}2`, last ? position : position + size);
   }
 
   /**
@@ -216,15 +184,6 @@ export default class Axis extends BaseClass {
   */
   height(_) {
     return arguments.length ? (this._height = _, this) : this._height;
-  }
-
-  /**
-      @memberof Axis
-      @desc If *config* is specified, sets the methods that correspond to the key/value pairs for each label's textBox and returns the current class instance. If *config* is not specified, returns the current label textBox configuration.
-      @param {Object} [*config* = {}]
-  */
-  labelConfig(_) {
-    return arguments.length ? (this._labelConfig = Object.assign(this._labelConfig, _), this) : this._labelConfig;
   }
 
   /**
@@ -305,15 +264,21 @@ export default class Axis extends BaseClass {
     }
 
     if (this._lineHeight === void 0) {
-      this._lineHeight = (d, i) => this._labelConfig.fontSize(d, i) * 1.1;
+      this._lineHeight = (d, i) => this._shapeConfig.fontSize(d, i) * 1.1;
     }
 
-    const {width, height, x, y, horizontal} = this._position,
+    const {width, height, x, y, horizontal, opposite} = this._position,
           clipId = `d3plus-Axis-clip-${this._uuid}`,
+          hBuff = this._shape === "Circle" ? this._shapeConfig.r
+                   : this._shape === "Rect" ? this._shapeConfig[height] / 2
+                   : this._tickSize,
           p = this._padding,
           parent = this._select,
           range = this._range ? this._range.slice() : [undefined, undefined],
-          t = transition().duration(this._duration);
+          t = transition().duration(this._duration),
+          wBuff = this._shape === "Circle" ? this._shapeConfig.r
+                   : this._shape === "Rect" ? this._shapeConfig[width] / 2
+                   : this._tickSize;
 
     if (range[0] === void 0) range[0] = p;
     if (range[1] === void 0) range[1] = this[`_${width}`] - p;
@@ -337,12 +302,13 @@ export default class Axis extends BaseClass {
       .domain(this._scale === "time" ? this._domain.map(this._parseDate) : this._domain)
       .rangeRound(range);
 
-    const tickScale = scales.scaleSqrt().domain([10, 400]).range([10, 50]);
+    const tickScale = scales.scaleSqrt().domain([10, 400]).range([10, this._gridSize === 0 ? 25 : 50]);
+    const labelScale = scales.scaleSqrt().domain([10, 400]).range([10, 50]);
     const ticks = this._ticks
                 ? this._scale === "time" ? this._ticks.map(this._parseDate) : this._ticks
                 : this._d3Scale.ticks(Math.floor(this._size / tickScale(this._size)));
-    const tickFormat = this._d3Scale.tickFormat(ticks.length - 1);
-    const labels = this._labels || this._d3Scale.ticks(Math.floor(this._size / tickScale(this._size)));
+    const labels = this._labels || this._d3Scale.ticks(Math.floor(this._size / labelScale(this._size)));
+    const tickFormat = this._d3Scale.tickFormat(labels.length - 1);
 
     this._space = 0;
     if (labels.length > 1) {
@@ -356,23 +322,23 @@ export default class Axis extends BaseClass {
     // Measures size of ticks
     const textData = labels.map((d, i) => {
 
-      const f = this._labelConfig.fontFamily(d, i),
-            s = this._labelConfig.fontSize(d, i);
+      const f = this._shapeConfig.fontFamily(d, i),
+            s = this._shapeConfig.fontSize(d, i);
 
-      const lh = this._labelConfig.lineHeight ? this._labelConfig.lineHeight(d, i) : s * 1.1;
+      const lh = this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : s * 1.1;
 
       const res = textWrap()
         .fontFamily(f)
         .fontSize(s)
         .lineHeight(lh)
-        .width(horizontal ? this._space : this._width - this._tickSize - p)
-        .height(horizontal ? this._height - this._tickSize - p : this._space)
+        .width(horizontal ? this._space : this._width - hBuff - p)
+        .height(horizontal ? this._height - hBuff - p : this._space)
         (tickFormat(d));
 
       res.lines = res.lines.filter(d => d !== "");
       res.d = d;
       res.fS = s;
-      res.width = Math.ceil(max(res.lines.map(t => textWidth(t, {"font-family": f, "font-size": s}))));
+      res.width = Math.ceil(max(res.lines.map(t => textWidth(t, {"font-family": f, "font-size": s})))) + s / 4;
       res.height = Math.ceil(res.lines.length * (lh + 1));
       if (res.width % 2) res.width++;
 
@@ -387,7 +353,7 @@ export default class Axis extends BaseClass {
       const first = textData[0],
             last = textData[textData.length - 1];
 
-      const firstB = this._d3Scale(first.d) - first[width] / 2;
+      const firstB = min([this._d3Scale(first.d) - first[width] / 2, range[0] - wBuff]);
       if (firstB < range[0]) {
         const d = range[0] - firstB;
         if (this._range === void 0 || this._range[0] === void 0) {
@@ -399,7 +365,7 @@ export default class Axis extends BaseClass {
         }
       }
 
-      const lastB = this._d3Scale(last.d) + last[width] / 2;
+      const lastB = max([this._d3Scale(last.d) + last[width] / 2, range[1] + wBuff]);
       if (lastB > range[1]) {
         const d = lastB - range[1];
         if (this._range === void 0 || this._range[1] === void 0) {
@@ -416,25 +382,18 @@ export default class Axis extends BaseClass {
     }
 
     this._outerBounds = {
-      [height]: this._margin[this._orient] + this._tickSize + (max(textData, t => t[height]) || 0) + (textData.length ? p : 0),
+      [height]: this._margin[this._orient] + hBuff + (max(textData, t => t[height]) || 0) + (textData.length ? p : 0),
       [width]: rangeOuter[1] - rangeOuter[0],
       [x]: rangeOuter[0]
     };
-    this._margin[this._position.opposite] = this._gridSize !== void 0 ? this._gridSize : this[`_${height}`] - this._outerBounds[height] - p * 2;
-    this._outerBounds[height] += this._margin[this._position.opposite];
+    this._margin[opposite] = this._gridSize !== void 0 ? max([this._gridSize, hBuff]) : this[`_${height}`] - this._outerBounds[height] - p * 2 + hBuff;
+    this._outerBounds[height] += this._margin[opposite];
+    if (this._margin[opposite] < hBuff) this._outerBounds[height] += hBuff;
     this._outerBounds[y] = this._align === "start" ? this._padding
                          : this._align === "end" ? this[`_${height}`] - this._outerBounds[height]
                          : this[`_${height}`] / 2 - this._outerBounds[height] / 2;
 
     const group = elem(`g#d3plus-Axis-${this._uuid}`, {parent});
-    const defs = elem("defs", {parent: group});
-    const clip = elem(`clipPath#${clipId}`, {parent: defs});
-
-    const axisClip = clip.selectAll("rect").data([null]);
-    axisClip.enter().append("rect")
-      .call(this._clipPosition.bind(this))
-      .merge(axisClip).transition(t)
-        .call(this._clipPosition.bind(this));
 
     const grid = elem("g.grid", {parent: group}).selectAll("line")
       .data((this._grid || ticks).map(d => ({id: d})), d => d.id);
@@ -452,21 +411,47 @@ export default class Axis extends BaseClass {
         .attr("opacity", 1)
         .call(this._gridPosition.bind(this));
 
-    const lines = elem("g.ticks", {parent: group}).selectAll("line")
-      .data(ticks.map(d => ({id: d})), d => d.id);
+    const labelHeight = max(textData, t => t.height) || 0,
+          labelWidth = horizontal ? this._space : this._outerBounds.width - this._margin[this._position.opposite] - hBuff - this._margin[this._orient] + p;
 
-    lines.exit().transition(t)
-      .attr("opacity", 0)
-      .call(this._tickPosition.bind(this))
-      .remove();
+    let tickData = ticks
+      .concat(labels.filter((d, i) => textData[i].lines.length && !ticks.includes(d)))
+      .map(d => {
+        const offset = this._margin[opposite],
+              position = ["top", "left"].includes(this._orient) ? this._outerBounds[y] + this._outerBounds[height] - offset : this._outerBounds[y] + offset,
+              size = ["top", "left"].includes(this._orient) ? -hBuff : hBuff,
+              sizeOffset = this._shape === "Line" ? size / 2 : size;
+        return {
+          id: d,
+          labelBounds: {
+            x: horizontal ? -labelWidth / 2 : this._orient === "left" ? -labelWidth - p + sizeOffset : sizeOffset + p,
+            y: horizontal ? this._orient === "bottom" ? sizeOffset + p : sizeOffset - p - labelHeight : -labelHeight / 2,
+            width: labelWidth,
+            height: labelHeight
+          },
+          size,
+          text: labels.includes(d) ? tickFormat(d) : false,
+          [x]: this._d3Scale(d),
+          [y]: position
+        };
+      });
 
-    lines.enter().append("line")
-        .attr("opacity", 0)
-        .attr("clip-path", `url(#${clipId})`)
-        .call(this._tickPosition.bind(this), true)
-      .merge(lines).transition(t)
-        .attr("opacity", 1)
-        .call(this._tickPosition.bind(this));
+    if (this._shape === "Line") {
+      tickData = tickData.concat(tickData.map(d => {
+        const dupe = Object.assign({}, d);
+        dupe[y] += d.size;
+        return dupe;
+      }));
+    }
+
+    console.log(tickData);
+
+    new shapes[this._shape]()
+      .data(tickData)
+      .duration(this._duration)
+      .select(elem("g.ticks", {parent: group}).node())
+      .config(this._shapeConfig)
+      .render();
 
     const bar = group.selectAll("line.bar").data([null]);
 
@@ -491,28 +476,6 @@ export default class Axis extends BaseClass {
       .x(horizontal ? this._outerBounds.x : this._orient === "left" ? this._outerBounds.x + this._margin[this._orient] / 2 - this._outerBounds[width] / 2 : this._outerBounds.x + this._outerBounds.width - this._margin[this._orient] / 2 - this._outerBounds[width] / 2)
       .y(horizontal ? this._outerBounds.y : this._outerBounds.y - this._margin[this._orient] / 2 + this._outerBounds[width] / 2)
       .config(this._titleConfig)
-      .render();
-
-    const labelHeight = max(textData, t => t.height) || 0;
-
-    new TextBox()
-      .data(labels.filter((d, i) => textData[i].lines.length).map(d => ({id: d})))
-      .duration(this._duration)
-      .height(labelHeight)
-      .select(elem("g.d3plus-Axis-ticks", {parent: group}).node())
-      .text(d => tickFormat(d.id))
-      .textAnchor(this._orient === "left" ? "end" : this._orient === "right" ? "start" : "middle")
-      .verticalAlign(this._orient === "bottom" ? "top" : this._orient === "top" ? "bottom" : "middle")
-      .width(horizontal ? this._space : this._outerBounds.width - this._margin[this._position.opposite] - this._tickSize - this._margin[this._orient] + p)
-      .x(d => {
-        if (horizontal) return this._d3Scale(d.id) - this._space / 2;
-        return this._orient === "left" ? this._margin[this._orient] + this._outerBounds.x - p * 2 : this._outerBounds.x + this._tickSize + this._margin[this._position.opposite] + p;
-      })
-      .y(d => {
-        if (horizontal) return this._orient === "bottom" ? this._outerBounds.y + this._margin[this._position.opposite] + this._tickSize + p : this._margin[this._orient] + this._outerBounds.y;
-        return this._d3Scale(d.id) - labelHeight / 2;
-      })
-      .config(this._labelConfig)
       .render();
 
     this._lastScale = this._d3Scale;
@@ -543,11 +506,20 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
+      @desc If *value* is specified, sets the tick shape constructor and returns the current class instance. If *value* is not specified, returns the current shape.
+      @param {String} [*value* = "Line"]
+  */
+  shape(_) {
+    return arguments.length ? (this._shape = _, this) : this._shape;
+  }
+
+  /**
+      @memberof Axis
       @desc If *value* is specified, sets the tick style of the axis and returns the current class instance. If *value* is not specified, returns the current tick style.
       @param {Object} [*value*]
   */
-  tickStyle(_) {
-    return arguments.length ? (this._tickStyle = Object.assign(this._tickStyle, _), this) : this._tickStyle;
+  shapeConfig(_) {
+    return arguments.length ? (this._shapeConfig = Object.assign(this._shapeConfig, _), this) : this._shapeConfig;
   }
 
   /**
