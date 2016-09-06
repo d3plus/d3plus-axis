@@ -12,7 +12,7 @@ Beautiful javascript scales and axes.
 If you use NPM, `npm install d3plus-axis`. Otherwise, download the [latest release](https://github.com/d3plus/d3plus-axis/releases/latest). The released bundle supports AMD, CommonJS, and vanilla environments. Create a [custom bundle using Rollup](https://github.com/rollup/rollup) or your preferred bundler. You can also load directly from [d3plus.org](https://d3plus.org):
 
 ```html
-<script src="https://d3plus.org/js/d3plus-axis.v0.1.full.min.js"></script>
+<script src="https://d3plus.org/js/d3plus-axis.v0.2.full.min.js"></script>
 ```
 
 [width]: 600
@@ -82,6 +82,7 @@ These axes are the brains behind [d3plus-plot](https://github.com/d3plus/d3plus-
     * [.gridConfig([*value*])](#Axis.gridConfig)
     * [.gridSize([*value*])](#Axis.gridSize)
     * [.height([*value*])](#Axis.height)
+    * [.labels([*value*])](#Axis.labels)
     * [.orient([*orient*])](#Axis.orient)
     * [.outerBounds()](#Axis.outerBounds)
     * [.padding([*value*])](#Axis.padding)
@@ -89,8 +90,8 @@ These axes are the brains behind [d3plus-plot](https://github.com/d3plus/d3plus-
     * [.render([*callback*])](#Axis.render)
     * [.scale([*value*])](#Axis.scale)
     * [.select([*selector*])](#Axis.select)
-    * [.tickConfig([*value*])](#Axis.tickConfig)
-    * [.tickLabels([*value*])](#Axis.tickLabels)
+    * [.shape([*value*])](#Axis.shape)
+    * [.shapeConfig([*value*])](#Axis.shapeConfig)
     * [.ticks([*value*])](#Axis.ticks)
     * [.tickSize([*value*])](#Axis.tickSize)
     * [.title([*value*])](#Axis.title)
@@ -190,6 +191,17 @@ If *value* is specified, sets the overall height of the axis and returns the cur
 | --- | --- | --- |
 | [*value*] | <code>Number</code> | <code>100</code> | 
 
+<a name="Axis.labels"></a>
+
+#### Axis.labels([*value*])
+If *value* is specified, sets the visible tick labels of the axis and returns the current class instance. If *value* is not specified, returns the current visible tick labels, which defaults to showing all labels.
+
+**Kind**: static method of <code>[Axis](#Axis)</code>  
+
+| Param | Type |
+| --- | --- |
+| [*value*] | <code>Array</code> | 
+
 <a name="Axis.orient"></a>
 
 #### Axis.orient([*orient*])
@@ -214,7 +226,7 @@ If called after the elements have been drawn to DOM, will returns the outer boun
 <a name="Axis.padding"></a>
 
 #### Axis.padding([*value*])
-If *value* is specified, sets the padding between each key to the specified number and returns the current class instance. If *value* is not specified, returns the current padding value.
+If *value* is specified, sets the padding between each tick label to the specified number and returns the current class instance. If *value* is not specified, returns the current padding value.
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
 
@@ -266,9 +278,20 @@ If *selector* is specified, sets the SVG container element to the specified d3 s
 | --- | --- | --- |
 | [*selector*] | <code>String</code> &#124; <code>HTMLElement</code> | <code>d3.select(&quot;body&quot;).append(&quot;svg&quot;)</code> | 
 
-<a name="Axis.tickConfig"></a>
+<a name="Axis.shape"></a>
 
-#### Axis.tickConfig([*value*])
+#### Axis.shape([*value*])
+If *value* is specified, sets the tick shape constructor and returns the current class instance. If *value* is not specified, returns the current shape.
+
+**Kind**: static method of <code>[Axis](#Axis)</code>  
+
+| Param | Type | Default |
+| --- | --- | --- |
+| [*value*] | <code>String</code> | <code>&quot;Line&quot;</code> | 
+
+<a name="Axis.shapeConfig"></a>
+
+#### Axis.shapeConfig([*value*])
 If *value* is specified, sets the tick style of the axis and returns the current class instance. If *value* is not specified, returns the current tick style.
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
@@ -276,17 +299,6 @@ If *value* is specified, sets the tick style of the axis and returns the current
 | Param | Type |
 | --- | --- |
 | [*value*] | <code>Object</code> | 
-
-<a name="Axis.tickLabels"></a>
-
-#### Axis.tickLabels([*value*])
-If *value* is specified, sets the visible tick labels of the axis and returns the current class instance. If *value* is not specified, returns the current visible tick labels, which defaults to showing all labels.
-
-**Kind**: static method of <code>[Axis](#Axis)</code>  
-
-| Param | Type |
-| --- | --- |
-| [*value*] | <code>Array</code> | 
 
 <a name="Axis.ticks"></a>
 
@@ -385,4 +397,4 @@ Shorthand method for creating an axis where the ticks are drawn above the vertic
 
 
 
-###### <sub>Documentation generated on Thu, 18 Aug 2016 20:17:37 GMT</sub>
+###### <sub>Documentation generated on Tue, 06 Sep 2016 20:07:37 GMT</sub>
