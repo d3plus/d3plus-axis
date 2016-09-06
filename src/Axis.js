@@ -109,6 +109,7 @@ export default class Axis extends BaseClass {
   */
   _parseDate(d) {
     if (d.constructor === Date) return d;
+    else if (d.constructor === Number && `${d}`.length > 4 && d % 1 === 0) return new Date(d);
     d = `${d}`;
     if (d.length === 4 && `${parseInt(d, 10)}` === d) d = `${d}/01/01`;
     return new Date(d);
@@ -309,6 +310,7 @@ export default class Axis extends BaseClass {
                 : this._d3Scale.ticks(Math.floor(this._size / tickScale(this._size)));
     const labels = this._labels || this._d3Scale.ticks(Math.floor(this._size / labelScale(this._size)));
     const tickFormat = this._d3Scale.tickFormat(labels.length - 1);
+    this._visibleTicks = ticks;
 
     this._space = 0;
     if (labels.length > 1) {
@@ -394,6 +396,7 @@ export default class Axis extends BaseClass {
                          : this[`_${height}`] / 2 - this._outerBounds[height] / 2;
 
     const group = elem(`g#d3plus-Axis-${this._uuid}`, {parent});
+    this._group = group;
 
     const grid = elem("g.grid", {parent: group}).selectAll("line")
       .data((this._grid || ticks).map(d => ({id: d})), d => d.id);
