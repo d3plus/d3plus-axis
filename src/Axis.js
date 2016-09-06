@@ -444,8 +444,6 @@ export default class Axis extends BaseClass {
       }));
     }
 
-    console.log(tickData);
-
     new shapes[this._shape]()
       .data(tickData)
       .duration(this._duration)
