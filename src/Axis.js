@@ -305,10 +305,12 @@ export default class Axis extends BaseClass {
 
     const tickScale = scales.scaleSqrt().domain([10, 400]).range([10, this._gridSize === 0 ? 25 : 50]);
     const labelScale = scales.scaleSqrt().domain([10, 400]).range([10, 50]);
-    const ticks = this._ticks
+    const ticks = (this._ticks
                 ? this._scale === "time" ? this._ticks.map(this._parseDate) : this._ticks
-                : this._d3Scale.ticks(Math.floor(this._size / tickScale(this._size)));
-    const labels = this._labels || this._d3Scale.ticks(Math.floor(this._size / labelScale(this._size)));
+                : this._d3Scale.ticks(Math.floor(this._size / tickScale(this._size)))).map(Number);
+    const labels = this._ticks && !this._labels ? ticks : (this._labels
+                ? this._scale === "time" ? this._labels.map(this._parseDate) : this._labels
+                : this._d3Scale.ticks(Math.floor(this._size / labelScale(this._size)))).map(Number);
     const tickFormat = this._d3Scale.tickFormat(labels.length - 1);
     this._visibleTicks = ticks;
 
@@ -393,7 +395,7 @@ export default class Axis extends BaseClass {
     this._margin[this._orient] += hBuff;
     this._outerBounds[height] += this._margin[opposite] + this._margin[this._orient];
     this._outerBounds[y] = this._align === "start" ? this._padding
-                         : this._align === "end" ? this[`_${height}`] - this._outerBounds[height]
+                         : this._align === "end" ? this[`_${height}`] - this._outerBounds[height] - this._padding
                          : this[`_${height}`] / 2 - this._outerBounds[height] / 2;
 
     const group = elem(`g#d3plus-Axis-${this._uuid}`, {parent});
@@ -416,8 +418,7 @@ export default class Axis extends BaseClass {
         .call(this._gridPosition.bind(this));
 
     const labelHeight = max(textData, t => t.height) || 0,
-          labelWidth = horizontal ? this._space : this._outerBounds.width - this._margin[this._position.opposite] - hBuff - this._margin[this._orient] + p;
-
+          labelWidth = horizontal ? this._space * 1.1 : this._outerBounds.width - this._margin[this._position.opposite] - hBuff - this._margin[this._orient] + p;
     let tickData = ticks
       .concat(labels.filter((d, i) => textData[i].lines.length && !ticks.includes(d)))
       .map(d => {
