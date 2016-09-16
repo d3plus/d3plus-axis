@@ -391,7 +391,7 @@ export default class Axis extends BaseClass {
       [width]: rangeOuter[1] - rangeOuter[0],
       [x]: rangeOuter[0]
     };
-    this._margin[opposite] = this._gridSize !== void 0 ? max([this._gridSize, tBuff]) : this[`_${height}`] - this._outerBounds[height] - p * 2 - hBuff;
+    this._margin[opposite] = this._gridSize !== void 0 ? max([this._gridSize, tBuff]) : this[`_${height}`] - this._margin[this._orient] - this._outerBounds[height] - p * 2 - hBuff;
     this._margin[this._orient] += hBuff;
     this._outerBounds[height] += this._margin[opposite] + this._margin[this._orient];
     this._outerBounds[y] = this._align === "start" ? this._padding
