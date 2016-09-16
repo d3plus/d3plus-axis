@@ -418,7 +418,7 @@ export default class Axis extends BaseClass {
         .call(this._gridPosition.bind(this));
 
     const labelHeight = max(textData, t => t.height) || 0,
-          labelWidth = horizontal ? this._space * 1.1 : this._outerBounds.width - this._margin[this._position.opposite] - hBuff - this._margin[this._orient] + p;
+          labelWidth = horizontal ? this._space * 1.1 : (this._outerBounds.width - this._margin[this._position.opposite] - hBuff - this._margin[this._orient] + p) * 1.1;
     let tickData = ticks
       .concat(labels.filter((d, i) => textData[i].lines.length && !ticks.includes(d)))
       .map(d => {
