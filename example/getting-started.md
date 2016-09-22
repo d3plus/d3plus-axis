@@ -16,7 +16,7 @@ Here is the javascript needed:
 ```js
 var bottom = new d3plus.AxisBottom()
   .select("#my-axis")
-  .domain([1, 10])
+  .domain([0, 10])
   .width(600)
   .height(300)
   .render();

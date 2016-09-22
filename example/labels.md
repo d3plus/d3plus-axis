@@ -7,8 +7,8 @@ Sometimes it's necessary to only show the labels for specific ticks. By passing 
 
 ```js
 var bottom = new d3plus.AxisBottom()
-  .domain([1, 10])
-  .labels([1, 3, 5, 7, 8, 9, 10])
+  .domain([0, 10])
+  .labels([0, 1, 3, 5, 7, 8, 9, 10])
   .width(600)
   .height(300)
   .render();

@@ -7,7 +7,7 @@ Sometimes it's necessary to override the default behavior to show only specific 
 
 ```js
 var bottom = new d3plus.AxisBottom()
-  .domain([1, 10])
+  .domain([0, 10])
   .ticks([1, 3, 5, 7, 8, 9, 10])
   .width(600)
   .height(300)

@@ -7,7 +7,7 @@ Any of the scales made available in [d3-scale](https://github.com/d3/d3-scale) a
 
 ```js
 var bottom = new d3plus.AxisBottom()
-  .domain([2002, 2016])
+  .domain([2002, 2004])
   .scale("time")
   .width(600)
   .height(300)
