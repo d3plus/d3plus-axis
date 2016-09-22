@@ -12,18 +12,18 @@ Beautiful javascript scales and axes.
 If you use NPM, `npm install d3plus-axis`. Otherwise, download the [latest release](https://github.com/d3plus/d3plus-axis/releases/latest). The released bundle supports AMD, CommonJS, and vanilla environments. Create a [custom bundle using Rollup](https://github.com/rollup/rollup) or your preferred bundler. You can also load directly from [d3plus.org](https://d3plus.org):
 
 ```html
-<script src="https://d3plus.org/js/d3plus-axis.v0.2.full.min.js"></script>
+<script src="https://d3plus.org/js/d3plus-axis.v0.3.full.min.js"></script>
 ```
 
 [width]: 600
-[height]: 200
+[height]: 300
 
 ## Getting Started
 
-d3plus-axis extrapolates on the ideas presented in [d3-axis](https://github.com/d3/d3-axis), most notably by adding grid lines and fitting the axis within the allotted space. To create an axis in an SVG group defined like this:
+d3plus-axis extrapolates on the ideas presented in [d3-axis](https://github.com/d3/d3-axis), most notably by adding grid lines and fitting the axis within the allotted space. To create a bottom axis in an SVG group defined like this:
 
 ```html
-<svg width=600 height=200>
+<svg width=600 height=300>
   <g id="my-axis"></g>
 </svg>
 ```
@@ -33,22 +33,26 @@ Here is the javascript needed:
 ```js
 var bottom = new d3plus.AxisBottom()
   .select("#my-axis")
-  .domain([3.14, 9.34])
-  .height(200)
+  .domain([1, 10])
   .width(600)
+  .height(300)
   .render();
 ```
 
-These axes are the brains behind [d3plus-plot](https://github.com/d3plus/d3plus-plot).
+The [d3plus-axis](https://github.com/d3plus/d3plus-axis) module makes all four orientations available as shorthand methods for the generalized [Axis](https://github.com/d3plus/d3plus-axis#Axis) class that they all extend. These axes are the brains behind [d3plus-plot](https://github.com/d3plus/d3plus-plot).
 
+
+[<kbd><img src="/example/getting-started.png" width="600px" /></kbd>](https://d3plus.org/examples/d3plus-axis/getting-started/)
 
 [Click here](https://d3plus.org/examples/d3plus-axis/getting-started/) to view this example live on the web.
 
-[![Getting Started](/example/getting-started.png)](https://d3plus.org/examples/d3plus-axis/getting-started/)
 
+### More Examples
 
-
-
+ * [Changing Axis Orientation](http://d3plus.org/examples/d3plus-axis/axis-orient/)<sup> ***New***</sup>
+ * [Axis w/ Time Scale](http://d3plus.org/examples/d3plus-axis/scale-time/)<sup> ***New***</sup>
+ * [Only Showing Specific Tick Labels](http://d3plus.org/examples/d3plus-axis/labels/)<sup> ***New***</sup>
+ * [Setting Custom Ticks](http://d3plus.org/examples/d3plus-axis/ticks/)<sup> ***New***</sup>
 
 ## API Reference
 ### Classes
@@ -86,6 +90,8 @@ These axes are the brains behind [d3plus-plot](https://github.com/d3plus/d3plus-
     * [.orient([*orient*])](#Axis.orient)
     * [.outerBounds()](#Axis.outerBounds)
     * [.padding([*value*])](#Axis.padding)
+    * [.paddingInner([*value*])](#Axis.paddingInner)
+    * [.paddingOuter([*value*])](#Axis.paddingOuter)
     * [.range([*value*])](#Axis.range)
     * [.render([*callback*])](#Axis.render)
     * [.scale([*value*])](#Axis.scale)
@@ -233,6 +239,28 @@ If *value* is specified, sets the padding between each tick label to the specifi
 | Param | Type | Default |
 | --- | --- | --- |
 | [*value*] | <code>Number</code> | <code>10</code> | 
+
+<a name="Axis.paddingInner"></a>
+
+#### Axis.paddingInner([*value*])
+If *value* is specified, sets the inner padding of band scale to the specified number and returns the current class instance. If *value* is not specified, returns the current inner padding value.
+
+**Kind**: static method of <code>[Axis](#Axis)</code>  
+
+| Param | Type | Default |
+| --- | --- | --- |
+| [*value*] | <code>Number</code> | <code>0.1</code> | 
+
+<a name="Axis.paddingOuter"></a>
+
+#### Axis.paddingOuter([*value*])
+If *value* is specified, sets the outer padding of band scales to the specified number and returns the current class instance. If *value* is not specified, returns the current outer padding value.
+
+**Kind**: static method of <code>[Axis](#Axis)</code>  
+
+| Param | Type | Default |
+| --- | --- | --- |
+| [*value*] | <code>Number</code> | <code>0.1</code> | 
 
 <a name="Axis.range"></a>
 
@@ -397,4 +425,4 @@ Shorthand method for creating an axis where the ticks are drawn above the vertic
 
 
 
-###### <sub>Documentation generated on Fri, 16 Sep 2016 17:29:36 GMT</sub>
+###### <sub>Documentation generated on Thu, 22 Sep 2016 20:05:30 GMT</sub>
