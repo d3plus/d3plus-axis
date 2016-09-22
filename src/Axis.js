@@ -1,4 +1,4 @@
-import {max, min} from "d3-array";
+import {max, min, range as d3Range} from "d3-array";
 import * as scales from "d3-scale";
 import {select} from "d3-selection";
 import {transition} from "d3-transition";
@@ -71,12 +71,14 @@ export default class Axis extends BaseClass {
   */
   _barPosition(bar) {
     const {height, x, y, opposite} = this._position,
+          domain = this._d3Scale.domain(),
           offset = this._margin[opposite],
           position = ["top", "left"].includes(this._orient) ? this._outerBounds[y] + this._outerBounds[height] - offset : this._outerBounds[y] + offset;
+
     bar
       .call(attrize, this._barConfig)
-      .attr(`${x}1`, this._d3Scale(this._d3Scale.domain()[0]))
-      .attr(`${x}2`, this._d3Scale(this._d3Scale.domain()[1]))
+      .attr(`${x}1`, this._d3Scale(domain[0]))
+      .attr(`${x}2`, this._d3Scale(domain[domain.length - 1]))
       .attr(`${y}1`, position)
       .attr(`${y}2`, position);
   }
@@ -275,15 +277,18 @@ export default class Axis extends BaseClass {
                    : this._tickSize,
           p = this._padding,
           parent = this._select,
-          range = this._range ? this._range.slice() : [undefined, undefined],
           t = transition().duration(this._duration),
           wBuff = this._shape === "Circle" ? this._shapeConfig.r
                    : this._shape === "Rect" ? this._shapeConfig[width] / 2
                    : this._tickSize;
 
+    let range = this._range ? this._range.slice() : [undefined, undefined];
     if (range[0] === void 0) range[0] = p;
     if (range[1] === void 0) range[1] = this[`_${width}`] - p;
     this._size = range[1] - range[0];
+    if (this._domain.length > range.length) {
+      range = d3Range(this._domain.length).map(d => this._size * (d / (this._domain.length - 1)) + range[0]);
+    }
 
     this._margin = {top: 0, right: 0, bottom: 0, left: 0};
 
@@ -301,22 +306,38 @@ export default class Axis extends BaseClass {
 
     this._d3Scale = scales[`scale${this._scale.charAt(0).toUpperCase()}${this._scale.slice(1)}`]()
       .domain(this._scale === "time" ? this._domain.map(this._parseDate) : this._domain)
-      .rangeRound(range);
+      .range(range);
 
-    const tickScale = scales.scaleSqrt().domain([10, 400]).range([10, this._gridSize === 0 ? 25 : 50]);
-    const labelScale = scales.scaleSqrt().domain([10, 400]).range([10, 50]);
-    const ticks = (this._ticks
-                ? this._scale === "time" ? this._ticks.map(this._parseDate) : this._ticks
-                : this._d3Scale.ticks(Math.floor(this._size / tickScale(this._size)))).map(Number);
-    const labels = this._ticks && !this._labels ? ticks : (this._labels
-                ? this._scale === "time" ? this._labels.map(this._parseDate) : this._labels
-                : this._d3Scale.ticks(Math.floor(this._size / labelScale(this._size)))).map(Number);
-    const tickFormat = this._d3Scale.tickFormat(labels.length - 1);
+    if (this._d3Scale.round) this._d3Scale.round(true);
+
+    const tickScale = scales.scaleSqrt().domain([10, 400]).range([10, this._gridSize === 0 ? 32.5 : 75]);
+    const labelScale = scales.scaleSqrt().domain([10, 400]).range([10, 75]);
+
+    let ticks = this._ticks
+               ? this._scale === "time" ? this._ticks.map(this._parseDate) : this._ticks
+               : this._d3Scale.ticks
+               ? this._d3Scale.ticks(Math.floor(this._size / tickScale(this._size)))
+               : this._domain;
+    let labels = this._ticks && !this._labels ? ticks : this._labels
+               ? this._scale === "time" ? this._labels.map(this._parseDate) : this._labels
+               : this._d3Scale.ticks
+               ? this._d3Scale.ticks(Math.floor(this._size / labelScale(this._size)))
+               : this._domain;
+
+    const tickFormat = this._d3Scale.tickFormat
+                     ? this._d3Scale.tickFormat(labels.length - 1)
+                     : d => d;
+
+    if (this._scale === "time") {
+      ticks = ticks.map(Number);
+      labels = labels.map(Number);
+    }
+
     this._visibleTicks = ticks;
 
     this._space = 0;
     if (labels.length > 1) {
-      for (let i = 0; i < labels.length; i++) {
+      for (let i = 0; i < labels.length - 1; i++) {
         const s = this._d3Scale(labels[i + 1]) - this._d3Scale(labels[i]);
         if (s > this._space) this._space = s;
       }
@@ -352,6 +373,7 @@ export default class Axis extends BaseClass {
 
     // Calculates new range, based on any text that may be overflowing.
     const rangeOuter = range.slice();
+    const lastI = range.length - 1;
     if (textData.length) {
 
       const first = textData[0],
@@ -369,26 +391,26 @@ export default class Axis extends BaseClass {
         }
       }
 
-      const lastB = max([this._d3Scale(last.d) + last[width] / 2, range[1] + wBuff]);
-      if (lastB > range[1]) {
-        const d = lastB - range[1];
-        if (this._range === void 0 || this._range[1] === void 0) {
+      const lastB = max([this._d3Scale(last.d) + last[width] / 2, range[lastI] + wBuff]);
+      if (lastB > range[lastI]) {
+        const d = lastB - range[lastI];
+        if (this._range === void 0 || this._range[lastI] === void 0) {
           this._size -= d;
-          range[1] -= d;
+          range[lastI] -= d;
         }
         else if (this._range) {
-          rangeOuter[1] += d;
+          rangeOuter[lastI] += d;
         }
       }
 
-      this._d3Scale.rangeRound(range);
+      this._d3Scale.range(range);
 
     }
 
     const tBuff = this._shape === "Line" ? 0 : hBuff;
     this._outerBounds = {
       [height]: (max(textData, t => t[height]) || 0) + (textData.length ? p : 0),
-      [width]: rangeOuter[1] - rangeOuter[0],
+      [width]: rangeOuter[lastI] - rangeOuter[0],
       [x]: rangeOuter[0]
     };
     this._margin[opposite] = this._gridSize !== void 0 ? max([this._gridSize, tBuff]) : this[`_${height}`] - this._margin[this._orient] - this._outerBounds[height] - p * 2 - hBuff;
