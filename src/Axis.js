@@ -33,6 +33,8 @@ export default class Axis extends BaseClass {
     this.orient("bottom");
     this._outerBounds = {width: 0, height: 0, x: 0, y: 0};
     this._padding = 5;
+    this._paddingInner = 0.1;
+    this._paddingOuter = 0.1;
     this._scale = "linear";
     this._shape = "Line";
     this._shapeConfig = {
@@ -74,11 +76,10 @@ export default class Axis extends BaseClass {
           domain = this._d3Scale.domain(),
           offset = this._margin[opposite],
           position = ["top", "left"].includes(this._orient) ? this._outerBounds[y] + this._outerBounds[height] - offset : this._outerBounds[y] + offset;
-
     bar
       .call(attrize, this._barConfig)
-      .attr(`${x}1`, this._d3Scale(domain[0]))
-      .attr(`${x}2`, this._d3Scale(domain[domain.length - 1]))
+      .attr(`${x}1`, this._d3Scale(domain[0]) - (this._scale === "band" ? this._d3Scale.step() - this._d3Scale.bandwidth() : 0))
+      .attr(`${x}2`, this._d3Scale(domain[domain.length - 1]) + (this._scale === "band" ? this._d3Scale.step() : 0))
       .attr(`${y}1`, position)
       .attr(`${y}2`, position);
   }
@@ -94,11 +95,13 @@ export default class Axis extends BaseClass {
           offset = this._margin[opposite],
           position = ["top", "left"].includes(this._orient) ? this._outerBounds[y] + this._outerBounds[height] - offset : this._outerBounds[y] + offset,
           scale = last ? this._lastScale || this._d3Scale : this._d3Scale,
-          size = ["top", "left"].includes(this._orient) ? offset : -offset;
+          size = ["top", "left"].includes(this._orient) ? offset : -offset,
+          xDiff = this._scale === "band" ? this._d3Scale.bandwidth() / 2 : 0,
+          xPos = d => scale(d.id) + xDiff;
     lines
       .call(attrize, this._gridConfig)
-      .attr(`${x}1`, d => scale(d.id))
-      .attr(`${x}2`, d => scale(d.id))
+      .attr(`${x}1`, xPos)
+      .attr(`${x}2`, xPos)
       .attr(`${y}1`, position)
       .attr(`${y}2`, last ? position : position + size);
   }
@@ -245,6 +248,24 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
+      @desc If *value* is specified, sets the inner padding of band scale to the specified number and returns the current class instance. If *value* is not specified, returns the current inner padding value.
+      @param {Number} [*value* = 0.1]
+  */
+  paddingInner(_) {
+    return arguments.length ? (this._paddingInner = _, this) : this._paddingInner;
+  }
+
+  /**
+      @memberof Axis
+      @desc If *value* is specified, sets the outer padding of band scales to the specified number and returns the current class instance. If *value* is not specified, returns the current outer padding value.
+      @param {Number} [*value* = 0.1]
+  */
+  paddingOuter(_) {
+    return arguments.length ? (this._paddingOuter = _, this) : this._paddingOuter;
+  }
+
+  /**
+      @memberof Axis
       @desc If *value* is specified, sets the scale range (in pixels) of the axis and returns the current class instance. The given array must have 2 values, but one may be `undefined` to allow the default behavior for that value. If *value* is not specified, returns the current scale range.
       @param {Array} [*value*]
   */
@@ -286,7 +307,7 @@ export default class Axis extends BaseClass {
     if (range[0] === void 0) range[0] = p;
     if (range[1] === void 0) range[1] = this[`_${width}`] - p;
     this._size = range[1] - range[0];
-    if (this._domain.length > range.length) {
+    if (this._scale === "ordinal" && this._domain.length > range.length) {
       range = d3Range(this._domain.length).map(d => this._size * (d / (this._domain.length - 1)) + range[0]);
     }
 
@@ -309,6 +330,8 @@ export default class Axis extends BaseClass {
       .range(range);
 
     if (this._d3Scale.round) this._d3Scale.round(true);
+    if (this._d3Scale.paddingInner) this._d3Scale.paddingInner(this._paddingInner);
+    if (this._d3Scale.paddingOuter) this._d3Scale.paddingOuter(this._paddingOuter);
 
     const tickScale = scales.scaleSqrt().domain([10, 400]).range([10, this._gridSize === 0 ? 32.5 : 75]);
     const labelScale = scales.scaleSqrt().domain([10, 400]).range([10, 75]);
@@ -335,8 +358,11 @@ export default class Axis extends BaseClass {
 
     this._visibleTicks = ticks;
 
-    this._space = 0;
-    if (labels.length > 1) {
+    if (this._scale === "band") {
+      this._space = this._d3Scale.bandwidth();
+    }
+    else if (labels.length > 1) {
+      this._space = 0;
       for (let i = 0; i < labels.length - 1; i++) {
         const s = this._d3Scale(labels[i + 1]) - this._d3Scale(labels[i]);
         if (s > this._space) this._space = s;
@@ -374,7 +400,7 @@ export default class Axis extends BaseClass {
     // Calculates new range, based on any text that may be overflowing.
     const rangeOuter = range.slice();
     const lastI = range.length - 1;
-    if (textData.length) {
+    if (this._scale !== "band" && textData.length) {
 
       const first = textData[0],
             last = textData[textData.length - 1];
@@ -458,7 +484,7 @@ export default class Axis extends BaseClass {
           },
           size,
           text: labels.includes(d) ? tickFormat(d) : false,
-          [x]: this._d3Scale(d),
+          [x]: this._d3Scale(d) + (this._scale === "band" ? this._d3Scale.bandwidth() / 2 : 0),
           [y]: position
         };
       });
