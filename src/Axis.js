@@ -14,6 +14,11 @@ import {TextBox, textWidth, textWrap} from "d3plus-text";
 */
 export default class Axis extends BaseClass {
 
+  /**
+      @memberof Axis
+      @desc Invoked when creating a new class instance, and sets any default parameters.
+      @private
+  */
   constructor() {
 
     super();

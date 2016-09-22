@@ -7,6 +7,11 @@ import {default as Axis} from "./Axis";
 */
 export default class AxisLeft extends Axis {
 
+  /**
+      @memberof AxisLeft
+      @desc Invoked when creating a new class instance, and overrides any default parameters inherited from Axis.
+      @private
+  */
   constructor() {
     super();
     this.orient("left");
