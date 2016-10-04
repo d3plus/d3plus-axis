@@ -49,10 +49,10 @@ The [d3plus-axis](https://github.com/d3plus/d3plus-axis) module makes all four o
 
 ### More Examples
 
- * [Changing Axis Orientation](http://d3plus.org/examples/d3plus-axis/axis-orient/)<sup> ***New***</sup>
- * [Axis w/ Time Scale](http://d3plus.org/examples/d3plus-axis/scale-time/)<sup> ***New***</sup>
- * [Only Showing Specific Tick Labels](http://d3plus.org/examples/d3plus-axis/labels/)<sup> ***New***</sup>
- * [Setting Custom Ticks](http://d3plus.org/examples/d3plus-axis/ticks/)<sup> ***New***</sup>
+ * [Changing Axis Orientation](http://d3plus.org/examples/d3plus-axis/axis-orient/)
+ * [Axis w/ Time Scale](http://d3plus.org/examples/d3plus-axis/scale-time/)
+ * [Only Showing Specific Tick Labels](http://d3plus.org/examples/d3plus-axis/labels/)
+ * [Setting Custom Ticks](http://d3plus.org/examples/d3plus-axis/ticks/)
 
 ## API Reference
 ### Classes
@@ -68,6 +68,14 @@ The [d3plus-axis](https://github.com/d3plus/d3plus-axis) module makes all four o
 <dd></dd>
 <dt><a href="#AxisTop">AxisTop</a> ⇐ <code><a href="#Axis">Axis</a></code></dt>
 <dd></dd>
+</dl>
+
+### Functions
+
+<dl>
+<dt><a href="#date">date(*date*)</a></dt>
+<dd><p>Parses numbers and strings to valid Javascript Date obejcts.</p>
+</dd>
 </dl>
 
 <a name="Axis"></a>
@@ -107,7 +115,7 @@ The [d3plus-axis](https://github.com/d3plus/d3plus-axis) module makes all four o
 <a name="new_Axis_new"></a>
 
 #### new Axis()
-Creates an SVG scale based on an array of data. If *data* is specified, immediately draws based on the specified array and returns the current class instance. If *data* is not specified on instantiation, it can be passed/updated after instantiation using the [data](#shape.data) method.
+Creates an SVG scale based on an array of data.
 
 <a name="Axis.align"></a>
 
@@ -423,6 +431,17 @@ Shorthand method for creating an axis where the ticks are drawn to the right of 
 #### new AxisTop()
 Shorthand method for creating an axis where the ticks are drawn above the vertical domain path. Extends all functionality of the base [Axis](#Axis) class.
 
+<a name="date"></a>
+
+### date(*date*)
+Parses numbers and strings to valid Javascript Date obejcts.
+
+**Kind**: global function  
+
+| Param | Type |
+| --- | --- |
+| *date* | <code>Date</code> &#124; <code>Number</code> &#124; <code>String</code> | 
 
 
-###### <sub>Documentation generated on Thu, 22 Sep 2016 20:09:45 GMT</sub>
+
+###### <sub>Documentation generated on Tue, 04 Oct 2016 19:26:31 GMT</sub>
