@@ -444,4 +444,4 @@ Parses numbers and strings to valid Javascript Date obejcts.
 
 
 
-###### <sub>Documentation generated on Tue, 04 Oct 2016 19:26:31 GMT</sub>
+###### <sub>Documentation generated on Tue, 04 Oct 2016 19:38:48 GMT</sub>
