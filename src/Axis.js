@@ -10,7 +10,7 @@ import {TextBox, textWidth, textWrap} from "d3plus-text";
 /**
     @class Axis
     @extends BaseClass
-    @desc Creates an SVG scale based on an array of data. If *data* is specified, immediately draws based on the specified array and returns the current class instance. If *data* is not specified on instantiation, it can be passed/updated after instantiation using the [data](#shape.data) method.
+    @desc Creates an SVG scale based on an array of data.
 */
 export default class Axis extends BaseClass {
 
