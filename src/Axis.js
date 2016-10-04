@@ -326,8 +326,7 @@ export default class Axis extends BaseClass {
     if (this._d3Scale.paddingInner) this._d3Scale.paddingInner(this._paddingInner);
     if (this._d3Scale.paddingOuter) this._d3Scale.paddingOuter(this._paddingOuter);
 
-    const tickScale = scales.scaleSqrt().domain([10, 400]).range([10, this._gridSize === 0 ? 32.5 : 75]);
-    const labelScale = scales.scaleSqrt().domain([10, 400]).range([10, 75]);
+    const tickScale = scales.scaleSqrt().domain([10, 400]).range([10, this._gridSize === 0 ? 45 : 75]);
 
     let ticks = this._ticks
                ? this._scale === "time" ? this._ticks.map(date) : this._ticks
@@ -336,9 +335,7 @@ export default class Axis extends BaseClass {
                : this._domain;
     let labels = this._ticks && !this._labels ? ticks : this._labels
                ? this._scale === "time" ? this._labels.map(date) : this._labels
-               : this._d3Scale.ticks
-               ? this._d3Scale.ticks(Math.floor(this._size / labelScale(this._size)))
-               : this._domain;
+               : ticks;
 
     const tickFormat = this._d3Scale.tickFormat
                      ? this._d3Scale.tickFormat(labels.length - 1)
