@@ -8,7 +8,7 @@ export default function(d) {
   // returns if already Date object
   if (d.constructor === Date) return d;
   // detects if milliseconds
-  else if (d.constructor === Number && `${d}`.length > 4 && d % 1 === 0) return new Date(d);
+  else if (d.constructor === Number && `${d}`.length > 5 && d % 1 === 0) return new Date(d);
 
   const s = `${d}`;
   // detects if only passing a year value
