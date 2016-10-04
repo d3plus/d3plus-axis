@@ -7,6 +7,8 @@ import {attrize, BaseClass, constant, elem} from "d3plus-common";
 import * as shapes from "d3plus-shape";
 import {TextBox, textWidth, textWrap} from "d3plus-text";
 
+import {default as date} from "./date";
+
 /**
     @class Axis
     @extends BaseClass
@@ -109,20 +111,6 @@ export default class Axis extends BaseClass {
       .attr(`${x}2`, xPos)
       .attr(`${y}1`, position)
       .attr(`${y}2`, last ? position : position + size);
-  }
-
-  /**
-      @memberof Axis
-      @desc Parses numbers and strings to valid Javascript Date obejcts.
-      @param {Date|Number|String} *date*
-      @private
-  */
-  _parseDate(d) {
-    if (d.constructor === Date) return d;
-    else if (d.constructor === Number && `${d}`.length > 4 && d % 1 === 0) return new Date(d);
-    d = `${d}`;
-    if (d.length === 4 && `${parseInt(d, 10)}` === d) d = `${d}/01/01`;
-    return new Date(d);
   }
 
   /**
@@ -331,7 +319,7 @@ export default class Axis extends BaseClass {
     }
 
     this._d3Scale = scales[`scale${this._scale.charAt(0).toUpperCase()}${this._scale.slice(1)}`]()
-      .domain(this._scale === "time" ? this._domain.map(this._parseDate) : this._domain)
+      .domain(this._scale === "time" ? this._domain.map(date) : this._domain)
       .range(range);
 
     if (this._d3Scale.round) this._d3Scale.round(true);
@@ -342,12 +330,12 @@ export default class Axis extends BaseClass {
     const labelScale = scales.scaleSqrt().domain([10, 400]).range([10, 75]);
 
     let ticks = this._ticks
-               ? this._scale === "time" ? this._ticks.map(this._parseDate) : this._ticks
+               ? this._scale === "time" ? this._ticks.map(date) : this._ticks
                : this._d3Scale.ticks
                ? this._d3Scale.ticks(Math.floor(this._size / tickScale(this._size)))
                : this._domain;
     let labels = this._ticks && !this._labels ? ticks : this._labels
-               ? this._scale === "time" ? this._labels.map(this._parseDate) : this._labels
+               ? this._scale === "time" ? this._labels.map(date) : this._labels
                : this._d3Scale.ticks
                ? this._d3Scale.ticks(Math.floor(this._size / labelScale(this._size)))
                : this._domain;
