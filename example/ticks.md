@@ -13,3 +13,5 @@ var bottom = new d3plus.AxisBottom()
   .height(300)
   .render();
 ```
+
+Notice that while the tick/gridlines have been modified, the labels still appear at default intervals. This behavior can be overridden using the [.labels( )](https://github.com/d3plus/d3plus-axis#Axis.labels) method.

@@ -52,7 +52,7 @@ The [d3plus-axis](https://github.com/d3plus/d3plus-axis) module makes all four o
  * [Changing Axis Orientation](http://d3plus.org/examples/d3plus-axis/axis-orient/)
  * [Axis w/ Time Scale](http://d3plus.org/examples/d3plus-axis/scale-time/)
  * [Only Showing Specific Tick Labels](http://d3plus.org/examples/d3plus-axis/labels/)
- * [Setting Custom Ticks](http://d3plus.org/examples/d3plus-axis/ticks/)
+ * [Setting Custom Ticks](http://d3plus.org/examples/d3plus-axis/ticks/)<sup> ***New***</sup>
 
 ## API Reference
 ### Classes
@@ -444,4 +444,4 @@ Parses numbers and strings to valid Javascript Date obejcts.
 
 
 
-###### <sub>Documentation generated on Tue, 11 Oct 2016 19:37:57 GMT</sub>
+###### <sub>Documentation generated on Tue, 11 Oct 2016 19:40:03 GMT</sub>
