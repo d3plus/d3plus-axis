@@ -329,12 +329,15 @@ export default class Axis extends BaseClass {
     const tickScale = scales.scaleSqrt().domain([10, 400]).range([10, this._gridSize === 0 ? 45 : 75]);
 
     let ticks = this._ticks
-               ? this._scale === "time" ? this._ticks.map(date) : this._ticks
+              ? this._scale === "time" ? this._ticks.map(date) : this._ticks
+              : this._d3Scale.ticks
+              ? this._d3Scale.ticks(Math.floor(this._size / tickScale(this._size)))
+              : this._domain;
+
+    let labels = this._labels
+               ? this._scale === "time" ? this._labels.map(date) : this._labels
                : this._d3Scale.ticks
                ? this._d3Scale.ticks(Math.floor(this._size / tickScale(this._size)))
-               : this._domain;
-    let labels = this._ticks && !this._labels ? ticks : this._labels
-               ? this._scale === "time" ? this._labels.map(date) : this._labels
                : ticks;
 
     const tickFormat = this._d3Scale.tickFormat
