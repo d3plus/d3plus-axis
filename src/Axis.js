@@ -319,8 +319,10 @@ export default class Axis extends BaseClass {
     }
 
     this._d3Scale = scales[`scale${this._scale.charAt(0).toUpperCase()}${this._scale.slice(1)}`]()
-      .domain(this._scale === "time" ? this._domain.map(date) : this._domain)
-      .range(range);
+      .domain(this._scale === "time" ? this._domain.map(date) : this._domain);
+
+    if (this._d3Scale.rangeRound) this._d3Scale.rangeRound(range);
+    else this._d3Scale.range(range);
 
     if (this._d3Scale.round) this._d3Scale.round(true);
     if (this._d3Scale.paddingInner) this._d3Scale.paddingInner(this._paddingInner);
@@ -333,6 +335,18 @@ export default class Axis extends BaseClass {
               : this._d3Scale.ticks
               ? this._d3Scale.ticks(Math.floor(this._size / tickScale(this._size)))
               : this._domain;
+
+    const tickWidth = this._shape === "Circle" ? this._shapeConfig.r * 2
+             : this._shape === "Rect" ? this._shapeConfig[width]
+             : this._shapeConfig.strokeWidth;
+
+    const pixels = [];
+    ticks.forEach(d => {
+      const t = this._d3Scale(d);
+      if (!pixels.includes(t) && max(pixels) < t - tickWidth / 2 - 2) pixels.push(t);
+      else pixels.push(false);
+    });
+    ticks = ticks.filter((d, i) => pixels[i] !== false);
 
     let labels = this._labels
                ? this._scale === "time" ? this._labels.map(date) : this._labels
@@ -422,7 +436,8 @@ export default class Axis extends BaseClass {
         }
       }
 
-      this._d3Scale.range(range);
+      if (this._d3Scale.rangeRound) this._d3Scale.rangeRound(range);
+      else this._d3Scale.range(range);
 
     }
 
