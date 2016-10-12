@@ -286,15 +286,16 @@ export default class Axis extends BaseClass {
 
     const {width, height, x, y, horizontal, opposite} = this._position,
           clipId = `d3plus-Axis-clip-${this._uuid}`,
-          hBuff = this._shape === "Circle" ? this._shapeConfig.r
-                   : this._shape === "Rect" ? this._shapeConfig[height] / 2
-                   : this._tickSize,
           p = this._padding,
           parent = this._select,
-          t = transition().duration(this._duration),
-          wBuff = this._shape === "Circle" ? this._shapeConfig.r
-                   : this._shape === "Rect" ? this._shapeConfig[width] / 2
-                   : this._tickSize;
+          t = transition().duration(this._duration);
+
+    let hBuff = this._shape === "Circle" ? this._shapeConfig.r
+              : this._shape === "Rect" ? this._shapeConfig[height]
+              : width === "height" ? this._shapeConfig.strokeWidth : this._tickSize,
+        wBuff = this._shape === "Circle" ? this._shapeConfig.r
+                 : this._shape === "Rect" ? this._shapeConfig[width]
+                 : width === "width" ? this._shapeConfig.strokeWidth : this._tickSize;
 
     let range = this._range ? this._range.slice() : [undefined, undefined];
     if (range[0] === void 0) range[0] = p;
@@ -336,10 +337,6 @@ export default class Axis extends BaseClass {
               ? this._d3Scale.ticks(Math.floor(this._size / tickScale(this._size)))
               : this._domain;
 
-    const tickWidth = this._shape === "Circle" ? this._shapeConfig.r * 2
-             : this._shape === "Rect" ? this._shapeConfig[width]
-             : this._shapeConfig.strokeWidth;
-
     let labels = this._labels
                ? this._scale === "time" ? this._labels.map(date) : this._labels
                : this._d3Scale.ticks
@@ -355,16 +352,29 @@ export default class Axis extends BaseClass {
       labels = labels.map(Number);
     }
 
+    const tickSize = this._shape === "Circle" ? this._shapeConfig.r
+                   : this._shape === "Rect" ? this._shapeConfig[width]
+                   : this._shapeConfig.strokeWidth;
+
+    const tickGet = typeof tickSize !== "function" ? () => tickSize : tickSize;
+
     const pixels = [];
     this._availableTicks = ticks;
-    ticks.forEach(d => {
+    ticks.forEach((d, i) => {
+      let s = tickGet(d, i);
+      if (this._shape === "Circle") s *= 2;
       const t = this._d3Scale(d);
-      if (!pixels.length || !pixels.includes(t) && max(pixels) < t - tickWidth / 2 - 2) pixels.push(t);
+      if (!pixels.length || !pixels.includes(t) && max(pixels) < t - s * 2) pixels.push(t);
       else pixels.push(false);
     });
     ticks = ticks.filter((d, i) => pixels[i] !== false);
 
     this._visibleTicks = ticks;
+
+    if (typeof hBuff === "function") hBuff = max(ticks.map(hBuff));
+    if (this._shape !== "Circle") hBuff / 2;
+    if (typeof wBuff === "function") wBuff = max(ticks.map(wBuff));
+    if (this._shape !== "Circle") wBuff / 2;
 
     if (this._scale === "band") {
       this._space = this._d3Scale.bandwidth();
