@@ -343,7 +343,7 @@ export default class Axis extends BaseClass {
     const pixels = [];
     ticks.forEach(d => {
       const t = this._d3Scale(d);
-      if (!pixels.includes(t) && max(pixels) < t - tickWidth / 2 - 2) pixels.push(t);
+      if (!pixels.length || !pixels.includes(t) && max(pixels) < t - tickWidth / 2 - 2) pixels.push(t);
       else pixels.push(false);
     });
     ticks = ticks.filter((d, i) => pixels[i] !== false);
