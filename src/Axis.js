@@ -340,14 +340,6 @@ export default class Axis extends BaseClass {
              : this._shape === "Rect" ? this._shapeConfig[width]
              : this._shapeConfig.strokeWidth;
 
-    const pixels = [];
-    ticks.forEach(d => {
-      const t = this._d3Scale(d);
-      if (!pixels.length || !pixels.includes(t) && max(pixels) < t - tickWidth / 2 - 2) pixels.push(t);
-      else pixels.push(false);
-    });
-    ticks = ticks.filter((d, i) => pixels[i] !== false);
-
     let labels = this._labels
                ? this._scale === "time" ? this._labels.map(date) : this._labels
                : this._d3Scale.ticks
@@ -362,6 +354,15 @@ export default class Axis extends BaseClass {
       ticks = ticks.map(Number);
       labels = labels.map(Number);
     }
+
+    const pixels = [];
+    this._availableTicks = ticks;
+    ticks.forEach(d => {
+      const t = this._d3Scale(d);
+      if (!pixels.length || !pixels.includes(t) && max(pixels) < t - tickWidth / 2 - 2) pixels.push(t);
+      else pixels.push(false);
+    });
+    ticks = ticks.filter((d, i) => pixels[i] !== false);
 
     this._visibleTicks = ticks;
 
