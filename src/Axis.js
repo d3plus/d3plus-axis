@@ -290,13 +290,6 @@ export default class Axis extends BaseClass {
           parent = this._select,
           t = transition().duration(this._duration);
 
-    let hBuff = this._shape === "Circle" ? this._shapeConfig.r
-              : this._shape === "Rect" ? this._shapeConfig[height]
-              : width === "height" ? this._shapeConfig.strokeWidth : this._tickSize,
-        wBuff = this._shape === "Circle" ? this._shapeConfig.r
-                 : this._shape === "Rect" ? this._shapeConfig[width]
-                 : width === "width" ? this._shapeConfig.strokeWidth : this._tickSize;
-
     let range = this._range ? this._range.slice() : [undefined, undefined];
     if (range[0] === void 0) range[0] = p;
     if (range[1] === void 0) range[1] = this[`_${width}`] - p;
@@ -371,10 +364,17 @@ export default class Axis extends BaseClass {
 
     this._visibleTicks = ticks;
 
+    let hBuff = this._shape === "Circle" ? this._shapeConfig.r
+              : this._shape === "Rect" ? this._shapeConfig[height]
+              : this._tickSize,
+        wBuff = this._shape === "Circle" ? this._shapeConfig.r
+              : this._shape === "Rect" ? this._shapeConfig[width]
+              : this._shapeConfig.strokeWidth;
+
     if (typeof hBuff === "function") hBuff = max(ticks.map(hBuff));
-    if (this._shape !== "Circle") hBuff / 2;
+    if (this._shape === "Rect") hBuff /= 2;
     if (typeof wBuff === "function") wBuff = max(ticks.map(wBuff));
-    if (this._shape !== "Circle") wBuff / 2;
+    if (this._shape !== "Circle") wBuff /= 2;
 
     if (this._scale === "band") {
       this._space = this._d3Scale.bandwidth();
