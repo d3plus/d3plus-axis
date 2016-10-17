@@ -336,7 +336,7 @@ export default class Axis extends BaseClass {
                ? this._d3Scale.ticks(Math.floor(this._size / tickScale(this._size)))
                : ticks;
 
-    const tickFormat = this._d3Scale.tickFormat
+    const tickFormat = this._tickFormat ? this._tickFormat : this._d3Scale.tickFormat
                      ? this._d3Scale.tickFormat(labels.length - 1)
                      : d => d;
 
@@ -590,6 +590,15 @@ export default class Axis extends BaseClass {
   */
   shapeConfig(_) {
     return arguments.length ? (this._shapeConfig = Object.assign(this._shapeConfig, _), this) : this._shapeConfig;
+  }
+
+  /**
+      @memberof Axis
+      @desc If *value* is specified, sets the tick formatter and returns the current class instance. If *value* is not specified, returns the current tick formatter, which by default is retrieved from the [d3-scale](https://github.com/d3/d3-scale#continuous_tickFormat).
+      @param {Function} [*value*]
+  */
+  tickFormat(_) {
+    return arguments.length ? (this._tickFormat = _, this) : this._tickFormat;
   }
 
   /**
