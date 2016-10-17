@@ -49,6 +49,7 @@ The [d3plus-axis](https://github.com/d3plus/d3plus-axis) module makes all four o
 
 ### More Examples
 
+ * [Tick Label Formatting](http://d3plus.org/examples/d3plus-axis/tickFormat/)<sup> ***New***</sup>
  * [Changing Axis Orientation](http://d3plus.org/examples/d3plus-axis/axis-orient/)
  * [Axis w/ Time Scale](http://d3plus.org/examples/d3plus-axis/scale-time/)
  * [Only Showing Specific Tick Labels](http://d3plus.org/examples/d3plus-axis/labels/)
@@ -106,6 +107,7 @@ The [d3plus-axis](https://github.com/d3plus/d3plus-axis) module makes all four o
     * [.select([*selector*])](#Axis.select)
     * [.shape([*value*])](#Axis.shape)
     * [.shapeConfig([*value*])](#Axis.shapeConfig)
+    * [.tickFormat([*value*])](#Axis.tickFormat)
     * [.ticks([*value*])](#Axis.ticks)
     * [.tickSize([*value*])](#Axis.tickSize)
     * [.title([*value*])](#Axis.title)
@@ -336,6 +338,17 @@ If *value* is specified, sets the tick style of the axis and returns the current
 | --- | --- |
 | [*value*] | <code>Object</code> | 
 
+<a name="Axis.tickFormat"></a>
+
+#### Axis.tickFormat([*value*])
+If *value* is specified, sets the tick formatter and returns the current class instance. If *value* is not specified, returns the current tick formatter, which by default is retrieved from the [d3-scale](https://github.com/d3/d3-scale#continuous_tickFormat).
+
+**Kind**: static method of <code>[Axis](#Axis)</code>  
+
+| Param | Type |
+| --- | --- |
+| [*value*] | <code>function</code> | 
+
 <a name="Axis.ticks"></a>
 
 #### Axis.ticks([*value*])
@@ -444,4 +457,4 @@ Parses numbers and strings to valid Javascript Date obejcts.
 
 
 
-###### <sub>Documentation generated on Wed, 12 Oct 2016 20:13:06 GMT</sub>
+###### <sub>Documentation generated on Mon, 17 Oct 2016 18:57:34 GMT</sub>
