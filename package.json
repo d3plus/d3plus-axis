@@ -27,7 +27,7 @@
     "d3-scale": "^1.0.3",
     "d3-selection": "^1.0.2",
     "d3-transition": "^1.0.1",
-    "d3plus-common": "^0.5.22",
+    "d3plus-common": "^0.6.5",
     "d3plus-shape": "^0.8.7",
     "d3plus-text": "^0.9.6"
   },
@@ -39,5 +39,8 @@
     "examples": "d3plus-examples",
     "release": "d3plus-release",
     "test": "d3plus-test"
+  },
+  "devDependencies": {
+    "d3plus-dev": "^0.1.10"
   }
 }
