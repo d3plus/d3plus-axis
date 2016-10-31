@@ -49,11 +49,11 @@ The [d3plus-axis](https://github.com/d3plus/d3plus-axis) module makes all four o
 
 ### More Examples
 
- * [Tick Label Formatting](http://d3plus.org/examples/d3plus-axis/tickFormat/)<sup> ***New***</sup>
+ * [Tick Label Formatting](http://d3plus.org/examples/d3plus-axis/tickFormat/)
  * [Changing Axis Orientation](http://d3plus.org/examples/d3plus-axis/axis-orient/)
  * [Axis w/ Time Scale](http://d3plus.org/examples/d3plus-axis/scale-time/)
  * [Only Showing Specific Tick Labels](http://d3plus.org/examples/d3plus-axis/labels/)
- * [Setting Custom Ticks](http://d3plus.org/examples/d3plus-axis/ticks/)<sup> ***New***</sup>
+ * [Setting Custom Ticks](http://d3plus.org/examples/d3plus-axis/ticks/)
 
 ## API Reference
 ### Classes
@@ -457,4 +457,4 @@ Parses numbers and strings to valid Javascript Date obejcts.
 
 
 
-###### <sub>Documentation generated on Mon, 17 Oct 2016 18:57:34 GMT</sub>
+###### <sub>Documentation generated on Mon, 31 Oct 2016 20:46:39 GMT</sub>
