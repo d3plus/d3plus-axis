@@ -332,7 +332,7 @@ export default class Axis extends BaseClass {
 
     let labels = this._labels
                ? this._scale === "time" ? this._labels.map(date) : this._labels
-               : this._d3Scale.ticks
+               : this._ticks ? ticks : this._d3Scale.ticks
                ? this._d3Scale.ticks(Math.floor(this._size / tickScale(this._size)))
                : ticks;
 
