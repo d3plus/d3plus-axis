@@ -504,7 +504,7 @@ export default class Axis extends BaseClass {
             width: labelWidth,
             height: labelHeight
           },
-          size,
+          size: ticks.includes(d) ? size : 0,
           text: labels.includes(d) ? tickFormat(d) : false,
           [x]: this._d3Scale(d) + (this._scale === "band" ? this._d3Scale.bandwidth() / 2 : 0),
           [y]: position
