@@ -8,7 +8,7 @@ import * as scales from "d3-scale";
 import {select} from "d3-selection";
 import {transition} from "d3-transition";
 
-import {attrize, BaseClass, constant, elem} from "d3plus-common";
+import {attrize, BaseClass, closest, constant, elem} from "d3plus-common";
 import * as shapes from "d3plus-shape";
 import {TextBox, textWidth, textWrap} from "d3plus-text";
 
@@ -380,7 +380,7 @@ export default class Axis extends BaseClass {
       let s = tickGet(d, i);
       if (this._shape === "Circle") s *= 2;
       const t = this._d3Scale(d);
-      if (!pixels.length || !pixels.includes(t) && max(pixels) < t - s * 2) pixels.push(t);
+      if (!pixels.length || Math.abs(closest(t, pixels) - t) > s * 2) pixels.push(t);
       else pixels.push(false);
     });
     ticks = ticks.filter((d, i) => pixels[i] !== false);
