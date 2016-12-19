@@ -345,7 +345,7 @@ export default class Axis extends BaseClass {
     if (this._d3Scale.paddingInner) this._d3Scale.paddingInner(this._paddingInner);
     if (this._d3Scale.paddingOuter) this._d3Scale.paddingOuter(this._paddingOuter);
 
-    const tickScale = scales.scaleSqrt().domain([10, 400]).range([10, this._gridSize === 0 ? 45 : 75]);
+    const tickScale = scales.scaleSqrt().domain([10, 400]).range([10, this._gridSize === 0 ? 50 : 75]);
 
     let ticks = this._ticks
               ? this._scale === "time" ? this._ticks.map(date) : this._ticks
