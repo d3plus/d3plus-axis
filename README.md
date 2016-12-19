@@ -59,7 +59,7 @@ The [d3plus-axis](https://github.com/d3plus/d3plus-axis) module makes all four o
 ### Classes
 
 <dl>
-<dt><a href="#Axis">Axis</a> ⇐ <code>BaseClass</code></dt>
+<dt><a href="#Axis">Axis</a> ⇐ <code><a href="https://github.com/d3plus/d3plus-common#BaseClass">BaseClass</a></code></dt>
 <dd></dd>
 <dt><a href="#AxisBottom">AxisBottom</a> ⇐ <code><a href="#Axis">Axis</a></code></dt>
 <dd></dd>
@@ -81,38 +81,38 @@ The [d3plus-axis](https://github.com/d3plus/d3plus-axis) module makes all four o
 
 <a name="Axis"></a>
 
-### Axis ⇐ <code>BaseClass</code>
+### Axis ⇐ <code>[BaseClass](https://github.com/d3plus/d3plus-common#BaseClass)</code>
 **Kind**: global class  
-**Extends:** <code>BaseClass</code>  
+**Extends:** <code>[BaseClass](https://github.com/d3plus/d3plus-common#BaseClass)</code>  
 
-* [Axis](#Axis) ⇐ <code>BaseClass</code>
+* [Axis](#Axis) ⇐ <code>[BaseClass](https://github.com/d3plus/d3plus-common#BaseClass)</code>
     * [new Axis()](#new_Axis_new)
-    * [.align([*value*])](#Axis.align)
-    * [.barConfig([*value*])](#Axis.barConfig)
-    * [.domain([*value*])](#Axis.domain)
-    * [.duration([*value*])](#Axis.duration)
-    * [.grid([*value*])](#Axis.grid)
-    * [.gridConfig([*value*])](#Axis.gridConfig)
-    * [.gridSize([*value*])](#Axis.gridSize)
-    * [.height([*value*])](#Axis.height)
-    * [.labels([*value*])](#Axis.labels)
-    * [.orient([*orient*])](#Axis.orient)
+    * [.align([*value*])](#Axis.align) ↩︎
+    * [.barConfig([*value*])](#Axis.barConfig) ↩︎
+    * [.domain([*value*])](#Axis.domain) ↩︎
+    * [.duration([*value*])](#Axis.duration) ↩︎
+    * [.grid([*value*])](#Axis.grid) ↩︎
+    * [.gridConfig([*value*])](#Axis.gridConfig) ↩︎
+    * [.gridSize([*value*])](#Axis.gridSize) ↩︎
+    * [.height([*value*])](#Axis.height) ↩︎
+    * [.labels([*value*])](#Axis.labels) ↩︎
+    * [.orient([*orient*])](#Axis.orient) ↩︎
     * [.outerBounds()](#Axis.outerBounds)
-    * [.padding([*value*])](#Axis.padding)
-    * [.paddingInner([*value*])](#Axis.paddingInner)
-    * [.paddingOuter([*value*])](#Axis.paddingOuter)
-    * [.range([*value*])](#Axis.range)
-    * [.render([*callback*])](#Axis.render)
-    * [.scale([*value*])](#Axis.scale)
-    * [.select([*selector*])](#Axis.select)
-    * [.shape([*value*])](#Axis.shape)
-    * [.shapeConfig([*value*])](#Axis.shapeConfig)
-    * [.tickFormat([*value*])](#Axis.tickFormat)
-    * [.ticks([*value*])](#Axis.ticks)
-    * [.tickSize([*value*])](#Axis.tickSize)
-    * [.title([*value*])](#Axis.title)
-    * [.titleConfig([*value*])](#Axis.titleConfig)
-    * [.width([*value*])](#Axis.width)
+    * [.padding([*value*])](#Axis.padding) ↩︎
+    * [.paddingInner([*value*])](#Axis.paddingInner) ↩︎
+    * [.paddingOuter([*value*])](#Axis.paddingOuter) ↩︎
+    * [.range([*value*])](#Axis.range) ↩︎
+    * [.render([*callback*])](#Axis.render) ↩︎
+    * [.scale([*value*])](#Axis.scale) ↩︎
+    * [.select([*selector*])](#Axis.select) ↩︎
+    * [.shape([*value*])](#Axis.shape) ↩︎
+    * [.shapeConfig([*value*])](#Axis.shapeConfig) ↩︎
+    * [.tickFormat([*value*])](#Axis.tickFormat) ↩︎
+    * [.ticks([*value*])](#Axis.ticks) ↩︎
+    * [.tickSize([*value*])](#Axis.tickSize) ↩︎
+    * [.title([*value*])](#Axis.title) ↩︎
+    * [.titleConfig([*value*])](#Axis.titleConfig) ↩︎
+    * [.width([*value*])](#Axis.width) ↩︎
 
 <a name="new_Axis_new"></a>
 
@@ -121,10 +121,11 @@ Creates an SVG scale based on an array of data.
 
 <a name="Axis.align"></a>
 
-#### Axis.align([*value*])
+#### Axis.align([*value*]) ↩︎
 If *value* is specified, sets the horizontal alignment to the specified value and returns the current class instance. If *value* is not specified, returns the current horizontal alignment.
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
+**Chainable**  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -132,10 +133,11 @@ If *value* is specified, sets the horizontal alignment to the specified value an
 
 <a name="Axis.barConfig"></a>
 
-#### Axis.barConfig([*value*])
+#### Axis.barConfig([*value*]) ↩︎
 If *value* is specified, sets the axis line style and returns the current class instance. If *value* is not specified, returns the current axis line style.
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
+**Chainable**  
 
 | Param | Type |
 | --- | --- |
@@ -143,10 +145,11 @@ If *value* is specified, sets the axis line style and returns the current class 
 
 <a name="Axis.domain"></a>
 
-#### Axis.domain([*value*])
+#### Axis.domain([*value*]) ↩︎
 If *value* is specified, sets the scale domain of the axis and returns the current class instance. If *value* is not specified, returns the current scale domain.
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
+**Chainable**  
 
 | Param | Type | Default |
 | --- | --- | --- |
@@ -154,10 +157,11 @@ If *value* is specified, sets the scale domain of the axis and returns the curre
 
 <a name="Axis.duration"></a>
 
-#### Axis.duration([*value*])
+#### Axis.duration([*value*]) ↩︎
 If *value* is specified, sets the transition duration of the axis and returns the current class instance. If *value* is not specified, returns the current duration.
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
+**Chainable**  
 
 | Param | Type | Default |
 | --- | --- | --- |
@@ -165,10 +169,11 @@ If *value* is specified, sets the transition duration of the axis and returns th
 
 <a name="Axis.grid"></a>
 
-#### Axis.grid([*value*])
+#### Axis.grid([*value*]) ↩︎
 If *value* is specified, sets the grid values of the axis and returns the current class instance. If *value* is not specified, returns the current grid values, which by default are interpreted based on the [domain](#Axis.domain) and the available [width](#Axis.width).
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
+**Chainable**  
 
 | Param | Type |
 | --- | --- |
@@ -176,10 +181,11 @@ If *value* is specified, sets the grid values of the axis and returns the curren
 
 <a name="Axis.gridConfig"></a>
 
-#### Axis.gridConfig([*value*])
+#### Axis.gridConfig([*value*]) ↩︎
 If *value* is specified, sets the grid style of the axis and returns the current class instance. If *value* is not specified, returns the current grid style.
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
+**Chainable**  
 
 | Param | Type |
 | --- | --- |
@@ -187,10 +193,11 @@ If *value* is specified, sets the grid style of the axis and returns the current
 
 <a name="Axis.gridSize"></a>
 
-#### Axis.gridSize([*value*])
+#### Axis.gridSize([*value*]) ↩︎
 If *value* is specified, sets the grid size of the axis and returns the current class instance. If *value* is not specified, returns the current grid size, which defaults to taking up as much space as available.
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
+**Chainable**  
 
 | Param | Type |
 | --- | --- |
@@ -198,10 +205,11 @@ If *value* is specified, sets the grid size of the axis and returns the current 
 
 <a name="Axis.height"></a>
 
-#### Axis.height([*value*])
+#### Axis.height([*value*]) ↩︎
 If *value* is specified, sets the overall height of the axis and returns the current class instance. If *value* is not specified, returns the current height value.
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
+**Chainable**  
 
 | Param | Type | Default |
 | --- | --- | --- |
@@ -209,10 +217,11 @@ If *value* is specified, sets the overall height of the axis and returns the cur
 
 <a name="Axis.labels"></a>
 
-#### Axis.labels([*value*])
+#### Axis.labels([*value*]) ↩︎
 If *value* is specified, sets the visible tick labels of the axis and returns the current class instance. If *value* is not specified, returns the current visible tick labels, which defaults to showing all labels.
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
+**Chainable**  
 
 | Param | Type |
 | --- | --- |
@@ -220,10 +229,11 @@ If *value* is specified, sets the visible tick labels of the axis and returns th
 
 <a name="Axis.orient"></a>
 
-#### Axis.orient([*orient*])
+#### Axis.orient([*orient*]) ↩︎
 If *orient* is specified, sets the orientation of the shape and returns the current class instance. If *orient* is not specified, returns the current orientation.
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
+**Chainable**  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -241,10 +251,11 @@ If called after the elements have been drawn to DOM, will returns the outer boun
 ```
 <a name="Axis.padding"></a>
 
-#### Axis.padding([*value*])
+#### Axis.padding([*value*]) ↩︎
 If *value* is specified, sets the padding between each tick label to the specified number and returns the current class instance. If *value* is not specified, returns the current padding value.
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
+**Chainable**  
 
 | Param | Type | Default |
 | --- | --- | --- |
@@ -252,10 +263,11 @@ If *value* is specified, sets the padding between each tick label to the specifi
 
 <a name="Axis.paddingInner"></a>
 
-#### Axis.paddingInner([*value*])
+#### Axis.paddingInner([*value*]) ↩︎
 If *value* is specified, sets the inner padding of band scale to the specified number and returns the current class instance. If *value* is not specified, returns the current inner padding value.
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
+**Chainable**  
 
 | Param | Type | Default |
 | --- | --- | --- |
@@ -263,10 +275,11 @@ If *value* is specified, sets the inner padding of band scale to the specified n
 
 <a name="Axis.paddingOuter"></a>
 
-#### Axis.paddingOuter([*value*])
+#### Axis.paddingOuter([*value*]) ↩︎
 If *value* is specified, sets the outer padding of band scales to the specified number and returns the current class instance. If *value* is not specified, returns the current outer padding value.
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
+**Chainable**  
 
 | Param | Type | Default |
 | --- | --- | --- |
@@ -274,10 +287,11 @@ If *value* is specified, sets the outer padding of band scales to the specified 
 
 <a name="Axis.range"></a>
 
-#### Axis.range([*value*])
+#### Axis.range([*value*]) ↩︎
 If *value* is specified, sets the scale range (in pixels) of the axis and returns the current class instance. The given array must have 2 values, but one may be `undefined` to allow the default behavior for that value. If *value* is not specified, returns the current scale range.
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
+**Chainable**  
 
 | Param | Type |
 | --- | --- |
@@ -285,10 +299,11 @@ If *value* is specified, sets the scale range (in pixels) of the axis and return
 
 <a name="Axis.render"></a>
 
-#### Axis.render([*callback*])
+#### Axis.render([*callback*]) ↩︎
 Renders the current Axis to the page. If a *callback* is specified, it will be called once the legend is done drawing.
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
+**Chainable**  
 
 | Param | Type |
 | --- | --- |
@@ -296,10 +311,11 @@ Renders the current Axis to the page. If a *callback* is specified, it will be c
 
 <a name="Axis.scale"></a>
 
-#### Axis.scale([*value*])
+#### Axis.scale([*value*]) ↩︎
 If *value* is specified, sets the scale of the axis and returns the current class instance. If *value* is not specified, returns the current this._d3Scale
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
+**Chainable**  
 
 | Param | Type | Default |
 | --- | --- | --- |
@@ -307,10 +323,11 @@ If *value* is specified, sets the scale of the axis and returns the current clas
 
 <a name="Axis.select"></a>
 
-#### Axis.select([*selector*])
+#### Axis.select([*selector*]) ↩︎
 If *selector* is specified, sets the SVG container element to the specified d3 selector or DOM element and returns the current class instance. If *selector* is not specified, returns the current SVG container element.
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
+**Chainable**  
 
 | Param | Type | Default |
 | --- | --- | --- |
@@ -318,10 +335,11 @@ If *selector* is specified, sets the SVG container element to the specified d3 s
 
 <a name="Axis.shape"></a>
 
-#### Axis.shape([*value*])
+#### Axis.shape([*value*]) ↩︎
 If *value* is specified, sets the tick shape constructor and returns the current class instance. If *value* is not specified, returns the current shape.
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
+**Chainable**  
 
 | Param | Type | Default |
 | --- | --- | --- |
@@ -329,10 +347,11 @@ If *value* is specified, sets the tick shape constructor and returns the current
 
 <a name="Axis.shapeConfig"></a>
 
-#### Axis.shapeConfig([*value*])
+#### Axis.shapeConfig([*value*]) ↩︎
 If *value* is specified, sets the tick style of the axis and returns the current class instance. If *value* is not specified, returns the current tick style.
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
+**Chainable**  
 
 | Param | Type |
 | --- | --- |
@@ -340,10 +359,11 @@ If *value* is specified, sets the tick style of the axis and returns the current
 
 <a name="Axis.tickFormat"></a>
 
-#### Axis.tickFormat([*value*])
+#### Axis.tickFormat([*value*]) ↩︎
 If *value* is specified, sets the tick formatter and returns the current class instance. If *value* is not specified, returns the current tick formatter, which by default is retrieved from the [d3-scale](https://github.com/d3/d3-scale#continuous_tickFormat).
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
+**Chainable**  
 
 | Param | Type |
 | --- | --- |
@@ -351,10 +371,11 @@ If *value* is specified, sets the tick formatter and returns the current class i
 
 <a name="Axis.ticks"></a>
 
-#### Axis.ticks([*value*])
+#### Axis.ticks([*value*]) ↩︎
 If *value* is specified, sets the tick values of the axis and returns the current class instance. If *value* is not specified, returns the current tick values, which by default are interpreted based on the [domain](#Axis.domain) and the available [width](#Axis.width).
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
+**Chainable**  
 
 | Param | Type |
 | --- | --- |
@@ -362,10 +383,11 @@ If *value* is specified, sets the tick values of the axis and returns the curren
 
 <a name="Axis.tickSize"></a>
 
-#### Axis.tickSize([*value*])
+#### Axis.tickSize([*value*]) ↩︎
 If *value* is specified, sets the tick size of the axis and returns the current class instance. If *value* is not specified, returns the current tick size.
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
+**Chainable**  
 
 | Param | Type | Default |
 | --- | --- | --- |
@@ -373,10 +395,11 @@ If *value* is specified, sets the tick size of the axis and returns the current 
 
 <a name="Axis.title"></a>
 
-#### Axis.title([*value*])
+#### Axis.title([*value*]) ↩︎
 If *value* is specified, sets the title of the axis and returns the current class instance. If *value* is not specified, returns the current title.
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
+**Chainable**  
 
 | Param | Type |
 | --- | --- |
@@ -384,10 +407,11 @@ If *value* is specified, sets the title of the axis and returns the current clas
 
 <a name="Axis.titleConfig"></a>
 
-#### Axis.titleConfig([*value*])
+#### Axis.titleConfig([*value*]) ↩︎
 If *value* is specified, sets the title configuration of the axis and returns the current class instance. If *value* is not specified, returns the current title configuration.
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
+**Chainable**  
 
 | Param | Type |
 | --- | --- |
@@ -395,10 +419,11 @@ If *value* is specified, sets the title configuration of the axis and returns th
 
 <a name="Axis.width"></a>
 
-#### Axis.width([*value*])
+#### Axis.width([*value*]) ↩︎
 If *value* is specified, sets the overall width of the axis and returns the current class instance. If *value* is not specified, returns the current width value.
 
 **Kind**: static method of <code>[Axis](#Axis)</code>  
+**Chainable**  
 
 | Param | Type | Default |
 | --- | --- | --- |
@@ -457,4 +482,4 @@ Parses numbers and strings to valid Javascript Date obejcts.
 
 
 
-###### <sub>Documentation generated on Mon, 19 Dec 2016 19:51:20 GMT</sub>
+###### <sub>Documentation generated on Mon, 19 Dec 2016 20:16:47 GMT</sub>
