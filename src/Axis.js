@@ -372,12 +372,12 @@ export default class Axis extends BaseClass {
                    : this._shape === "Rect" ? this._shapeConfig[width]
                    : this._shapeConfig.strokeWidth;
 
-    const tickGet = typeof tickSize !== "function" ? () => tickSize : tickSize;
+    const tickGet = typeof tickSize !== "function" ? (d, i) => tickSize(d, i) : tickSize;
 
     const pixels = [];
     this._availableTicks = ticks;
     ticks.forEach((d, i) => {
-      let s = tickGet(d, i);
+      let s = tickGet({id: d, tick: true}, i);
       if (this._shape === "Circle") s *= 2;
       const t = this._d3Scale(d);
       if (!pixels.length || Math.abs(closest(t, pixels) - t) > s * 2) pixels.push(t);
@@ -387,12 +387,12 @@ export default class Axis extends BaseClass {
 
     this._visibleTicks = ticks;
 
-    let hBuff = this._shape === "Circle" ? this._shapeConfig.r
-              : this._shape === "Rect" ? this._shapeConfig[height]
+    let hBuff = this._shape === "Circle"
+              ? typeof this._shapeConfig.r === "function" ? this._shapeConfig.r({tick: true}) : this._shapeConfig.r
+              : this._shape === "Rect"
+              ? typeof this._shapeConfig[height] === "function" ? this._shapeConfig[height]({tick: true}) : this._shapeConfig[height]
               : this._tickSize,
-        wBuff = this._shape === "Circle" ? this._shapeConfig.r
-              : this._shape === "Rect" ? this._shapeConfig[width]
-              : this._shapeConfig.strokeWidth;
+        wBuff = tickGet({tick: true});
 
     if (typeof hBuff === "function") hBuff = max(ticks.map(hBuff));
     if (this._shape === "Rect") hBuff /= 2;
