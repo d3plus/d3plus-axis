@@ -372,7 +372,7 @@ export default class Axis extends BaseClass {
                    : this._shape === "Rect" ? this._shapeConfig[width]
                    : this._shapeConfig.strokeWidth;
 
-    const tickGet = typeof tickSize !== "function" ? (d, i) => tickSize(d, i) : tickSize;
+    const tickGet = typeof tickSize !== "function" ? () => tickSize : tickSize;
 
     const pixels = [];
     this._availableTicks = ticks;
