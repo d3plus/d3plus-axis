@@ -55,16 +55,16 @@ export default class Axis extends BaseClass {
       fontFamily: new TextBox().fontFamily(),
       fontResize: false,
       fontSize: constant(10),
-      height: 8,
+      height: d => d.tick ? 8 : 0,
       label: d => d.text,
       labelBounds: d => d.labelBounds,
       labelPadding: 0,
-      r: 4,
+      r: d => d.tick ? 4 : 0,
       stroke: "#000",
       strokeWidth: 1,
       textAnchor: () => this._orient === "left" ? "end" : this._orient === "right" ? "start" : "middle",
       verticalAlign: () => this._orient === "bottom" ? "top" : this._orient === "top" ? "bottom" : "middle",
-      width: 8
+      width: d => d.tick ? 8 : 0
     };
     this._tickSize = 5;
     this._titleConfig = {
@@ -526,6 +526,7 @@ export default class Axis extends BaseClass {
           },
           size: ticks.includes(d) ? size : 0,
           text: labels.includes(d) ? tickFormat(d) : false,
+          tick: ticks.includes(d),
           [x]: this._d3Scale(d) + (this._scale === "band" ? this._d3Scale.bandwidth() / 2 : 0),
           [y]: position
         };
