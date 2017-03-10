@@ -142,6 +142,7 @@ export default class Axis extends BaseClass {
 
     const {width, height, x, y, horizontal, opposite} = this._position,
           clipId = `d3plus-Axis-clip-${this._uuid}`,
+          flip = ["top", "left"].includes(this._orient),
           p = this._padding,
           parent = this._select,
           t = transition().duration(this._duration);
@@ -272,10 +273,21 @@ export default class Axis extends BaseClass {
       res.fS = s;
       res.width = Math.ceil(max(res.lines.map(t => textWidth(t, {"font-family": f, "font-size": s})))) + s / 4;
       res.height = Math.ceil(res.lines.length * (lh + 1));
+      res.offset = 0;
       if (res.width % 2) res.width++;
 
       return res;
 
+    });
+
+    textData.forEach((d, i) => {
+      if (i) {
+        const prev = textData[i - 1];
+        if (!prev.offset && this._d3Scale(d.d) - d[width] / 2 < this._d3Scale(prev.d) + prev[width] / 2) {
+          d.offset = prev[height] + this._padding;
+          d[height] += d.offset;
+        }
+      }
     });
 
     // Calculates new range, based on any text that may be overflowing.
@@ -351,16 +363,15 @@ export default class Axis extends BaseClass {
           labelWidth = horizontal ? this._space * 1.1 : (this._outerBounds.width - this._margin[this._position.opposite] - hBuff - this._margin[this._orient] + p) * 1.1;
     let tickData = ticks
       .concat(labels.filter((d, i) => textData[i].lines.length && !ticks.includes(d)))
-      .map(d => {
+      .map((d, i) => {
         const offset = this._margin[opposite],
-              position = ["top", "left"].includes(this._orient) ? this._outerBounds[y] + this._outerBounds[height] - offset : this._outerBounds[y] + offset,
-              size = ["top", "left"].includes(this._orient) ? -hBuff : hBuff,
-              sizeOffset = this._shape === "Line" ? size / 2 : size;
+              position = flip ? this._outerBounds[y] + this._outerBounds[height] - offset : this._outerBounds[y] + offset,
+              size = (hBuff + textData[i].offset) * (flip ? -1 : 1);
         return {
           id: d,
           labelBounds: {
-            x: horizontal ? -labelWidth / 2 : this._orient === "left" ? -labelWidth - p + sizeOffset : sizeOffset + p,
-            y: horizontal ? this._orient === "bottom" ? sizeOffset + p : sizeOffset - p - labelHeight : -labelHeight / 2,
+            x: horizontal ? -labelWidth / 2 : this._orient === "left" ? -labelWidth - p + size : size + p,
+            y: horizontal ? this._orient === "bottom" ? size + p : size - p - labelHeight : -labelHeight / 2,
             width: labelWidth,
             height: labelHeight
           },
