@@ -83,10 +83,11 @@ The [d3plus-axis](https://github.com/d3plus/d3plus-axis) module makes all four o
 
 ### Axis ⇐ <code>[BaseClass](https://github.com/d3plus/d3plus-common#BaseClass)</code>
 **Kind**: global class  
-**Extends:** <code>[BaseClass](https://github.com/d3plus/d3plus-common#BaseClass)</code>  
+**Extends**: <code>[BaseClass](https://github.com/d3plus/d3plus-common#BaseClass)</code>  
 
 * [Axis](#Axis) ⇐ <code>[BaseClass](https://github.com/d3plus/d3plus-common#BaseClass)</code>
     * [new Axis()](#new_Axis_new)
+    * [.render([*callback*])](#Axis.render) ↩︎
     * [.align([*value*])](#Axis.align) ↩︎
     * [.barConfig([*value*])](#Axis.barConfig) ↩︎
     * [.domain([*value*])](#Axis.domain) ↩︎
@@ -102,7 +103,6 @@ The [d3plus-axis](https://github.com/d3plus/d3plus-axis) module makes all four o
     * [.paddingInner([*value*])](#Axis.paddingInner) ↩︎
     * [.paddingOuter([*value*])](#Axis.paddingOuter) ↩︎
     * [.range([*value*])](#Axis.range) ↩︎
-    * [.render([*callback*])](#Axis.render) ↩︎
     * [.scale([*value*])](#Axis.scale) ↩︎
     * [.select([*selector*])](#Axis.select) ↩︎
     * [.shape([*value*])](#Axis.shape) ↩︎
@@ -118,6 +118,18 @@ The [d3plus-axis](https://github.com/d3plus/d3plus-axis) module makes all four o
 
 #### new Axis()
 Creates an SVG scale based on an array of data.
+
+<a name="Axis.render"></a>
+
+#### Axis.render([*callback*]) ↩︎
+Renders the current Axis to the page. If a *callback* is specified, it will be called once the legend is done drawing.
+
+**Kind**: static method of <code>[Axis](#Axis)</code>  
+**Chainable**  
+
+| Param | Type |
+| --- | --- |
+| [*callback*] | <code>function</code> | 
 
 <a name="Axis.align"></a>
 
@@ -297,18 +309,6 @@ If *value* is specified, sets the scale range (in pixels) of the axis and return
 | --- | --- |
 | [*value*] | <code>Array</code> | 
 
-<a name="Axis.render"></a>
-
-#### Axis.render([*callback*]) ↩︎
-Renders the current Axis to the page. If a *callback* is specified, it will be called once the legend is done drawing.
-
-**Kind**: static method of <code>[Axis](#Axis)</code>  
-**Chainable**  
-
-| Param | Type |
-| --- | --- |
-| [*callback*] | <code>function</code> | 
-
 <a name="Axis.scale"></a>
 
 #### Axis.scale([*value*]) ↩︎
@@ -433,7 +433,7 @@ If *value* is specified, sets the overall width of the axis and returns the curr
 
 ### AxisBottom ⇐ <code>[Axis](#Axis)</code>
 **Kind**: global class  
-**Extends:** <code>[Axis](#Axis)</code>  
+**Extends**: <code>[Axis](#Axis)</code>  
 <a name="new_AxisBottom_new"></a>
 
 #### new AxisBottom()
@@ -443,7 +443,7 @@ Shorthand method for creating an axis where the ticks are drawn below the horizo
 
 ### AxisLeft ⇐ <code>[Axis](#Axis)</code>
 **Kind**: global class  
-**Extends:** <code>[Axis](#Axis)</code>  
+**Extends**: <code>[Axis](#Axis)</code>  
 <a name="new_AxisLeft_new"></a>
 
 #### new AxisLeft()
@@ -453,7 +453,7 @@ Shorthand method for creating an axis where the ticks are drawn to the left of t
 
 ### AxisRight ⇐ <code>[Axis](#Axis)</code>
 **Kind**: global class  
-**Extends:** <code>[Axis](#Axis)</code>  
+**Extends**: <code>[Axis](#Axis)</code>  
 <a name="new_AxisRight_new"></a>
 
 #### new AxisRight()
@@ -463,7 +463,7 @@ Shorthand method for creating an axis where the ticks are drawn to the right of 
 
 ### AxisTop ⇐ <code>[Axis](#Axis)</code>
 **Kind**: global class  
-**Extends:** <code>[Axis](#Axis)</code>  
+**Extends**: <code>[Axis](#Axis)</code>  
 <a name="new_AxisTop_new"></a>
 
 #### new AxisTop()
@@ -482,4 +482,4 @@ Parses numbers and strings to valid Javascript Date obejcts.
 
 
 
-###### <sub>Documentation generated on Thu, 16 Feb 2017 21:45:53 GMT</sub>
+###### <sub>Documentation generated on Fri, 10 Mar 2017 18:49:59 GMT</sub>
