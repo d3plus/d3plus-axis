@@ -123,173 +123,6 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
-      @desc If *value* is specified, sets the horizontal alignment to the specified value and returns the current class instance. If *value* is not specified, returns the current horizontal alignment.
-      @param {String} [*value* = "center"] Supports `"left"` and `"center"` and `"right"`.
-      @chainable
-  */
-  align(_) {
-    return arguments.length ? (this._align = _, this) : this._align;
-  }
-
-  /**
-      @memberof Axis
-      @desc If *value* is specified, sets the axis line style and returns the current class instance. If *value* is not specified, returns the current axis line style.
-      @param {Object} [*value*]
-      @chainable
-  */
-  barConfig(_) {
-    return arguments.length ? (this._barConfig = Object.assign(this._barConfig, _), this) : this._barConfig;
-  }
-
-  /**
-      @memberof Axis
-      @desc If *value* is specified, sets the scale domain of the axis and returns the current class instance. If *value* is not specified, returns the current scale domain.
-      @param {Array} [*value* = [0, 10]]
-      @chainable
-  */
-  domain(_) {
-    return arguments.length ? (this._domain = _, this) : this._domain;
-  }
-
-  /**
-      @memberof Axis
-      @desc If *value* is specified, sets the transition duration of the axis and returns the current class instance. If *value* is not specified, returns the current duration.
-      @param {Number} [*value* = 600]
-      @chainable
-  */
-  duration(_) {
-    return arguments.length ? (this._duration = _, this) : this._duration;
-  }
-
-  /**
-      @memberof Axis
-      @desc If *value* is specified, sets the grid values of the axis and returns the current class instance. If *value* is not specified, returns the current grid values, which by default are interpreted based on the [domain](#Axis.domain) and the available [width](#Axis.width).
-      @param {Array} [*value*]
-      @chainable
-  */
-  grid(_) {
-    return arguments.length ? (this._grid = _, this) : this._grid;
-  }
-
-  /**
-      @memberof Axis
-      @desc If *value* is specified, sets the grid style of the axis and returns the current class instance. If *value* is not specified, returns the current grid style.
-      @param {Object} [*value*]
-      @chainable
-  */
-  gridConfig(_) {
-    return arguments.length ? (this._gridConfig = Object.assign(this._gridConfig, _), this) : this._gridConfig;
-  }
-
-  /**
-      @memberof Axis
-      @desc If *value* is specified, sets the grid size of the axis and returns the current class instance. If *value* is not specified, returns the current grid size, which defaults to taking up as much space as available.
-      @param {Number} [*value* = undefined]
-      @chainable
-  */
-  gridSize(_) {
-    return arguments.length ? (this._gridSize = _, this) : this._gridSize;
-  }
-
-  /**
-      @memberof Axis
-      @desc If *value* is specified, sets the overall height of the axis and returns the current class instance. If *value* is not specified, returns the current height value.
-      @param {Number} [*value* = 100]
-      @chainable
-  */
-  height(_) {
-    return arguments.length ? (this._height = _, this) : this._height;
-  }
-
-  /**
-      @memberof Axis
-      @desc If *value* is specified, sets the visible tick labels of the axis and returns the current class instance. If *value* is not specified, returns the current visible tick labels, which defaults to showing all labels.
-      @param {Array} [*value*]
-      @chainable
-  */
-  labels(_) {
-    return arguments.length ? (this._labels = _, this) : this._labels;
-  }
-
-  /**
-      @memberof Axis
-      @desc If *orient* is specified, sets the orientation of the shape and returns the current class instance. If *orient* is not specified, returns the current orientation.
-      @param {String} [*orient* = "bottom"] Supports `"top"`, `"right"`, `"bottom"`, and `"left"` orientations.
-      @chainable
-  */
-  orient(_) {
-    if (arguments.length) {
-
-      const horizontal = ["top", "bottom"].includes(_),
-            opps = {top: "bottom", right: "left", bottom: "top", left: "right"};
-
-      this._position = {
-        horizontal,
-        width: horizontal ? "width" : "height",
-        height: horizontal ? "height" : "width",
-        x: horizontal ? "x" : "y",
-        y: horizontal ? "y" : "x",
-        opposite: opps[_]
-      };
-
-      return this._orient = _, this;
-
-    }
-    return this._orient;
-  }
-
-  /**
-      @memberof Axis
-      @desc If called after the elements have been drawn to DOM, will returns the outer bounds of the axis content.
-      @example
-{"width": 180, "height": 24, "x": 10, "y": 20}
-  */
-  outerBounds() {
-    return this._outerBounds;
-  }
-
-  /**
-      @memberof Axis
-      @desc If *value* is specified, sets the padding between each tick label to the specified number and returns the current class instance. If *value* is not specified, returns the current padding value.
-      @param {Number} [*value* = 10]
-      @chainable
-  */
-  padding(_) {
-    return arguments.length ? (this._padding = _, this) : this._padding;
-  }
-
-  /**
-      @memberof Axis
-      @desc If *value* is specified, sets the inner padding of band scale to the specified number and returns the current class instance. If *value* is not specified, returns the current inner padding value.
-      @param {Number} [*value* = 0.1]
-      @chainable
-  */
-  paddingInner(_) {
-    return arguments.length ? (this._paddingInner = _, this) : this._paddingInner;
-  }
-
-  /**
-      @memberof Axis
-      @desc If *value* is specified, sets the outer padding of band scales to the specified number and returns the current class instance. If *value* is not specified, returns the current outer padding value.
-      @param {Number} [*value* = 0.1]
-      @chainable
-  */
-  paddingOuter(_) {
-    return arguments.length ? (this._paddingOuter = _, this) : this._paddingOuter;
-  }
-
-  /**
-      @memberof Axis
-      @desc If *value* is specified, sets the scale range (in pixels) of the axis and returns the current class instance. The given array must have 2 values, but one may be `undefined` to allow the default behavior for that value. If *value* is not specified, returns the current scale range.
-      @param {Array} [*value*]
-      @chainable
-  */
-  range(_) {
-    return arguments.length ? (this._range = _, this) : this._range;
-  }
-
-  /**
-      @memberof Axis
       @desc Renders the current Axis to the page. If a *callback* is specified, it will be called once the legend is done drawing.
       @param {Function} [*callback* = undefined]
       @chainable
@@ -578,6 +411,173 @@ export default class Axis extends BaseClass {
 
     return this;
 
+  }
+
+  /**
+      @memberof Axis
+      @desc If *value* is specified, sets the horizontal alignment to the specified value and returns the current class instance. If *value* is not specified, returns the current horizontal alignment.
+      @param {String} [*value* = "center"] Supports `"left"` and `"center"` and `"right"`.
+      @chainable
+  */
+  align(_) {
+    return arguments.length ? (this._align = _, this) : this._align;
+  }
+
+  /**
+      @memberof Axis
+      @desc If *value* is specified, sets the axis line style and returns the current class instance. If *value* is not specified, returns the current axis line style.
+      @param {Object} [*value*]
+      @chainable
+  */
+  barConfig(_) {
+    return arguments.length ? (this._barConfig = Object.assign(this._barConfig, _), this) : this._barConfig;
+  }
+
+  /**
+      @memberof Axis
+      @desc If *value* is specified, sets the scale domain of the axis and returns the current class instance. If *value* is not specified, returns the current scale domain.
+      @param {Array} [*value* = [0, 10]]
+      @chainable
+  */
+  domain(_) {
+    return arguments.length ? (this._domain = _, this) : this._domain;
+  }
+
+  /**
+      @memberof Axis
+      @desc If *value* is specified, sets the transition duration of the axis and returns the current class instance. If *value* is not specified, returns the current duration.
+      @param {Number} [*value* = 600]
+      @chainable
+  */
+  duration(_) {
+    return arguments.length ? (this._duration = _, this) : this._duration;
+  }
+
+  /**
+      @memberof Axis
+      @desc If *value* is specified, sets the grid values of the axis and returns the current class instance. If *value* is not specified, returns the current grid values, which by default are interpreted based on the [domain](#Axis.domain) and the available [width](#Axis.width).
+      @param {Array} [*value*]
+      @chainable
+  */
+  grid(_) {
+    return arguments.length ? (this._grid = _, this) : this._grid;
+  }
+
+  /**
+      @memberof Axis
+      @desc If *value* is specified, sets the grid style of the axis and returns the current class instance. If *value* is not specified, returns the current grid style.
+      @param {Object} [*value*]
+      @chainable
+  */
+  gridConfig(_) {
+    return arguments.length ? (this._gridConfig = Object.assign(this._gridConfig, _), this) : this._gridConfig;
+  }
+
+  /**
+      @memberof Axis
+      @desc If *value* is specified, sets the grid size of the axis and returns the current class instance. If *value* is not specified, returns the current grid size, which defaults to taking up as much space as available.
+      @param {Number} [*value* = undefined]
+      @chainable
+  */
+  gridSize(_) {
+    return arguments.length ? (this._gridSize = _, this) : this._gridSize;
+  }
+
+  /**
+      @memberof Axis
+      @desc If *value* is specified, sets the overall height of the axis and returns the current class instance. If *value* is not specified, returns the current height value.
+      @param {Number} [*value* = 100]
+      @chainable
+  */
+  height(_) {
+    return arguments.length ? (this._height = _, this) : this._height;
+  }
+
+  /**
+      @memberof Axis
+      @desc If *value* is specified, sets the visible tick labels of the axis and returns the current class instance. If *value* is not specified, returns the current visible tick labels, which defaults to showing all labels.
+      @param {Array} [*value*]
+      @chainable
+  */
+  labels(_) {
+    return arguments.length ? (this._labels = _, this) : this._labels;
+  }
+
+  /**
+      @memberof Axis
+      @desc If *orient* is specified, sets the orientation of the shape and returns the current class instance. If *orient* is not specified, returns the current orientation.
+      @param {String} [*orient* = "bottom"] Supports `"top"`, `"right"`, `"bottom"`, and `"left"` orientations.
+      @chainable
+  */
+  orient(_) {
+    if (arguments.length) {
+
+      const horizontal = ["top", "bottom"].includes(_),
+            opps = {top: "bottom", right: "left", bottom: "top", left: "right"};
+
+      this._position = {
+        horizontal,
+        width: horizontal ? "width" : "height",
+        height: horizontal ? "height" : "width",
+        x: horizontal ? "x" : "y",
+        y: horizontal ? "y" : "x",
+        opposite: opps[_]
+      };
+
+      return this._orient = _, this;
+
+    }
+    return this._orient;
+  }
+
+  /**
+      @memberof Axis
+      @desc If called after the elements have been drawn to DOM, will returns the outer bounds of the axis content.
+      @example
+{"width": 180, "height": 24, "x": 10, "y": 20}
+  */
+  outerBounds() {
+    return this._outerBounds;
+  }
+
+  /**
+      @memberof Axis
+      @desc If *value* is specified, sets the padding between each tick label to the specified number and returns the current class instance. If *value* is not specified, returns the current padding value.
+      @param {Number} [*value* = 10]
+      @chainable
+  */
+  padding(_) {
+    return arguments.length ? (this._padding = _, this) : this._padding;
+  }
+
+  /**
+      @memberof Axis
+      @desc If *value* is specified, sets the inner padding of band scale to the specified number and returns the current class instance. If *value* is not specified, returns the current inner padding value.
+      @param {Number} [*value* = 0.1]
+      @chainable
+  */
+  paddingInner(_) {
+    return arguments.length ? (this._paddingInner = _, this) : this._paddingInner;
+  }
+
+  /**
+      @memberof Axis
+      @desc If *value* is specified, sets the outer padding of band scales to the specified number and returns the current class instance. If *value* is not specified, returns the current outer padding value.
+      @param {Number} [*value* = 0.1]
+      @chainable
+  */
+  paddingOuter(_) {
+    return arguments.length ? (this._paddingOuter = _, this) : this._paddingOuter;
+  }
+
+  /**
+      @memberof Axis
+      @desc If *value* is specified, sets the scale range (in pixels) of the axis and returns the current class instance. The given array must have 2 values, but one may be `undefined` to allow the default behavior for that value. If *value* is not specified, returns the current scale range.
+      @param {Array} [*value*]
+      @chainable
+  */
+  range(_) {
+    return arguments.length ? (this._range = _, this) : this._range;
   }
 
   /**
