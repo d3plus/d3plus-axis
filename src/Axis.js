@@ -192,6 +192,10 @@ export default class Axis extends BaseClass {
                ? this._d3Scale.ticks(Math.floor(this._size / tickScale(this._size)))
                : ticks;
 
+
+    ticks = ticks.slice();
+    labels = labels.slice();
+
     const tickFormat = this._tickFormat ? this._tickFormat : this._d3Scale.tickFormat
                      ? this._d3Scale.tickFormat(labels.length - 1)
                      : d => d;
@@ -200,6 +204,9 @@ export default class Axis extends BaseClass {
       ticks = ticks.map(Number);
       labels = labels.map(Number);
     }
+
+    ticks = ticks.sort((a, b) => this._d3Scale(a) - this._d3Scale(b));
+    labels = labels.sort((a, b) => this._d3Scale(a) - this._d3Scale(b));
 
     const tickSize = this._shape === "Circle" ? this._shapeConfig.r
                    : this._shape === "Rect" ? this._shapeConfig[width]
