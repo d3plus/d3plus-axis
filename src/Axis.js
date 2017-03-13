@@ -363,10 +363,12 @@ export default class Axis extends BaseClass {
           labelWidth = horizontal ? this._space * 1.1 : (this._outerBounds.width - this._margin[this._position.opposite] - hBuff - this._margin[this._orient] + p) * 1.1;
     let tickData = ticks
       .concat(labels.filter((d, i) => textData[i].lines.length && !ticks.includes(d)))
-      .map((d, i) => {
+      .map(d => {
+        const data = textData.filter(td => td.d === d);
+        const labelOffset = data.length ? data[0].offset : 0;
         const offset = this._margin[opposite],
               position = flip ? this._outerBounds[y] + this._outerBounds[height] - offset : this._outerBounds[y] + offset,
-              size = (hBuff + textData[i].offset) * (flip ? -1 : 1);
+              size = (hBuff + labelOffset) * (flip ? -1 : 1);
         return {
           id: d,
           labelBounds: {
