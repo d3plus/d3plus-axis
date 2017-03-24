@@ -290,6 +290,13 @@ export default class Axis extends BaseClass {
       }
     });
 
+    const maxOffset = max(textData, d => d.offset);
+    if (maxOffset) {
+      textData.forEach(d => {
+        if (d.offset) d.offset = maxOffset;
+      });
+    }
+
     // Calculates new range, based on any text that may be overflowing.
     const rangeOuter = range.slice();
     const lastI = range.length - 1;
