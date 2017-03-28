@@ -51,19 +51,21 @@ export default class Axis extends BaseClass {
     this._shape = "Line";
     this._shapeConfig = {
       fill: "#000",
-      fontColor: "#000",
-      fontFamily: new TextBox().fontFamily(),
-      fontResize: false,
-      fontSize: constant(10),
       height: d => d.tick ? 8 : 0,
       label: d => d.text,
       labelBounds: d => d.labelBounds,
+      labelConfig: {
+        fontColor: "#000",
+        fontFamily: new TextBox().fontFamily(),
+        fontResize: false,
+        fontSize: constant(10),
+        textAnchor: () => this._orient === "left" ? "end" : this._orient === "right" ? "start" : "middle",
+        verticalAlign: () => this._orient === "bottom" ? "top" : this._orient === "top" ? "bottom" : "middle"
+      },
       labelPadding: 0,
       r: d => d.tick ? 4 : 0,
       stroke: "#000",
       strokeWidth: 1,
-      textAnchor: () => this._orient === "left" ? "end" : this._orient === "right" ? "start" : "middle",
-      verticalAlign: () => this._orient === "bottom" ? "top" : this._orient === "top" ? "bottom" : "middle",
       width: d => d.tick ? 8 : 0
     };
     this._tickSize = 5;
@@ -137,7 +139,7 @@ export default class Axis extends BaseClass {
     }
 
     if (this._lineHeight === void 0) {
-      this._lineHeight = (d, i) => this._shapeConfig.fontSize(d, i) * 1.1;
+      this._lineHeight = (d, i) => this._shapeConfig.labelConfig.fontSize(d, i) * 1.1;
     }
 
     const {width, height, x, y, horizontal, opposite} = this._position,
@@ -255,8 +257,8 @@ export default class Axis extends BaseClass {
     // Measures size of ticks
     const textData = labels.map((d, i) => {
 
-      const f = this._shapeConfig.fontFamily(d, i),
-            s = this._shapeConfig.fontSize(d, i);
+      const f = this._shapeConfig.labelConfig.fontFamily(d, i),
+            s = this._shapeConfig.labelConfig.fontSize(d, i);
 
       const lh = this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : s * 1.1;
 
