@@ -8,7 +8,7 @@ import * as scales from "d3-scale";
 import {select} from "d3-selection";
 import {transition} from "d3-transition";
 
-import {attrize, BaseClass, closest, constant, elem} from "d3plus-common";
+import {assign, attrize, BaseClass, closest, constant, elem} from "d3plus-common";
 import * as shapes from "d3plus-shape";
 import {TextBox, textWidth, textWrap} from "d3plus-text";
 
@@ -646,7 +646,7 @@ export default class Axis extends BaseClass {
       @chainable
   */
   shapeConfig(_) {
-    return arguments.length ? (this._shapeConfig = Object.assign(this._shapeConfig, _), this) : this._shapeConfig;
+    return arguments.length ? (this._shapeConfig = assign(this._shapeConfig, _), this) : this._shapeConfig;
   }
 
   /**
