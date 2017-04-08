@@ -1,14 +1,10 @@
-import {test} from "tape";
+import zora from "zora";
 import {default as Axis} from "../src/Axis.js";
 
-test("Axis", assert => {
+export default zora()
+  .test("Axis", function *(assert) {
 
-  new Axis()
-    .render(() => {
+    yield cb => new Axis().render(cb);
+    assert.ok(true, "function success");
 
-      assert.true(true, "function success");
-      assert.end();
-
-    });
-
-});
+  });
