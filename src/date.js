@@ -1,7 +1,8 @@
 /**
     @function date
-    @desc Parses numbers and strings to valid Javascript Date obejcts.
-    @param {Date|Number|String} *date*
+    @summary Parses numbers and strings to valid Javascript Date objects.
+    @description Returns a javascript Date object for a given a Number (representing either a 4-digit year or milliseconds since epoch) or a String that is in [valid dateString format](http://dygraphs.com/date-formats.html). Besides the 4-digit year parsing, this function is useful when needing to parse negative (BC) years, which the vanilla Date object cannot parse.
+    @param {Number|String} *date*
 */
 export default function(d) {
 

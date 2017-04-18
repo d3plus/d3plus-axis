@@ -62,7 +62,7 @@ The [d3plus-axis](https://github.com/d3plus/d3plus-axis) module makes all four o
 * [AxisTop](#AxisTop)
 
 ##### Functions
-* [date](#date) - Parses numbers and strings to valid Javascript Date obejcts.
+* [date](#date) - Parses numbers and strings to valid Javascript Date objects.
 
 ---
 
@@ -70,7 +70,7 @@ The [d3plus-axis](https://github.com/d3plus/d3plus-axis) module makes all four o
 #### **Axis** [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L17)
 
 
-This is a global class. It extends all of the methods and functionality of <code>[BaseClass](https://github.com/d3plus/d3plus-common#BaseClass)</code>.
+This is a global class, and extends all of the methods and functionality of <code>[BaseClass](https://github.com/d3plus/d3plus-common#BaseClass)</code>.
 
 
 * [Axis](#Axis) ⇐ <code>[BaseClass](https://github.com/d3plus/d3plus-common#BaseClass)</code>
@@ -107,7 +107,7 @@ This is a global class. It extends all of the methods and functionality of <code
 Creates an SVG scale based on an array of data.
 
 
-This is a constructor.
+
 
 <a name="Axis.render" href="Axis.render">#</a> Axis.**render**([*callback*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L132)
 
@@ -426,14 +426,14 @@ This is a static method of <code>[Axis](#Axis)</code>, and is chainable with oth
 #### **AxisBottom** [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/AxisBottom.js#L3)
 
 
-This is a global class. It extends all of the methods and functionality of <code>[Axis](#Axis)</code>.
+This is a global class, and extends all of the methods and functionality of <code>[Axis](#Axis)</code>.
 
 <a name="new_AxisBottom_new" href="new_AxisBottom_new">#</a> new **AxisBottom**()
 
 Shorthand method for creating an axis where the ticks are drawn below the horizontal domain path. Extends all functionality of the base [Axis](#Axis) class.
 
 
-This is a constructor.
+
 
 ---
 
@@ -441,14 +441,14 @@ This is a constructor.
 #### **AxisLeft** [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/AxisLeft.js#L3)
 
 
-This is a global class. It extends all of the methods and functionality of <code>[Axis](#Axis)</code>.
+This is a global class, and extends all of the methods and functionality of <code>[Axis](#Axis)</code>.
 
 <a name="new_AxisLeft_new" href="new_AxisLeft_new">#</a> new **AxisLeft**()
 
 Shorthand method for creating an axis where the ticks are drawn to the left of the vertical domain path. Extends all functionality of the base [Axis](#Axis) class.
 
 
-This is a constructor.
+
 
 ---
 
@@ -456,14 +456,14 @@ This is a constructor.
 #### **AxisRight** [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/AxisRight.js#L3)
 
 
-This is a global class. It extends all of the methods and functionality of <code>[Axis](#Axis)</code>.
+This is a global class, and extends all of the methods and functionality of <code>[Axis](#Axis)</code>.
 
 <a name="new_AxisRight_new" href="new_AxisRight_new">#</a> new **AxisRight**()
 
 Shorthand method for creating an axis where the ticks are drawn to the right of the vertical domain path. Extends all functionality of the base [Axis](#Axis) class.
 
 
-This is a constructor.
+
 
 ---
 
@@ -471,21 +471,21 @@ This is a constructor.
 #### **AxisTop** [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/AxisTop.js#L3)
 
 
-This is a global class. It extends all of the methods and functionality of <code>[Axis](#Axis)</code>.
+This is a global class, and extends all of the methods and functionality of <code>[Axis](#Axis)</code>.
 
 <a name="new_AxisTop_new" href="new_AxisTop_new">#</a> new **AxisTop**()
 
 Shorthand method for creating an axis where the ticks are drawn above the vertical domain path. Extends all functionality of the base [Axis](#Axis) class.
 
 
-This is a constructor.
+
 
 ---
 
 <a name="date"></a>
 #### d3plus.**date**(*date*) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/date.js#L1)
 
-Parses numbers and strings to valid Javascript Date obejcts.
+Returns a javascript Date object for a given a Number (representing either a 4-digit year or milliseconds since epoch) or a String that is in [valid dateString format](http://dygraphs.com/date-formats.html). Besides the 4-digit year parsing, this function is useful when needing to parse negative (BC) years, which the vanilla Date object cannot parse.
 
 
 This is a global function.
@@ -493,8 +493,8 @@ This is a global function.
 
 | Param | Type |
 | --- | --- |
-| *date* | <code>Date</code> \| <code>Number</code> \| <code>String</code> | 
+| *date* | <code>Number</code> \| <code>String</code> | 
 
 ---
 
-###### <sub>Documentation generated on Tue, 18 Apr 2017 20:27:52 GMT</sub>
+###### <sub>Documentation generated on Tue, 18 Apr 2017 21:40:46 GMT</sub>
