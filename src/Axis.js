@@ -273,8 +273,10 @@ export default class Axis extends BaseClass {
       res.lines = res.lines.filter(d => d !== "");
       res.d = d;
       res.fS = s;
-      res.width = Math.ceil(max(res.lines.map(t => textWidth(t, {"font-family": f, "font-size": s})))) + s / 4;
-      res.height = Math.ceil(res.lines.length * (lh + 1));
+      res.width = res.lines.length
+        ? Math.ceil(max(res.lines.map(line => textWidth(line, {"font-family": f, "font-size": s})))) + s / 4
+        : 0;
+      res.height = res.lines.length ? Math.ceil(res.lines.length * (lh + 1)) : 0;
       res.offset = 0;
       if (res.width % 2) res.width++;
 
@@ -405,6 +407,9 @@ export default class Axis extends BaseClass {
     new shapes[this._shape]()
       .data(tickData)
       .duration(this._duration)
+      .labelConfig({
+        ellipsis: d => d && d.length ? `${d}...` : ""
+      })
       .select(elem("g.ticks", {parent: group}).node())
       .config(this._shapeConfig)
       .render();
