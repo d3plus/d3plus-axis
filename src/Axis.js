@@ -266,8 +266,8 @@ export default class Axis extends BaseClass {
         .fontFamily(f)
         .fontSize(s)
         .lineHeight(lh)
-        .width(horizontal ? this._space : this._width - hBuff - p)
-        .height(horizontal ? this._height - hBuff - p : this._space)
+        .width(horizontal ? this._space * 2 : this._width - hBuff - p)
+        .height(horizontal ? this._height - hBuff - p : this._space * 2)
         (tickFormat(d));
 
       res.lines = res.lines.filter(d => d !== "");
@@ -289,7 +289,6 @@ export default class Axis extends BaseClass {
         const prev = textData[i - 1];
         if (!prev.offset && this._d3Scale(d.d) - d[width] / 2 < this._d3Scale(prev.d) + prev[width] / 2) {
           d.offset = prev[height] + this._padding;
-          d[height] += d.offset;
         }
       }
     });
@@ -297,7 +296,10 @@ export default class Axis extends BaseClass {
     const maxOffset = max(textData, d => d.offset);
     if (maxOffset) {
       textData.forEach(d => {
-        if (d.offset) d.offset = maxOffset;
+        if (d.offset) {
+          d.offset = maxOffset;
+          d[height] += maxOffset;
+        }
       });
     }
 
@@ -333,10 +335,24 @@ export default class Axis extends BaseClass {
         }
       }
 
+      if (range.length > 2) range = d3Range(this._domain.length).map(d => this._size * (d / (range.length - 1)) + range[0]);
+      range = range.map(Math.round);
       if (this._d3Scale.rangeRound) this._d3Scale.rangeRound(range);
       else this._d3Scale.range(range);
 
     }
+
+    if (this._scale === "band") {
+      this._space = this._d3Scale.bandwidth();
+    }
+    else if (labels.length > 1) {
+      this._space = 0;
+      for (let i = 0; i < labels.length - 1; i++) {
+        const s = this._d3Scale(labels[i + 1]) - this._d3Scale(labels[i]);
+        if (s > this._space) this._space = s;
+      }
+    }
+    else this._space = this._size;
 
     const tBuff = this._shape === "Line" ? 0 : hBuff;
     this._outerBounds = {
@@ -344,6 +360,7 @@ export default class Axis extends BaseClass {
       [width]: rangeOuter[lastI] - rangeOuter[0],
       [x]: rangeOuter[0]
     };
+
     this._margin[opposite] = this._gridSize !== void 0 ? max([this._gridSize, tBuff]) : this[`_${height}`] - this._margin[this._orient] - this._outerBounds[height] - p * 2 - hBuff;
     this._margin[this._orient] += hBuff;
     this._outerBounds[height] += this._margin[opposite] + this._margin[this._orient];
@@ -371,21 +388,34 @@ export default class Axis extends BaseClass {
         .call(this._gridPosition.bind(this));
 
     const labelHeight = max(textData, t => t.height) || 0,
-          labelWidth = horizontal ? this._space * 1.1 : (this._outerBounds.width - this._margin[this._position.opposite] - hBuff - this._margin[this._orient] + p) * 1.1;
+          labelWidth = horizontal ? this._space : this._outerBounds.width - this._margin[this._position.opposite] - hBuff - this._margin[this._orient] + p;
+
     let tickData = ticks
       .concat(labels.filter((d, i) => textData[i].lines.length && !ticks.includes(d)))
-      .map(d => {
+      .map((d, i, arr) => {
         const data = textData.filter(td => td.d === d);
         const labelOffset = data.length ? data[0].offset : 0;
+        let inline = false;
+        if (i) {
+          const prev = textData.filter(td => td.d === arr[i - 1]);
+          if (prev.length && prev[0].offset === labelOffset) inline = true;
+        }
+        if (i < arr.length - 1) {
+          const next = textData.filter(td => td.d === arr[i + 1]);
+          if (next.length && next[0].offset === labelOffset) inline = true;
+        }
         const offset = this._margin[opposite],
               position = flip ? this._outerBounds[y] + this._outerBounds[height] - offset : this._outerBounds[y] + offset,
               size = (hBuff + labelOffset) * (flip ? -1 : 1);
+
+        const space = inline ? labelWidth : labelWidth * 1.9;
+
         return {
           id: d,
           labelBounds: {
-            x: horizontal ? -labelWidth / 2 : this._orient === "left" ? -labelWidth - p + size : size + p,
+            x: horizontal ? -space / 2 : this._orient === "left" ? -space - p + size : size + p,
             y: horizontal ? this._orient === "bottom" ? size + p : size - p - labelHeight : -labelHeight / 2,
-            width: labelWidth,
+            width: space,
             height: labelHeight
           },
           size: ticks.includes(d) ? size : 0,
