@@ -195,7 +195,6 @@ export default class Axis extends BaseClass {
                ? this._d3Scale.ticks(Math.floor(this._size / tickScale(this._size)))
                : ticks;
 
-
     ticks = ticks.slice();
     labels = labels.slice();
 
@@ -206,6 +205,9 @@ export default class Axis extends BaseClass {
     if (this._scale === "time") {
       ticks = ticks.map(Number);
       labels = labels.map(Number);
+    }
+    else if (this._scale === "ordinal") {
+      labels = labels.filter(label => ticks.includes(label));
     }
 
     ticks = ticks.sort((a, b) => this._d3Scale(a) - this._d3Scale(b));
@@ -226,6 +228,7 @@ export default class Axis extends BaseClass {
       if (!pixels.length || Math.abs(closest(t, pixels) - t) > s * 2) pixels.push(t);
       else pixels.push(false);
     });
+
     ticks = ticks.filter((d, i) => pixels[i] !== false);
 
     this._visibleTicks = ticks;
@@ -390,8 +393,9 @@ export default class Axis extends BaseClass {
     const labelHeight = max(textData, t => t.height) || 0,
           labelWidth = horizontal ? this._space : this._outerBounds.width - this._margin[this._position.opposite] - hBuff - this._margin[this._orient] + p;
 
-    let tickData = ticks
-      .concat(labels.filter((d, i) => textData[i].lines.length && !ticks.includes(d)))
+    const labelOnly = labels.filter((d, i) => textData[i].lines.length && !ticks.includes(d));
+
+    let tickData = ticks.concat(labelOnly)
       .map((d, i, arr) => {
         const data = textData.filter(td => td.d === d);
         const labelOffset = data.length ? data[0].offset : 0;
