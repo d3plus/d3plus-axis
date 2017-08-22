@@ -10,7 +10,7 @@ import {transition} from "d3-transition";
 
 import {assign, attrize, BaseClass, closest, constant, elem} from "d3plus-common";
 import * as shapes from "d3plus-shape";
-import {TextBox, textWidth, textWrap} from "d3plus-text";
+import {rtl as detectRTL, TextBox, textWidth, textWrap} from "d3plus-text";
 
 import {default as date} from "./date";
 
@@ -59,7 +59,12 @@ export default class Axis extends BaseClass {
         fontFamily: new TextBox().fontFamily(),
         fontResize: false,
         fontSize: constant(10),
-        textAnchor: () => this._orient === "left" ? "end" : this._orient === "right" ? "start" : "middle",
+        textAnchor: () => {
+          const rtl = detectRTL();
+          return this._orient === "left" ? rtl ? "start" : "end"
+            : this._orient === "right" ? rtl ? "end" : "start"
+            : "middle";
+        },
         verticalAlign: () => this._orient === "bottom" ? "top" : this._orient === "top" ? "bottom" : "middle"
       },
       labelPadding: 0,
@@ -69,6 +74,7 @@ export default class Axis extends BaseClass {
       width: d => d.tick ? 8 : 0
     };
     this._tickSize = 5;
+    this._titleClass = new TextBox();
     this._titleConfig = {
       fontSize: 12,
       textAnchor: "middle"
@@ -151,7 +157,7 @@ export default class Axis extends BaseClass {
       range = d3Range(this._domain.length).map(d => this._size * (d / (this._domain.length - 1)) + range[0]);
     }
 
-    this._margin = {top: 0, right: 0, bottom: 0, left: 0};
+    const margin = this._margin = {top: 0, right: 0, bottom: 0, left: 0};
 
     if (this._title) {
       const titleWrap = textWrap()
@@ -160,7 +166,8 @@ export default class Axis extends BaseClass {
         .lineHeight(this._titleConfig.lineHeight)
         .width(this._size)
         .height(this[`_${height}`] - this._tickSize - p);
-      this._margin[this._orient] = titleWrap(this._title).lines.length * titleWrap.lineHeight() + p;
+      const lines = titleWrap(this._title).lines.length;
+      margin[this._orient] = lines * titleWrap.lineHeight() + p;
     }
 
     this._d3Scale = scales[`scale${this._scale.charAt(0).toUpperCase()}${this._scale.slice(1)}`]()
@@ -348,18 +355,18 @@ export default class Axis extends BaseClass {
     else this._space = this._size;
 
     const tBuff = this._shape === "Line" ? 0 : hBuff;
-    this._outerBounds = {
+    const bounds = this._outerBounds = {
       [height]: (max(textData, t => t[height]) || 0) + (textData.length ? p : 0),
       [width]: rangeOuter[lastI] - rangeOuter[0],
       [x]: rangeOuter[0]
     };
 
-    this._margin[opposite] = this._gridSize !== void 0 ? max([this._gridSize, tBuff]) : this[`_${height}`] - this._margin[this._orient] - this._outerBounds[height] - p * 2 - hBuff;
-    this._margin[this._orient] += hBuff;
-    this._outerBounds[height] += this._margin[opposite] + this._margin[this._orient];
-    this._outerBounds[y] = this._align === "start" ? this._padding
-                         : this._align === "end" ? this[`_${height}`] - this._outerBounds[height] - this._padding
-                         : this[`_${height}`] / 2 - this._outerBounds[height] / 2;
+    margin[opposite] = this._gridSize !== void 0 ? max([this._gridSize, tBuff]) : this[`_${height}`] - margin[this._orient] - bounds[height] - p * 2 - hBuff;
+    margin[this._orient] += hBuff;
+    bounds[height] += margin[opposite] + margin[this._orient];
+    bounds[y] = this._align === "start" ? this._padding
+                         : this._align === "end" ? this[`_${height}`] - bounds[height] - this._padding
+                         : this[`_${height}`] / 2 - bounds[height] / 2;
 
     const group = elem(`g#d3plus-Axis-${this._uuid}`, {parent});
     this._group = group;
@@ -381,7 +388,7 @@ export default class Axis extends BaseClass {
         .call(this._gridPosition.bind(this));
 
     const labelHeight = max(textData, t => t.height) || 0,
-          labelWidth = horizontal ? this._space : this._outerBounds.width - this._margin[this._position.opposite] - hBuff - this._margin[this._orient] + p;
+          labelWidth = horizontal ? this._space : bounds.width - margin[this._position.opposite] - hBuff - margin[this._orient] + p;
 
     const labelOnly = labels.filter((d, i) => textData[i].lines.length && !ticks.includes(d));
 
@@ -398,8 +405,8 @@ export default class Axis extends BaseClass {
           const next = textData.filter(td => td.d === arr[i + 1]);
           if (next.length && next[0].offset === labelOffset) inline = true;
         }
-        const offset = this._margin[opposite],
-              position = flip ? this._outerBounds[y] + this._outerBounds[height] - offset : this._outerBounds[y] + offset,
+        const offset = margin[opposite],
+              position = flip ? bounds[y] + bounds[height] - offset : bounds[y] + offset,
               size = (hBuff + labelOffset) * (flip ? -1 : 1);
 
         const space = inline ? labelWidth : labelWidth * 1.9;
@@ -448,18 +455,17 @@ export default class Axis extends BaseClass {
         .attr("opacity", 1)
         .call(this._barPosition.bind(this));
 
-    new TextBox()
+    this._titleClass
       .data(this._title ? [{text: this._title}] : [])
       .duration(this._duration)
-      .height(this._outerBounds.height)
+      .height(margin[this._orient])
       .rotate(this._orient === "left" ? -90 : this._orient === "right" ? 90 : 0)
       .select(elem("g.d3plus-Axis-title", {parent: group}).node())
       .text(d => d.text)
-      .textAnchor("middle")
-      .verticalAlign(this._orient === "bottom" ? "bottom" : "top")
-      .width(this._outerBounds[width])
-      .x(horizontal ? this._outerBounds.x : this._orient === "left" ? this._outerBounds.x + this._margin[this._orient] / 2 - this._outerBounds[width] / 2 : this._outerBounds.x + this._outerBounds.width - this._margin[this._orient] / 2 - this._outerBounds[width] / 2)
-      .y(horizontal ? this._outerBounds.y : this._outerBounds.y - this._margin[this._orient] / 2 + this._outerBounds[width] / 2)
+      .verticalAlign("middle")
+      .width(bounds[width])
+      .x(horizontal ? bounds.x : this._orient === "left" ? bounds.x + margin[this._orient] / 2 - bounds[width] / 2 : bounds.x + bounds.width - margin[this._orient] / 2 - bounds[width] / 2)
+      .y(horizontal ? this._orient === "bottom" ? bounds.y + bounds.height - margin.bottom + p : bounds.y : bounds.y - margin[this._orient] / 2 + bounds[width] / 2)
       .config(this._titleConfig)
       .render();
 
