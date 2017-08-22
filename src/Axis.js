@@ -62,8 +62,8 @@ export default class Axis extends BaseClass {
         textAnchor: () => {
           const rtl = detectRTL();
           return this._orient === "left" ? rtl ? "start" : "end"
-            : this._orient === "right" ? rtl ? "end" : "start"
-            : "middle";
+          : this._orient === "right" ? rtl ? "end" : "start"
+          : "middle";
         },
         verticalAlign: () => this._orient === "bottom" ? "top" : this._orient === "top" ? "bottom" : "middle"
       },
@@ -183,23 +183,23 @@ export default class Axis extends BaseClass {
     const tickScale = scales.scaleSqrt().domain([10, 400]).range([10, this._gridSize === 0 ? 50 : 75]);
 
     let ticks = this._ticks
-              ? this._scale === "time" ? this._ticks.map(date) : this._ticks
-              : this._d3Scale.ticks
-              ? this._d3Scale.ticks(Math.floor(this._size / tickScale(this._size)))
-              : this._domain;
+      ? this._scale === "time" ? this._ticks.map(date) : this._ticks
+      : this._d3Scale.ticks
+        ? this._d3Scale.ticks(Math.floor(this._size / tickScale(this._size)))
+        : this._domain;
 
     let labels = this._labels
-               ? this._scale === "time" ? this._labels.map(date) : this._labels
-               : this._d3Scale.ticks
-               ? this._d3Scale.ticks(Math.floor(this._size / tickScale(this._size)))
-               : ticks;
+      ? this._scale === "time" ? this._labels.map(date) : this._labels
+      : this._d3Scale.ticks
+        ? this._d3Scale.ticks(Math.floor(this._size / tickScale(this._size)))
+        : ticks;
 
     ticks = ticks.slice();
     labels = labels.slice();
 
     const tickFormat = this._tickFormat ? this._tickFormat : this._d3Scale.tickFormat
-                     ? this._d3Scale.tickFormat(labels.length - 1)
-                     : d => d;
+      ? this._d3Scale.tickFormat(labels.length - 1)
+      : d => d;
 
     if (this._scale === "time") {
       ticks = ticks.map(Number);
@@ -213,8 +213,8 @@ export default class Axis extends BaseClass {
     labels = labels.sort((a, b) => this._d3Scale(a) - this._d3Scale(b));
 
     const tickSize = this._shape === "Circle" ? this._shapeConfig.r
-                   : this._shape === "Rect" ? this._shapeConfig[width]
-                   : this._shapeConfig.strokeWidth;
+      : this._shape === "Rect" ? this._shapeConfig[width]
+      : this._shapeConfig.strokeWidth;
 
     const tickGet = typeof tickSize !== "function" ? () => tickSize : tickSize;
 
@@ -233,10 +233,10 @@ export default class Axis extends BaseClass {
     this._visibleTicks = ticks;
 
     let hBuff = this._shape === "Circle"
-              ? typeof this._shapeConfig.r === "function" ? this._shapeConfig.r({tick: true}) : this._shapeConfig.r
-              : this._shape === "Rect"
-              ? typeof this._shapeConfig[height] === "function" ? this._shapeConfig[height]({tick: true}) : this._shapeConfig[height]
-              : this._tickSize,
+          ? typeof this._shapeConfig.r === "function" ? this._shapeConfig.r({tick: true}) : this._shapeConfig.r
+          : this._shape === "Rect"
+            ? typeof this._shapeConfig[height] === "function" ? this._shapeConfig[height]({tick: true}) : this._shapeConfig[height]
+            : this._tickSize,
         wBuff = tickGet({tick: true});
 
     if (typeof hBuff === "function") hBuff = max(ticks.map(hBuff));
@@ -365,8 +365,8 @@ export default class Axis extends BaseClass {
     margin[this._orient] += hBuff;
     bounds[height] += margin[opposite] + margin[this._orient];
     bounds[y] = this._align === "start" ? this._padding
-                         : this._align === "end" ? this[`_${height}`] - bounds[height] - this._padding
-                         : this[`_${height}`] / 2 - bounds[height] / 2;
+      : this._align === "end" ? this[`_${height}`] - bounds[height] - this._padding
+      : this[`_${height}`] / 2 - bounds[height] / 2;
 
     const group = elem(`g#d3plus-Axis-${this._uuid}`, {parent});
     this._group = group;
@@ -479,7 +479,7 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
-      @desc If *value* is specified, sets the horizontal alignment to the specified value and returns the current class instance. If *value* is not specified, returns the current horizontal alignment.
+      @desc If *value* is specified, sets the horizontal alignment to the specified value and returns the current class instance.
       @param {String} [*value* = "center"] Supports `"left"` and `"center"` and `"right"`.
       @chainable
   */
@@ -489,7 +489,7 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
-      @desc If *value* is specified, sets the axis line style and returns the current class instance. If *value* is not specified, returns the current axis line style.
+      @desc If *value* is specified, sets the axis line style and returns the current class instance.
       @param {Object} [*value*]
       @chainable
   */
@@ -499,7 +499,7 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
-      @desc If *value* is specified, sets the scale domain of the axis and returns the current class instance. If *value* is not specified, returns the current scale domain.
+      @desc If *value* is specified, sets the scale domain of the axis and returns the current class instance.
       @param {Array} [*value* = [0, 10]]
       @chainable
   */
@@ -509,7 +509,7 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
-      @desc If *value* is specified, sets the transition duration of the axis and returns the current class instance. If *value* is not specified, returns the current duration.
+      @desc If *value* is specified, sets the transition duration of the axis and returns the current class instance.
       @param {Number} [*value* = 600]
       @chainable
   */
@@ -519,7 +519,7 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
-      @desc If *value* is specified, sets the grid values of the axis and returns the current class instance. If *value* is not specified, returns the current grid values, which by default are interpreted based on the [domain](#Axis.domain) and the available [width](#Axis.width).
+      @desc If *value* is specified, sets the grid values of the axis and returns the current class instance.
       @param {Array} [*value*]
       @chainable
   */
@@ -529,7 +529,7 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
-      @desc If *value* is specified, sets the grid style of the axis and returns the current class instance. If *value* is not specified, returns the current grid style.
+      @desc If *value* is specified, sets the grid style of the axis and returns the current class instance.
       @param {Object} [*value*]
       @chainable
   */
@@ -539,7 +539,7 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
-      @desc If *value* is specified, sets the grid size of the axis and returns the current class instance. If *value* is not specified, returns the current grid size, which defaults to taking up as much space as available.
+      @desc If *value* is specified, sets the grid size of the axis and returns the current class instance.
       @param {Number} [*value* = undefined]
       @chainable
   */
@@ -549,7 +549,7 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
-      @desc If *value* is specified, sets the overall height of the axis and returns the current class instance. If *value* is not specified, returns the current height value.
+      @desc If *value* is specified, sets the overall height of the axis and returns the current class instance.
       @param {Number} [*value* = 100]
       @chainable
   */
@@ -559,7 +559,7 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
-      @desc If *value* is specified, sets the visible tick labels of the axis and returns the current class instance. If *value* is not specified, returns the current visible tick labels, which defaults to showing all labels.
+      @desc If *value* is specified, sets the visible tick labels of the axis and returns the current class instance.
       @param {Array} [*value*]
       @chainable
   */
@@ -606,7 +606,7 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
-      @desc If *value* is specified, sets the padding between each tick label to the specified number and returns the current class instance. If *value* is not specified, returns the current padding value.
+      @desc If *value* is specified, sets the padding between each tick label to the specified number and returns the current class instance.
       @param {Number} [*value* = 10]
       @chainable
   */
@@ -616,7 +616,7 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
-      @desc If *value* is specified, sets the inner padding of band scale to the specified number and returns the current class instance. If *value* is not specified, returns the current inner padding value.
+      @desc If *value* is specified, sets the inner padding of band scale to the specified number and returns the current class instance.
       @param {Number} [*value* = 0.1]
       @chainable
   */
@@ -626,7 +626,7 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
-      @desc If *value* is specified, sets the outer padding of band scales to the specified number and returns the current class instance. If *value* is not specified, returns the current outer padding value.
+      @desc If *value* is specified, sets the outer padding of band scales to the specified number and returns the current class instance.
       @param {Number} [*value* = 0.1]
       @chainable
   */
@@ -636,7 +636,7 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
-      @desc If *value* is specified, sets the scale range (in pixels) of the axis and returns the current class instance. The given array must have 2 values, but one may be `undefined` to allow the default behavior for that value. If *value* is not specified, returns the current scale range.
+      @desc If *value* is specified, sets the scale range (in pixels) of the axis and returns the current class instance. The given array must have 2 values, but one may be `undefined` to allow the default behavior for that value.
       @param {Array} [*value*]
       @chainable
   */
@@ -646,7 +646,7 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
-      @desc If *value* is specified, sets the scale of the axis and returns the current class instance. If *value* is not specified, returns the current this._d3Scale
+      @desc If *value* is specified, sets the scale of the axis and returns the current class instance.
       @param {String} [*value* = "linear"]
       @chainable
   */
@@ -666,7 +666,7 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
-      @desc If *value* is specified, sets the tick shape constructor and returns the current class instance. If *value* is not specified, returns the current shape.
+      @desc If *value* is specified, sets the tick shape constructor and returns the current class instance.
       @param {String} [*value* = "Line"]
       @chainable
   */
@@ -676,7 +676,7 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
-      @desc If *value* is specified, sets the tick style of the axis and returns the current class instance. If *value* is not specified, returns the current tick style.
+      @desc If *value* is specified, sets the tick style of the axis and returns the current class instance.
       @param {Object} [*value*]
       @chainable
   */
@@ -686,7 +686,7 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
-      @desc If *value* is specified, sets the tick formatter and returns the current class instance. If *value* is not specified, returns the current tick formatter, which by default is retrieved from the [d3-scale](https://github.com/d3/d3-scale#continuous_tickFormat).
+      @desc If *value* is specified, sets the tick formatter and returns the current class instance.
       @param {Function} [*value*]
       @chainable
   */
@@ -696,7 +696,7 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
-      @desc If *value* is specified, sets the tick values of the axis and returns the current class instance. If *value* is not specified, returns the current tick values, which by default are interpreted based on the [domain](#Axis.domain) and the available [width](#Axis.width).
+      @desc If *value* is specified, sets the tick values of the axis and returns the current class instance.
       @param {Array} [*value*]
       @chainable
   */
@@ -706,7 +706,7 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
-      @desc If *value* is specified, sets the tick size of the axis and returns the current class instance. If *value* is not specified, returns the current tick size.
+      @desc If *value* is specified, sets the tick size of the axis and returns the current class instance.
       @param {Number} [*value* = 5]
       @chainable
   */
@@ -716,7 +716,7 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
-      @desc If *value* is specified, sets the title of the axis and returns the current class instance. If *value* is not specified, returns the current title.
+      @desc If *value* is specified, sets the title of the axis and returns the current class instance.
       @param {String} [*value*]
       @chainable
   */
@@ -726,7 +726,7 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
-      @desc If *value* is specified, sets the title configuration of the axis and returns the current class instance. If *value* is not specified, returns the current title configuration.
+      @desc If *value* is specified, sets the title configuration of the axis and returns the current class instance.
       @param {Object} [*value*]
       @chainable
   */
@@ -736,7 +736,7 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
-      @desc If *value* is specified, sets the overall width of the axis and returns the current class instance. If *value* is not specified, returns the current width value.
+      @desc If *value* is specified, sets the overall width of the axis and returns the current class instance.
       @param {Number} [*value* = 400]
       @chainable
   */
