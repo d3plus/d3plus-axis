@@ -70,9 +70,7 @@ export default class Axis extends BaseClass {
     };
     this._tickSize = 5;
     this._titleConfig = {
-      fontFamily: "Verdana",
       fontSize: 12,
-      lineHeight: 13,
       textAnchor: "middle"
     };
     this._width = 400;
@@ -138,10 +136,6 @@ export default class Axis extends BaseClass {
         .node());
     }
 
-    if (this._lineHeight === void 0) {
-      this._lineHeight = (d, i) => this._shapeConfig.labelConfig.fontSize(d, i) * 1.1;
-    }
-
     const {width, height, x, y, horizontal, opposite} = this._position,
           clipId = `d3plus-Axis-clip-${this._uuid}`,
           flip = ["top", "left"].includes(this._orient),
@@ -160,15 +154,13 @@ export default class Axis extends BaseClass {
     this._margin = {top: 0, right: 0, bottom: 0, left: 0};
 
     if (this._title) {
-      const lH = this._titleConfig.lineHeight ? this._titleConfig.lineHeight : this._titleConfig.fontSize * 1.1,
-            titleWrap = textWrap()
-              .fontFamily(this._titleConfig.fontFamily)
-              .fontSize(this._titleConfig.fontSize)
-              .lineHeight(lH)
-              .width(this._size)
-              .height(this[`_${height}`] - this._tickSize - p)
-              (this._title);
-      this._margin[this._orient] = titleWrap.lines.length * lH + p;
+      const titleWrap = textWrap()
+        .fontFamily(this._titleConfig.fontFamily)
+        .fontSize(this._titleConfig.fontSize)
+        .lineHeight(this._titleConfig.lineHeight)
+        .width(this._size)
+        .height(this[`_${height}`] - this._tickSize - p);
+      this._margin[this._orient] = titleWrap(this._title).lines.length * titleWrap.lineHeight() + p;
     }
 
     this._d3Scale = scales[`scale${this._scale.charAt(0).toUpperCase()}${this._scale.slice(1)}`]()
@@ -263,23 +255,21 @@ export default class Axis extends BaseClass {
       const f = this._shapeConfig.labelConfig.fontFamily(d, i),
             s = this._shapeConfig.labelConfig.fontSize(d, i);
 
-      const lh = this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : s * 1.1;
-
-      const res = textWrap()
+      const wrap = textWrap()
         .fontFamily(f)
         .fontSize(s)
-        .lineHeight(lh)
+        .lineHeight(this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : undefined)
         .width(horizontal ? this._space * 2 : this._width - hBuff - p)
-        .height(horizontal ? this._height - hBuff - p : this._space * 2)
-        (tickFormat(d));
+        .height(horizontal ? this._height - hBuff - p : this._space * 2);
 
+      const res = wrap(tickFormat(d));
       res.lines = res.lines.filter(d => d !== "");
       res.d = d;
       res.fS = s;
       res.width = res.lines.length
         ? Math.ceil(max(res.lines.map(line => textWidth(line, {"font-family": f, "font-size": s})))) + s / 4
         : 0;
-      res.height = res.lines.length ? Math.ceil(res.lines.length * (lh + 1)) : 0;
+      res.height = res.lines.length ? Math.ceil(res.lines.length * (wrap.lineHeight() + 1)) : 0;
       res.offset = 0;
       if (res.width % 2) res.width++;
 
