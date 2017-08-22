@@ -1,9 +1,9 @@
 [width]: 600
 [height]: 300
 
-# Only Showing Specific Tick Labels
+# Hiding Specific Axis Labels
 
-Sometimes it's necessary to only show the labels for specific ticks. By passing an array of values to the [.labels( )](https://github.com/d3plus/d3plus-axis#Axis.labels) method, it's possible to specify which tick labels are visible on the axis:
+It is occasionally necessary to only show labels for specific ticks on an [Axis](http://d3plus.org/docs/#Axis). By passing an array of values to the [.labels( )](http://d3plus.org/docs/#Axis.labels) method, it's possible to specify which tick labels are visible:
 
 ```js
 var bottom = new d3plus.AxisBottom()
@@ -13,3 +13,5 @@ var bottom = new d3plus.AxisBottom()
   .height(300)
   .render();
 ```
+
+Notice that while the labels have been modified, the ticks/gridlines still appear at default intervals. This behavior can be overridden using the [.ticks( )](http://d3plus.org/docs/#Axis.ticks) method, as seen in [this example](http://d3plus.org/examples/d3plus-axis/ticks/).

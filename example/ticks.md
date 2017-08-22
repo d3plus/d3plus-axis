@@ -1,9 +1,9 @@
 [width]: 600
 [height]: 300
 
-# Setting Custom Ticks
+# Hiding Specific Axis Ticks
 
-Sometimes it's necessary to override the default behavior to show only specific ticks. By passing an array of values to the [.ticks( )](https://github.com/d3plus/d3plus-axis#Axis.ticks) method, it's possible to specify which ticks are visible on the axis:
+It is occasionally necessary to only show tick marks for specific ticks on an [Axis](http://d3plus.org/docs/#Axis). By passing an array of values to the [.ticks( )](http://d3plus.org/docs/#Axis.ticks) method, it's possible to specify which ticks are visible on the axis:
 
 ```js
 var bottom = new d3plus.AxisBottom()
@@ -14,4 +14,4 @@ var bottom = new d3plus.AxisBottom()
   .render();
 ```
 
-Notice that while the tick/gridlines have been modified, the labels still appear at default intervals. This behavior can be overridden using the [.labels( )](https://github.com/d3plus/d3plus-axis#Axis.labels) method.
+Notice that while the ticks/gridlines have been modified, the labels still appear at default intervals. This behavior can be overridden using the [.labels( )](http://d3plus.org/docs/#Axis.labels) method, as seen in [this example](http://d3plus.org/examples/d3plus-axis/labels/).
