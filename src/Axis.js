@@ -160,10 +160,11 @@ export default class Axis extends BaseClass {
     const margin = this._margin = {top: 0, right: 0, bottom: 0, left: 0};
 
     if (this._title) {
+      const {fontFamily, fontSize, lineHeight} = this._titleConfig;
       const titleWrap = textWrap()
-        .fontFamily(this._titleConfig.fontFamily)
-        .fontSize(this._titleConfig.fontSize)
-        .lineHeight(this._titleConfig.lineHeight)
+        .fontFamily(typeof fontFamily === "function" ? fontFamily() : fontFamily)
+        .fontSize(typeof fontSize === "function" ? fontSize() : fontSize)
+        .lineHeight(typeof lineHeight === "function" ? lineHeight() : lineHeight)
         .width(this._size)
         .height(this[`_${height}`] - this._tickSize - p);
       const lines = titleWrap(this._title).lines.length;
