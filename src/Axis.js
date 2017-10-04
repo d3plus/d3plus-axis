@@ -151,7 +151,7 @@ export default class Axis extends BaseClass {
       @private
   */
   _getTicks() {
-    const tickScale = scales.scaleSqrt().domain([10, 400]).range([10, this._gridSize === 0 ? 50 : 75]);
+    const tickScale = scales.scaleSqrt().domain([10, 400]).range([10, 50]);
 
     let ticks = [];
     if (this._d3ScaleNegative) {
@@ -178,7 +178,7 @@ export default class Axis extends BaseClass {
     const {height, x, y, opposite} = this._position,
           offset = this._margin[opposite],
           position = ["top", "left"].includes(this._orient) ? this._outerBounds[y] + this._outerBounds[height] - offset : this._outerBounds[y] + offset,
-          scale = last ? this._lastScale || this._d3Scale : this._d3Scale,
+          scale = last ? this._lastScale || this._getPosition.bind(this) : this._getPosition.bind(this),
           size = ["top", "left"].includes(this._orient) ? offset : -offset,
           xDiff = this._scale === "band" ? this._d3Scale.bandwidth() / 2 : 0,
           xPos = d => scale(d.id) + xDiff;
@@ -265,10 +265,6 @@ export default class Axis extends BaseClass {
         const percentScale = scales.scaleLog().domain([1, domain[1]]).range([0, 1]);
         const leftPercentage = percentScale(Math.abs(domain[0]));
         const zero = leftPercentage / (leftPercentage + 1) * (range[1] - range[0]);
-        console.log(domain);
-        console.log(range);
-        console.log(leftPercentage);
-        console.log(zero);
         this._d3Scale
           .domain([1, domain[1]])
           .range([range[0] + zero, range[1]]);
@@ -584,7 +580,7 @@ export default class Axis extends BaseClass {
       .config(this._titleConfig)
       .render();
 
-    this._lastScale = this._d3Scale;
+    this._lastScale = this._getPosition.bind(this);
 
     if (callback) setTimeout(callback, this._duration + 100);
 
