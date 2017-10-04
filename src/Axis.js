@@ -92,17 +92,80 @@ export default class Axis extends BaseClass {
   _barPosition(bar) {
 
     const {height, x, y, opposite} = this._position,
-          domain = this._d3Scale.domain(),
+          domain = this._getDomain(),
           offset = this._margin[opposite],
           position = ["top", "left"].includes(this._orient) ? this._outerBounds[y] + this._outerBounds[height] - offset : this._outerBounds[y] + offset;
 
     bar
       .call(attrize, this._barConfig)
-      .attr(`${x}1`, this._d3Scale(domain[0]) - (this._scale === "band" ? this._d3Scale.step() - this._d3Scale.bandwidth() : 0))
-      .attr(`${x}2`, this._d3Scale(domain[domain.length - 1]) + (this._scale === "band" ? this._d3Scale.step() : 0))
+      .attr(`${x}1`, this._getPosition(domain[0]) - (this._scale === "band" ? this._d3Scale.step() - this._d3Scale.bandwidth() : 0))
+      .attr(`${x}2`, this._getPosition(domain[domain.length - 1]) + (this._scale === "band" ? this._d3Scale.step() : 0))
       .attr(`${y}1`, position)
       .attr(`${y}2`, position);
 
+  }
+
+  /**
+      @memberof Axis
+      @desc Returns the scale's domain, taking into account negative and positive log scales.
+      @private
+  */
+  _getDomain() {
+
+    let ticks = [];
+    if (this._d3ScaleNegative) ticks = this._d3ScaleNegative.domain();
+    if (this._d3Scale) ticks = ticks.concat(this._d3Scale.domain());
+
+    return [ticks[0], ticks[ticks.length - 1]];
+
+  }
+
+  /**
+      @memberof Axis
+      @desc Returns a value's scale position, taking into account negative and positive log scales.
+      @param {Number|String} *d*
+      @private
+  */
+  _getPosition(d) {
+    return d < 0 && this._d3ScaleNegative ? this._d3ScaleNegative(d) : this._d3Scale(d);
+  }
+
+  /**
+      @memberof Axis
+      @desc Returns the scale's range, taking into account negative and positive log scales.
+      @private
+  */
+  _getRange() {
+
+    let ticks = [];
+    if (this._d3ScaleNegative) ticks = this._d3ScaleNegative.range();
+    if (this._d3Scale) ticks = ticks.concat(this._d3Scale.range());
+
+    return [ticks[0], ticks[ticks.length - 1]];
+
+  }
+
+  /**
+      @memberof Axis
+      @desc Returns the scale's ticks, taking into account negative and positive log scales.
+      @private
+  */
+  _getTicks() {
+    const tickScale = scales.scaleSqrt().domain([10, 400]).range([10, this._gridSize === 0 ? 50 : 75]);
+
+    let ticks = [];
+    if (this._d3ScaleNegative) {
+      const negativeRange = this._d3ScaleNegative.range();
+      const size = negativeRange[1] - negativeRange[0];
+      ticks = this._d3ScaleNegative.ticks(Math.floor(size / tickScale(size)));
+    }
+    if (this._d3Scale) {
+      const positiveRange = this._d3Scale.range();
+      const size = positiveRange[1] - positiveRange[0];
+      ticks = ticks.concat(this._d3Scale.ticks(Math.floor(size / tickScale(size))));
+    }
+
+    return ticks;
   }
 
   /**
@@ -181,26 +244,68 @@ export default class Axis extends BaseClass {
     if (this._d3Scale.paddingInner) this._d3Scale.paddingInner(this._paddingInner);
     if (this._d3Scale.paddingOuter) this._d3Scale.paddingOuter(this._paddingOuter);
 
-    const tickScale = scales.scaleSqrt().domain([10, 400]).range([10, this._gridSize === 0 ? 50 : 75]);
+    this._d3ScaleNegative = null;
+    if (this._scale === "log") {
+      const domain = this._d3Scale.domain();
+      if (domain[0] === 0) domain[0] = 1;
+      if (domain[domain.length - 1] === 0) domain[domain.length - 1] = -1;
+      const range = this._d3Scale.range();
+      if (domain[domain.length - 1] < 0) {
+        this._d3ScaleNegative = this._d3Scale.copy()
+          .domain(domain)
+          .range(range);
+        this._d3Scale = null;
+      }
+      else if (domain[0] > 0) {
+        this._d3Scale
+          .domain(domain)
+          .range(range);
+      }
+      else {
+        const percentScale = scales.scaleLog().domain([1, domain[1]]).range([0, 1]);
+        const leftPercentage = percentScale(Math.abs(domain[0]));
+        const zero = leftPercentage / (leftPercentage + 1) * (range[1] - range[0]);
+        console.log(domain);
+        console.log(range);
+        console.log(leftPercentage);
+        console.log(zero);
+        this._d3Scale
+          .domain([1, domain[1]])
+          .range([range[0] + zero, range[1]]);
+        this._d3ScaleNegative = this._d3Scale.copy()
+          .domain([domain[0], -1])
+          .range([range[0], range[0] + zero]);
+      }
+    }
 
     let ticks = this._ticks
       ? this._scale === "time" ? this._ticks.map(date) : this._ticks
-      : this._d3Scale.ticks
-        ? this._d3Scale.ticks(Math.floor(this._size / tickScale(this._size)))
+      : (this._d3Scale ? this._d3Scale.ticks : this._d3ScaleNegative.ticks)
+        ? this._getTicks()
         : this._domain;
 
     let labels = this._labels
       ? this._scale === "time" ? this._labels.map(date) : this._labels
-      : this._d3Scale.ticks
-        ? this._d3Scale.ticks(Math.floor(this._size / tickScale(this._size)))
+      : (this._d3Scale ? this._d3Scale.ticks : this._d3ScaleNegative.ticks)
+        ? this._getTicks()
         : ticks;
 
     ticks = ticks.slice();
     labels = labels.slice();
 
-    const tickFormat = this._tickFormat ? this._tickFormat : this._d3Scale.tickFormat
-      ? this._d3Scale.tickFormat(labels.length - 1)
-      : d => d;
+    if (this._scale === "log") labels = labels.filter(t => Math.abs(t).toString().charAt(0) === "1" && (this._d3Scale ? t !== -1 : t !== 1));
+
+    const superscript = "⁰¹²³⁴⁵⁶⁷⁸⁹";
+    const tickFormat = this._tickFormat ? this._tickFormat : d => {
+      if (this._scale === "log") {
+        const p = Math.round(Math.log(Math.abs(d)) / Math.LN10);
+        const t = Math.abs(d).toString().charAt(0);
+        let n = `10 ${`${p}`.split("").map(c => superscript[c]).join("")}`;
+        if (t !== "1") n = `${t} x ${n}`;
+        return d < 0 ? `-${n}` : n;
+      }
+      return this._d3Scale.tickFormat ? this._d3Scale.tickFormat(labels.length - 1)(d) : d;
+    };
 
     if (this._scale === "time") {
       ticks = ticks.map(Number);
@@ -210,8 +315,8 @@ export default class Axis extends BaseClass {
       labels = labels.filter(label => ticks.includes(label));
     }
 
-    ticks = ticks.sort((a, b) => this._d3Scale(a) - this._d3Scale(b));
-    labels = labels.sort((a, b) => this._d3Scale(a) - this._d3Scale(b));
+    ticks = ticks.sort((a, b) => this._getPosition(a) - this._getPosition(b));
+    labels = labels.sort((a, b) => this._getPosition(a) - this._getPosition(b));
 
     const tickSize = this._shape === "Circle" ? this._shapeConfig.r
       : this._shape === "Rect" ? this._shapeConfig[width]
@@ -224,7 +329,7 @@ export default class Axis extends BaseClass {
     ticks.forEach((d, i) => {
       let s = tickGet({id: d, tick: true}, i);
       if (this._shape === "Circle") s *= 2;
-      const t = this._d3Scale(d);
+      const t = this._getPosition(d);
       if (!pixels.length || Math.abs(closest(t, pixels) - t) > s * 2) pixels.push(t);
       else pixels.push(false);
     });
@@ -251,7 +356,7 @@ export default class Axis extends BaseClass {
     else if (labels.length > 1) {
       this._space = 0;
       for (let i = 0; i < labels.length - 1; i++) {
-        const s = this._d3Scale(labels[i + 1]) - this._d3Scale(labels[i]);
+        const s = this._getPosition(labels[i + 1]) - this._getPosition(labels[i]);
         if (s > this._space) this._space = s;
       }
     }
@@ -288,7 +393,7 @@ export default class Axis extends BaseClass {
     textData.forEach((d, i) => {
       if (i) {
         const prev = textData[i - 1];
-        if (!prev.offset && this._d3Scale(d.d) - d[width] / 2 < this._d3Scale(prev.d) + prev[width] / 2) {
+        if (!prev.offset && this._getPosition(d.d) - d[width] / 2 < this._getPosition(prev.d) + prev[width] / 2) {
           d.offset = prev[height] + this._padding;
         }
       }
@@ -312,7 +417,7 @@ export default class Axis extends BaseClass {
       const first = textData[0],
             last = textData[textData.length - 1];
 
-      const firstB = min([this._d3Scale(first.d) - first[width] / 2, range[0] - wBuff]);
+      const firstB = min([this._getPosition(first.d) - first[width] / 2, range[0] - wBuff]);
       if (firstB < range[0]) {
         const d = range[0] - firstB;
         if (this._range === void 0 || this._range[0] === void 0) {
@@ -324,7 +429,7 @@ export default class Axis extends BaseClass {
         }
       }
 
-      const lastB = max([this._d3Scale(last.d) + last[width] / 2, range[lastI] + wBuff]);
+      const lastB = max([this._getPosition(last.d) + last[width] / 2, range[lastI] + wBuff]);
       if (lastB > range[lastI]) {
         const d = lastB - range[lastI];
         if (this._range === void 0 || this._range[lastI] === void 0) {
@@ -338,8 +443,17 @@ export default class Axis extends BaseClass {
 
       if (range.length > 2) range = d3Range(this._domain.length).map(d => this._size * (d / (range.length - 1)) + range[0]);
       range = range.map(Math.round);
-      if (this._d3Scale.rangeRound) this._d3Scale.rangeRound(range);
-      else this._d3Scale.range(range);
+      if (this._d3ScaleNegative) {
+        const negativeRange = this._d3ScaleNegative.range();
+        this._d3ScaleNegative[this._d3ScaleNegative.rangeRound ? "rangeRound" : "range"]([range[0], this._d3Scale ? negativeRange[1] : range[1]]);
+        if (this._d3Scale) {
+          const positiveRange = this._d3Scale.range();
+          this._d3Scale[this._d3Scale.rangeRound ? "rangeRound" : "range"]([positiveRange[0], range[1]]);
+        }
+      }
+      else {
+        this._d3Scale[this._d3Scale.rangeRound ? "rangeRound" : "range"](range);
+      }
 
     }
 
@@ -349,7 +463,7 @@ export default class Axis extends BaseClass {
     else if (labels.length > 1) {
       this._space = 0;
       for (let i = 0; i < labels.length - 1; i++) {
-        const s = this._d3Scale(labels[i + 1]) - this._d3Scale(labels[i]);
+        const s = this._getPosition(labels[i + 1]) - this._getPosition(labels[i]);
         if (s > this._space) this._space = s;
       }
     }
@@ -423,7 +537,7 @@ export default class Axis extends BaseClass {
           size: ticks.includes(d) ? size : 0,
           text: labels.includes(d) ? tickFormat(d) : false,
           tick: ticks.includes(d),
-          [x]: this._d3Scale(d) + (this._scale === "band" ? this._d3Scale.bandwidth() / 2 : 0),
+          [x]: this._getPosition(d) + (this._scale === "band" ? this._d3Scale.bandwidth() / 2 : 0),
           [y]: position
         };
       });
