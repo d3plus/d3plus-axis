@@ -3,7 +3,7 @@
     @see https://github.com/d3plus/d3plus-common#BaseClass
 */
 
-import {max, min, range as d3Range} from "d3-array";
+import {extent, max, min, range as d3Range} from "d3-array";
 import * as scales from "d3-scale";
 import {select} from "d3-selection";
 import {transition} from "d3-transition";
@@ -115,8 +115,7 @@ export default class Axis extends BaseClass {
     let ticks = [];
     if (this._d3ScaleNegative) ticks = this._d3ScaleNegative.domain();
     if (this._d3Scale) ticks = ticks.concat(this._d3Scale.domain());
-
-    return [ticks[0], ticks[ticks.length - 1]];
+    return ticks[0] > ticks[1] ? extent(ticks).reverse() : extent(ticks);
 
   }
 
@@ -140,8 +139,7 @@ export default class Axis extends BaseClass {
     let ticks = [];
     if (this._d3ScaleNegative) ticks = this._d3ScaleNegative.range();
     if (this._d3Scale) ticks = ticks.concat(this._d3Scale.range());
-
-    return [ticks[0], ticks[ticks.length - 1]];
+    return ticks[0] > ticks[1] ? extent(ticks).reverse() : extent(ticks);
 
   }
 
@@ -250,26 +248,28 @@ export default class Axis extends BaseClass {
       if (domain[0] === 0) domain[0] = 1;
       if (domain[domain.length - 1] === 0) domain[domain.length - 1] = -1;
       const range = this._d3Scale.range();
-      if (domain[domain.length - 1] < 0) {
+      if (domain[0] < 0 && domain[domain.length - 1] < 0) {
         this._d3ScaleNegative = this._d3Scale.copy()
           .domain(domain)
           .range(range);
         this._d3Scale = null;
       }
-      else if (domain[0] > 0) {
+      else if (domain[0] > 0 && domain[domain.length - 1] > 0) {
         this._d3Scale
           .domain(domain)
           .range(range);
       }
       else {
-        const percentScale = scales.scaleLog().domain([1, domain[1]]).range([0, 1]);
-        const leftPercentage = percentScale(Math.abs(domain[0]));
-        const zero = leftPercentage / (leftPercentage + 1) * (range[1] - range[0]);
-        this._d3Scale
-          .domain([1, domain[1]])
+        const percentScale = scales.scaleLog().domain([1, domain[domain[1] > 0 ? 1 : 0]]).range([0, 1]);
+        const leftPercentage = percentScale(Math.abs(domain[domain[1] < 0 ? 1 : 0]));
+        let zero = leftPercentage / (leftPercentage + 1) * (range[1] - range[0]);
+        if (domain[0] > 0) zero = range[1] - range[0] - zero;
+        this._d3ScaleNegative = this._d3Scale.copy();
+        (domain[0] < 0 ? this._d3Scale : this._d3ScaleNegative)
+          .domain([Math.sign(domain[1]), domain[1]])
           .range([range[0] + zero, range[1]]);
-        this._d3ScaleNegative = this._d3Scale.copy()
-          .domain([domain[0], -1])
+        (domain[0] < 0 ? this._d3ScaleNegative : this._d3Scale)
+          .domain([domain[0], Math.sign(domain[0])])
           .range([range[0], range[0] + zero]);
       }
     }
@@ -441,10 +441,18 @@ export default class Axis extends BaseClass {
       range = range.map(Math.round);
       if (this._d3ScaleNegative) {
         const negativeRange = this._d3ScaleNegative.range();
-        this._d3ScaleNegative[this._d3ScaleNegative.rangeRound ? "rangeRound" : "range"]([range[0], this._d3Scale ? negativeRange[1] : range[1]]);
+        this._d3ScaleNegative[this._d3ScaleNegative.rangeRound ? "rangeRound" : "range"](
+          this._d3Scale && this._d3Scale.range()[0] < negativeRange[0]
+            ? [negativeRange[0], range[1]]
+            : [range[0], this._d3Scale ? negativeRange[1] : range[1]]
+        );
         if (this._d3Scale) {
           const positiveRange = this._d3Scale.range();
-          this._d3Scale[this._d3Scale.rangeRound ? "rangeRound" : "range"]([positiveRange[0], range[1]]);
+          this._d3Scale[this._d3Scale.rangeRound ? "rangeRound" : "range"](
+            range[0] < negativeRange[0]
+              ? [range[0], positiveRange[1]]
+              : [positiveRange[0], range[1]]
+          );
         }
       }
       else {
