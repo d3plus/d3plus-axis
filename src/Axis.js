@@ -506,29 +506,29 @@ export default class Axis extends BaseClass {
         .attr("opacity", 1)
         .call(this._gridPosition.bind(this));
 
-    const labelHeight = max(textData, t => t.height) || 0,
-          labelWidth = horizontal ? this._space : bounds.width - margin[this._position.opposite] - hBuff - margin[this._orient] + p;
+    const labelHeight = max(textData, t => t.height) || 0;
 
     const labelOnly = labels.filter((d, i) => textData[i].lines.length && !ticks.includes(d));
 
     let tickData = ticks.concat(labelOnly)
-      .map((d, i, arr) => {
+      .map(d => {
         const data = textData.filter(td => td.d === d);
+        const dataIndex = data.length ? textData.indexOf(data[0]) : undefined;
         const labelOffset = data.length ? data[0].offset : 0;
-        let inline = false;
-        if (i) {
-          const prev = textData.filter(td => td.d === arr[i - 1]);
-          if (prev.length && prev[0].offset === labelOffset) inline = true;
-        }
-        if (i < arr.length - 1) {
-          const next = textData.filter(td => td.d === arr[i + 1]);
-          if (next.length && next[0].offset === labelOffset) inline = true;
-        }
-        const offset = margin[opposite],
-              position = flip ? bounds[y] + bounds[height] - offset : bounds[y] + offset,
-              size = (hBuff + labelOffset) * (flip ? -1 : 1);
+        const xPos = this._getPosition(d);
 
-        const space = inline ? labelWidth : labelWidth * 1.9;
+        let labelWidth = labelWidth = horizontal ? this._space : bounds.width - margin[this._position.opposite] - hBuff - margin[this._orient] + p;
+
+        let prev = data.length && dataIndex > 0 ? textData.filter((td, ti) => td.offset >= labelOffset && ti < dataIndex) : false;
+        prev = prev.length ? prev[prev.length - 1] : false;
+        let next = data.length && dataIndex < textData.length - 1 ? textData.filter((td, ti) => td.offset >= labelOffset && ti > dataIndex) : false;
+        next = next.length ? next[0] : false;
+
+        const offset = margin[opposite],
+              size = (hBuff + labelOffset) * (flip ? -1 : 1),
+              yPos = flip ? bounds[y] + bounds[height] - offset : bounds[y] + offset;
+
+        const space = Math.min(prev ? (xPos - this._getPosition(prev.d)) * 2 : labelWidth, next ? (this._getPosition(next.d) - xPos) * 2 : labelWidth);
 
         return {
           id: d,
@@ -541,8 +541,8 @@ export default class Axis extends BaseClass {
           size: ticks.includes(d) ? size : 0,
           text: labels.includes(d) ? tickFormat(d) : false,
           tick: ticks.includes(d),
-          [x]: this._getPosition(d) + (this._scale === "band" ? this._d3Scale.bandwidth() / 2 : 0),
-          [y]: position
+          [x]: xPos + (this._scale === "band" ? this._d3Scale.bandwidth() / 2 : 0),
+          [y]: yPos
         };
       });
 
