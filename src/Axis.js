@@ -62,8 +62,8 @@ export default class Axis extends BaseClass {
         textAnchor: () => {
           const rtl = detectRTL();
           return this._orient === "left" ? rtl ? "start" : "end"
-          : this._orient === "right" ? rtl ? "end" : "start"
-          : "middle";
+            : this._orient === "right" ? rtl ? "end" : "start"
+            : "middle";
         },
         verticalAlign: () => this._orient === "bottom" ? "top" : this._orient === "top" ? "bottom" : "middle"
       },
