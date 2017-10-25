@@ -380,6 +380,7 @@ export default class Axis extends BaseClass {
         : 0;
       res.height = res.lines.length ? Math.ceil(res.lines.length * (wrap.lineHeight() + 1)) : 0;
       res.offset = 0;
+      res.hidden = false;
       if (res.width % 2) res.width++;
 
       return res;
@@ -514,21 +515,26 @@ export default class Axis extends BaseClass {
       .map(d => {
         const data = textData.filter(td => td.d === d);
         const dataIndex = data.length ? textData.indexOf(data[0]) : undefined;
-        const labelOffset = data.length ? data[0].offset : 0;
         const xPos = this._getPosition(d);
+
+        let labelOffset = data.length ? data[0].offset : 0;
 
         let labelWidth = labelWidth = horizontal ? this._space : bounds.width - margin[this._position.opposite] - hBuff - margin[this._orient] + p;
 
-        let prev = data.length && dataIndex > 0 ? textData.filter((td, ti) => td.offset >= labelOffset && ti < dataIndex) : false;
+        let prev = data.length && dataIndex > 0 ? textData.filter((td, ti) => !td.hidden && td.offset >= labelOffset && ti < dataIndex) : false;
         prev = prev.length ? prev[prev.length - 1] : false;
-        let next = data.length && dataIndex < textData.length - 1 ? textData.filter((td, ti) => td.offset >= labelOffset && ti > dataIndex) : false;
+        let next = data.length && dataIndex < textData.length - 1 ? textData.filter((td, ti) => !td.hidden && td.offset >= labelOffset && ti > dataIndex) : false;
         next = next.length ? next[0] : false;
+
+        const space = Math.min(prev ? xPos - this._getPosition(prev.d) : labelWidth, next ? this._getPosition(next.d) - xPos : labelWidth / 2);
+        if (data.length && data[0].width > space) {
+          data[0].hidden = true;
+          data[0].offset = labelOffset = 0;
+        }
 
         const offset = margin[opposite],
               size = (hBuff + labelOffset) * (flip ? -1 : 1),
               yPos = flip ? bounds[y] + bounds[height] - offset : bounds[y] + offset;
-
-        const space = Math.min(prev ? (xPos - this._getPosition(prev.d)) * 2 : labelWidth, next ? (this._getPosition(next.d) - xPos) * 2 : labelWidth);
 
         return {
           id: d,
