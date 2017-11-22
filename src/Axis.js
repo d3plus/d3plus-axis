@@ -115,7 +115,9 @@ export default class Axis extends BaseClass {
     let ticks = [];
     if (this._d3ScaleNegative) ticks = this._d3ScaleNegative.domain();
     if (this._d3Scale) ticks = ticks.concat(this._d3Scale.domain());
-    return ticks[0] > ticks[1] ? extent(ticks).reverse() : extent(ticks);
+
+    const domain = this._scale === "ordinal" ? ticks : extent(ticks);
+    return ticks[0] > ticks[1] ? domain.reverse() : domain;
 
   }
 
@@ -476,13 +478,13 @@ export default class Axis extends BaseClass {
 
     const tBuff = this._shape === "Line" ? 0 : hBuff;
     const bounds = this._outerBounds = {
-      [height]: (max(textData, t => t[height]) || 0) + (textData.length ? p : 0),
+      [height]: (max(textData, t => Math.ceil(t[height])) || 0) + (textData.length ? p : 0),
       [width]: rangeOuter[lastI] - rangeOuter[0],
       [x]: rangeOuter[0]
     };
 
-    margin[opposite] = this._gridSize !== void 0 ? max([this._gridSize, tBuff]) : this[`_${height}`] - margin[this._orient] - bounds[height] - p * 2 - hBuff;
     margin[this._orient] += hBuff;
+    margin[opposite] = this._gridSize !== void 0 ? max([this._gridSize, tBuff]) : this[`_${height}`] - margin[this._orient] - bounds[height] - p;
     bounds[height] += margin[opposite] + margin[this._orient];
     bounds[y] = this._align === "start" ? this._padding
       : this._align === "end" ? this[`_${height}`] - bounds[height] - this._padding
@@ -519,14 +521,14 @@ export default class Axis extends BaseClass {
 
         let labelOffset = data.length ? data[0].offset : 0;
 
-        let labelWidth = labelWidth = horizontal ? this._space : bounds.width - margin[this._position.opposite] - hBuff - margin[this._orient] + p;
+        const labelWidth = horizontal ? this._space : bounds.width - margin[this._position.opposite] - hBuff - margin[this._orient] + p;
 
         let prev = data.length && dataIndex > 0 ? textData.filter((td, ti) => !td.hidden && td.offset >= labelOffset && ti < dataIndex) : false;
         prev = prev.length ? prev[prev.length - 1] : false;
         let next = data.length && dataIndex < textData.length - 1 ? textData.filter((td, ti) => !td.hidden && td.offset >= labelOffset && ti > dataIndex) : false;
         next = next.length ? next[0] : false;
 
-        const space = Math.min(prev ? xPos - this._getPosition(prev.d) : labelWidth, next ? this._getPosition(next.d) - xPos : labelWidth / 2);
+        const space = Math.min(prev ? xPos - this._getPosition(prev.d) : labelWidth, next ? this._getPosition(next.d) - xPos : labelWidth);
         if (data.length && data[0].width > space) {
           data[0].hidden = true;
           data[0].offset = labelOffset = 0;
@@ -539,10 +541,10 @@ export default class Axis extends BaseClass {
         return {
           id: d,
           labelBounds: {
-            x: horizontal ? -space / 2 : this._orient === "left" ? -space - p + size : size + p,
-            y: horizontal ? this._orient === "bottom" ? size + p : size - p - labelHeight : -labelHeight / 2,
-            width: space,
-            height: labelHeight
+            x: horizontal ? -space / 2 : this._orient === "left" ? -labelWidth - p + size : size + p,
+            y: horizontal ? this._orient === "bottom" ? size + p : size - p - labelHeight : -space / 2,
+            width: horizontal ? space : labelWidth,
+            height: horizontal ? labelHeight : space
           },
           size: ticks.includes(d) ? size : 0,
           text: labels.includes(d) ? tickFormat(d) : false,
