@@ -46,11 +46,11 @@ All four orientations available as shorthand methods for the generalized [Axis](
 
 ### More Examples
 
- * [Changing Axis Orientation](http://d3plus.org/examples/d3plus-axis/axis-orient/)
- * [Hiding Specific Axis Labels](http://d3plus.org/examples/d3plus-axis/labels/)
  * [Axis w/ Time Scale](http://d3plus.org/examples/d3plus-axis/scale-time/)
  * [Custom Axis Tick Formatting](http://d3plus.org/examples/d3plus-axis/tickFormat/)
  * [Hiding Specific Axis Ticks](http://d3plus.org/examples/d3plus-axis/ticks/)
+ * [Changing Axis Orientation](http://d3plus.org/examples/d3plus-axis/axis-orient/)
+ * [Hiding Specific Axis Labels](http://d3plus.org/examples/d3plus-axis/labels/)
 
 ## API Reference
 
@@ -401,4 +401,4 @@ This is a global function.
 
 
 
-###### <sub>Documentation generated on Wed, 22 Nov 2017 20:45:14 GMT</sub>
+###### <sub>Documentation generated on Wed, 20 Dec 2017 16:54:25 GMT</sub>
