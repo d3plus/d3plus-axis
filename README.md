@@ -54,14 +54,14 @@ All four orientations available as shorthand methods for the generalized [Axis](
 
 ## API Reference
 
-##### Classes
+##### 
 * [Axis](#Axis)
 * [AxisBottom](#AxisBottom)
 * [AxisLeft](#AxisLeft)
 * [AxisRight](#AxisRight)
 * [AxisTop](#AxisTop)
 
-##### Functions
+##### 
 * [date](#date) - Parses numbers and strings to valid Javascript Date objects.
 
 ---
@@ -401,4 +401,4 @@ This is a global function.
 
 
 
-###### <sub>Documentation generated on Wed, 20 Dec 2017 16:54:25 GMT</sub>
+###### <sub>Documentation generated on Thu, 21 Dec 2017 20:58:19 GMT</sub>
