@@ -362,7 +362,7 @@ export default class Axis extends BaseClass {
     else this._space = this._size;
 
     // Measures size of ticks
-    const textData = labels.map((d, i) => {
+    let textData = labels.map((d, i) => {
 
       const f = this._shapeConfig.labelConfig.fontFamily(d, i),
             s = this._shapeConfig.labelConfig.fontSize(d, i);
@@ -390,6 +390,49 @@ export default class Axis extends BaseClass {
 
     });
 
+    const labelHeight = max(textData, t => t.height) || 0;
+
+    if (horizontal) {
+      textData = labels.map((d, i) => {
+
+        const f = this._shapeConfig.labelConfig.fontFamily(d, i),
+          s = this._shapeConfig.labelConfig.fontSize(d, i);
+
+        const wrap = textWrap()
+          .fontFamily(f)
+          .fontSize(s)
+          .lineHeight(this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : undefined)
+          .width(this._space)
+          .height(labelHeight);
+
+        const res = wrap(tickFormat(d));
+        const {truncated} = res;
+
+
+        res.lines = res.lines.filter(d => d !== "");
+        res.d = d;
+        res.fS = s;
+        res[truncated ? "height" : "width"] = res.lines.length
+          ? Math.ceil(max(res.lines.map(line => textWidth(line, {"font-family": f, "font-size": s})))) + s / 4
+          : 0;
+        res[truncated ? "width" : "height"] = res.lines.length ? Math.ceil(res.lines.length * (wrap.lineHeight() + 1)) : 0;
+        res.offset = 0;
+        res.hidden = false;
+        if (res.width % 2) res.width++;
+
+        return res;
+
+      });
+    }
+
+    textData.forEach((d, i) => {
+      if (i) {
+        const prev = textData[i - 1];
+        if (!prev.offset && this._getPosition(d.d) - d[width] / 2 < this._getPosition(prev.d) + prev[width] / 2) {
+          d.offset = prev[height] + this._padding;
+        }
+      }
+    });
     if (this._labelOffset) {
       textData.forEach((d, i) => {
         if (i) {
@@ -512,8 +555,6 @@ export default class Axis extends BaseClass {
         .attr("opacity", 1)
         .call(this._gridPosition.bind(this));
 
-    const labelHeight = max(textData, t => t.height) || 0;
-
     const labelOnly = labels.filter((d, i) => textData[i].lines.length && !ticks.includes(d));
 
     let tickData = ticks.concat(labelOnly)
@@ -541,20 +582,70 @@ export default class Axis extends BaseClass {
               size = (hBuff + labelOffset) * (flip ? -1 : 1),
               yPos = flip ? bounds[y] + bounds[height] - offset : bounds[y] + offset;
 
-        return {
-          id: d,
-          labelBounds: {
-            x: horizontal ? -space / 2 : this._orient === "left" ? -labelWidth - p + size : size + p,
-            y: horizontal ? this._orient === "bottom" ? size + p : size - p - labelHeight : -space / 2,
-            width: horizontal ? space : labelWidth,
-            height: horizontal ? labelHeight : space
-          },
-          size: ticks.includes(d) ? size : 0,
-          text: labels.includes(d) ? tickFormat(d) : false,
-          tick: ticks.includes(d),
-          [x]: xPos + (this._scale === "band" ? this._d3Scale.bandwidth() / 2 : 0),
-          [y]: yPos
-        };
+        const f = this._shapeConfig.labelConfig.fontFamily(d, i),
+          s = this._shapeConfig.labelConfig.fontSize(d, i);
+
+        const wrap = textWrap()
+          .fontFamily(f)
+          .fontSize(s)
+          .lineHeight(this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : undefined)
+          .width(labelWidth)
+          .height(labelHeight);
+
+        const res = wrap(tickFormat(d));
+
+        const {truncated} = res;
+
+        if (truncated && horizontal) {
+          const lineHeight = this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : wrap.lineHeight();
+          const fitsTwoLines = prev ? xPos - lineHeight > this._getPosition(prev.d) + lineHeight : next ? xPos + lineHeight < this._getPosition(next.d) - lineHeight : true;
+          const height = fitsTwoLines ? lineHeight * 2 : lineHeight;
+
+          const lineTest = textWrap()
+            .fontFamily(f)
+            .fontSize(s)
+            .lineHeight(this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : undefined);
+
+          const lineTestResult = lineTest(tickFormat(d));
+
+          const isTwoLine = lineTestResult.words.length > 1 && lineTestResult.widths[0] > 80;
+          const width = isTwoLine ? lineTestResult.widths[0] / 1.5 : lineTestResult.widths[0];
+
+          return {
+            id: d,
+            labelBounds: {
+              x: -width / 2,
+              y: size + p + width / 3,
+              width,
+              height
+            },
+            labelConfig: {
+              rotate: -90,
+            },
+            size: ticks.includes(d) ? size : 0,
+            text: labels.includes(d) ? tickFormat(d) : false,
+            tick: ticks.includes(d),
+            [x]: xPos + (this._scale === "band" ? this._d3Scale.bandwidth() / 2 : 0),
+            [y]: yPos
+          };
+        }
+        else {
+          return {
+            id: d,
+            labelBounds: {
+              x: horizontal ? -space / 2 : this._orient === "left" ? -labelWidth - p + size : size + p,
+              y: horizontal ? this._orient === "bottom" ? size + p : size - p - labelHeight : -space / 2,
+              width: horizontal ? space : labelWidth,
+              height: horizontal ? labelHeight : space
+            },
+            size: ticks.includes(d) ? size : 0,
+            text: labels.includes(d) ? tickFormat(d) : false,
+            tick: ticks.includes(d),
+            [x]: xPos + (this._scale === "band" ? this._d3Scale.bandwidth() / 2 : 0),
+            [y]: yPos
+          };
+        }
+
       });
 
     if (this._shape === "Line") {
