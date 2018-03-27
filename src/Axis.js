@@ -391,6 +391,7 @@ export default class Axis extends BaseClass {
     });
 
     const labelHeight = max(textData, t => t.height) || 0;
+    const truncatedConfig = {};
 
     if (horizontal) {
       textData = labels.map((d, i) => {
@@ -408,14 +409,41 @@ export default class Axis extends BaseClass {
         const res = wrap(tickFormat(d));
         const {truncated} = res;
 
+        let lineTestResult;
+        let width;
+        let height;
+
+        if (truncated) {
+          const xPos = this._getPosition(d);
+          const lineHeight = this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : wrap.lineHeight();
+
+          const prev = labels[i - 1] || false;
+          const next = labels[i + 1] || false;
+
+          const fitsTwoLines = prev ? xPos - (lineHeight * 2) > this._getPosition(prev) + (lineHeight * 2) : next ? xPos + (lineHeight * 2) < this._getPosition(next) - (lineHeight * 2) : true;
+
+          const lineTest = textWrap()
+            .fontFamily(f)
+            .fontSize(s)
+            .lineHeight(this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : undefined)
+            .height(labelHeight);
+
+          lineTestResult = lineTest(tickFormat(d));
+
+          const isTwoLine = lineTestResult.words.length > 1 && lineTestResult.widths[0] > 80;
+          width = fitsTwoLines && isTwoLine ? lineTestResult.widths[0] / 1.2 : lineTestResult.widths[0] * 1.6;
+          height = fitsTwoLines && isTwoLine ? lineHeight * 2 : lineHeight;
+
+          truncatedConfig[d] = {width, height};
+        }
 
         res.lines = res.lines.filter(d => d !== "");
         res.d = d;
         res.fS = s;
-        res[truncated ? "height" : "width"] = res.lines.length
-          ? Math.ceil(max(res.lines.map(line => textWidth(line, {"font-family": f, "font-size": s})))) + s / 4
+        res.width = res.lines.length
+          ? truncated ? height : Math.ceil(max(res.lines.map(line => textWidth(line, {"font-family": f, "font-size": s})))) + s / 4
           : 0;
-        res[truncated ? "width" : "height"] = res.lines.length ? Math.ceil(res.lines.length * (wrap.lineHeight() + 1)) : 0;
+        res.height = res.lines.length ? truncated ? width : Math.ceil(res.lines.length * (wrap.lineHeight() + 1)) : 0;
         res.offset = 0;
         res.hidden = false;
         if (res.width % 2) res.width++;
@@ -585,39 +613,16 @@ export default class Axis extends BaseClass {
         const f = this._shapeConfig.labelConfig.fontFamily(d, i),
           s = this._shapeConfig.labelConfig.fontSize(d, i);
 
-        const wrap = textWrap()
-          .fontFamily(f)
-          .fontSize(s)
-          .lineHeight(this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : undefined)
-          .width(labelWidth)
-          .height(labelHeight);
+        const config = truncatedConfig[d];
 
-        const res = wrap(tickFormat(d));
-
-        const {truncated} = res;
-
-        if (truncated && horizontal) {
-          const lineHeight = this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : wrap.lineHeight();
-          const fitsTwoLines = prev ? xPos - lineHeight > this._getPosition(prev.d) + lineHeight : next ? xPos + lineHeight < this._getPosition(next.d) - lineHeight : true;
-          const height = fitsTwoLines ? lineHeight * 2 : lineHeight;
-
-          const lineTest = textWrap()
-            .fontFamily(f)
-            .fontSize(s)
-            .lineHeight(this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : undefined);
-
-          const lineTestResult = lineTest(tickFormat(d));
-
-          const isTwoLine = lineTestResult.words.length > 1 && lineTestResult.widths[0] > 80;
-          const width = isTwoLine ? lineTestResult.widths[0] / 1.5 : lineTestResult.widths[0];
-
+        if (config) {
           return {
             id: d,
             labelBounds: {
-              x: -width / 2,
-              y: size + p + width / 3,
-              width,
-              height
+              x: -config.width / 2,
+              y: size + p + config.width / 2.5,
+              width: config.width,
+              height: config.height
             },
             labelConfig: {
               rotate: -90,
