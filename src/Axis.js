@@ -407,18 +407,23 @@ export default class Axis extends BaseClass {
           .height(labelHeight);
 
         const res = wrap(tickFormat(d));
-        const {truncated} = res;
+        const isTruncated = res.truncated;
+
+        const xPos = this._getPosition(d);
+        const prev = labels[i - 1] || false;
+        const next = labels[i + 1] || false;
+
+        const maxWidth = Math.max(res.widths);
+
+        const isOverlapping = prev ? xPos - maxWidth < this._getPosition(prev) + maxWidth : next ? xPos + maxWidth > this._getPosition(next) - maxWidth : false;
 
         let lineTestResult;
         let width;
         let height;
+        const isRotated = isTruncated || isOverlapping;
 
-        if (truncated) {
-          const xPos = this._getPosition(d);
+        if (isRotated) {
           const lineHeight = this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : wrap.lineHeight();
-
-          const prev = labels[i - 1] || false;
-          const next = labels[i + 1] || false;
 
           const fitsTwoLines = prev ? xPos - (lineHeight * 2) > this._getPosition(prev) + (lineHeight * 2) : next ? xPos + (lineHeight * 2) < this._getPosition(next) - (lineHeight * 2) : true;
 
@@ -441,9 +446,9 @@ export default class Axis extends BaseClass {
         res.d = d;
         res.fS = s;
         res.width = res.lines.length
-          ? truncated ? height : Math.ceil(max(res.lines.map(line => textWidth(line, {"font-family": f, "font-size": s})))) + s / 4
+          ? isRotated ? height : Math.ceil(max(res.lines.map(line => textWidth(line, {"font-family": f, "font-size": s})))) + s / 4
           : 0;
-        res.height = res.lines.length ? truncated ? width : Math.ceil(res.lines.length * (wrap.lineHeight() + 1)) : 0;
+        res.height = res.lines.length ? isRotated ? width : Math.ceil(res.lines.length * (wrap.lineHeight() + 1)) : 0;
         res.offset = 0;
         res.hidden = false;
         if (res.width % 2) res.width++;
@@ -586,7 +591,7 @@ export default class Axis extends BaseClass {
     const labelOnly = labels.filter((d, i) => textData[i].lines.length && !ticks.includes(d));
 
     let tickData = ticks.concat(labelOnly)
-      .map(d => {
+      .map((d, i) => {
         const data = textData.filter(td => td.d === d);
         const dataIndex = data.length ? textData.indexOf(data[0]) : undefined;
         const xPos = this._getPosition(d);
