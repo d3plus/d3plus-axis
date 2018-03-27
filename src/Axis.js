@@ -42,6 +42,7 @@ export default class Axis extends BaseClass {
       "stroke-width": 1
     };
     this._height = 400;
+    this._labelOffset = true;
     this.orient("bottom");
     this._outerBounds = {width: 0, height: 0, x: 0, y: 0};
     this._padding = 5;
@@ -519,7 +520,7 @@ export default class Axis extends BaseClass {
         const dataIndex = data.length ? textData.indexOf(data[0]) : undefined;
         const xPos = this._getPosition(d);
 
-        let labelOffset = data.length ? data[0].offset : 0;
+        let labelOffset = data.length && this._labelOffset ? data[0].offset : 0;
 
         const labelWidth = horizontal ? this._space : bounds.width - margin[this._position.opposite] - hBuff - margin[this._orient] + p;
 
@@ -692,6 +693,16 @@ export default class Axis extends BaseClass {
   */
   labels(_) {
     return arguments.length ? (this._labels = _, this) : this._labels;
+  }
+
+  /**
+      @memberof Axis
+      @desc If *value* is specified, sets whether offsets will be used to position some labels further away from the axis in order to allow space for the text.
+      @param {Boolean} [*value* = true]
+      @chainable
+  */
+  labelOffset(_) {
+    return arguments.length ? (this._labelOffset = _, this) : this._labels;
   }
 
   /**
