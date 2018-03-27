@@ -391,7 +391,7 @@ export default class Axis extends BaseClass {
     });
 
     const labelHeight = max(textData, t => t.height) || 0;
-    const truncatedConfig = {};
+    const rotatedConfig = {};
 
     if (horizontal) {
       textData = labels.map((d, i) => {
@@ -439,7 +439,7 @@ export default class Axis extends BaseClass {
           width = fitsTwoLines && isTwoLine ? lineTestResult.widths[0] / 1.2 : lineTestResult.widths[0] * 1.6;
           height = fitsTwoLines && isTwoLine ? lineHeight * 2 : lineHeight;
 
-          truncatedConfig[d] = {width, height};
+          rotatedConfig[d] = {width, height, lineHeight};
         }
 
         res.lines = res.lines.filter(d => d !== "");
@@ -615,47 +615,38 @@ export default class Axis extends BaseClass {
               size = (hBuff + labelOffset) * (flip ? -1 : 1),
               yPos = flip ? bounds[y] + bounds[height] - offset : bounds[y] + offset;
 
-        const f = this._shapeConfig.labelConfig.fontFamily(d, i),
-          s = this._shapeConfig.labelConfig.fontSize(d, i);
+        let tickConfig = {
+          id: d,
+          labelBounds: {
+            x: horizontal ? -space / 2 : this._orient === "left" ? -labelWidth - p + size : size + p,
+            y: horizontal ? this._orient === "bottom" ? size + p : size - p - labelHeight : -space / 2,
+            width: horizontal ? space : labelWidth,
+            height: horizontal ? labelHeight : space
+          },
+          size: ticks.includes(d) ? size : 0,
+          text: labels.includes(d) ? tickFormat(d) : false,
+          tick: ticks.includes(d),
+          [x]: xPos + (this._scale === "band" ? this._d3Scale.bandwidth() / 2 : 0),
+          [y]: yPos
+        };
 
-        const config = truncatedConfig[d];
+        const config = rotatedConfig[d];
 
         if (config) {
-          return {
-            id: d,
+          tickConfig = Object.assign(tickConfig, {
             labelBounds: {
               x: -config.width / 2,
-              y: size + p + config.width / 2.5,
+              y: this._orient === "bottom" ? size + p + (config.width - (config.lineHeight * 2)) / 2 : -size - p - ((config.width + config.height) / 2),
               width: config.width,
-              height: config.height
+              height: config.height + 1
             },
             labelConfig: {
               rotate: -90,
-            },
-            size: ticks.includes(d) ? size : 0,
-            text: labels.includes(d) ? tickFormat(d) : false,
-            tick: ticks.includes(d),
-            [x]: xPos + (this._scale === "band" ? this._d3Scale.bandwidth() / 2 : 0),
-            [y]: yPos
-          };
-        }
-        else {
-          return {
-            id: d,
-            labelBounds: {
-              x: horizontal ? -space / 2 : this._orient === "left" ? -labelWidth - p + size : size + p,
-              y: horizontal ? this._orient === "bottom" ? size + p : size - p - labelHeight : -space / 2,
-              width: horizontal ? space : labelWidth,
-              height: horizontal ? labelHeight : space
-            },
-            size: ticks.includes(d) ? size : 0,
-            text: labels.includes(d) ? tickFormat(d) : false,
-            tick: ticks.includes(d),
-            [x]: xPos + (this._scale === "band" ? this._d3Scale.bandwidth() / 2 : 0),
-            [y]: yPos
-          };
+            }
+          });
         }
 
+        return tickConfig;
       });
 
     if (this._shape === "Line") {
