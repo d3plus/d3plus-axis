@@ -397,7 +397,7 @@ export default class Axis extends BaseClass {
       textData = labels.map((d, i) => {
 
         const f = this._shapeConfig.labelConfig.fontFamily(d, i),
-          s = this._shapeConfig.labelConfig.fontSize(d, i);
+              s = this._shapeConfig.labelConfig.fontSize(d, i);
 
         const wrap = textWrap()
           .fontFamily(f)
@@ -425,7 +425,7 @@ export default class Axis extends BaseClass {
         if (isRotated) {
           const lineHeight = this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : wrap.lineHeight();
 
-          const fitsTwoLines = prev ? xPos - (lineHeight * 2) > this._getPosition(prev) + (lineHeight * 2) : next ? xPos + (lineHeight * 2) < this._getPosition(next) - (lineHeight * 2) : true;
+          const fitsTwoLines = prev ? xPos - lineHeight * 2 > this._getPosition(prev) + lineHeight * 2 : next ? xPos + lineHeight * 2 < this._getPosition(next) - lineHeight * 2 : true;
 
           const lineTest = textWrap()
             .fontFamily(f)
@@ -591,7 +591,7 @@ export default class Axis extends BaseClass {
     const labelOnly = labels.filter((d, i) => textData[i].lines.length && !ticks.includes(d));
 
     let tickData = ticks.concat(labelOnly)
-      .map((d, i) => {
+      .map(d => {
         const data = textData.filter(td => td.d === d);
         const dataIndex = data.length ? textData.indexOf(data[0]) : undefined;
         const xPos = this._getPosition(d);
@@ -636,12 +636,12 @@ export default class Axis extends BaseClass {
           tickConfig = Object.assign(tickConfig, {
             labelBounds: {
               x: -config.width / 2,
-              y: this._orient === "bottom" ? size + p + (config.width - (config.lineHeight * 2)) / 2 : -size - p - ((config.width + config.height) / 2),
+              y: this._orient === "bottom" ? size + p + (config.width - config.lineHeight * 2) / 2 : -size - p - (config.width + config.height) / 2,
               width: config.width,
               height: config.height + 1
             },
             labelConfig: {
-              rotate: -90,
+              rotate: -90
             }
           });
         }
