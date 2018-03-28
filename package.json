@@ -1,6 +1,6 @@
 {
   "name": "d3plus-axis",
-  "version": "0.3.41",
+  "version": "0.3.42",
   "description": "Beautiful javascript scales and axes.",
   "main": "build/d3plus-axis.js",
   "jsnext:main": "es/index",
