@@ -59,6 +59,7 @@ export default class Axis extends BaseClass {
         fontFamily: new TextBox().fontFamily(),
         fontResize: false,
         fontSize: constant(10),
+        padding: 0,
         textAnchor: () => {
           const rtl = detectRTL();
           return this._orient === "left" ? rtl ? "start" : "end"
@@ -67,7 +68,6 @@ export default class Axis extends BaseClass {
         },
         verticalAlign: () => this._orient === "bottom" ? "top" : this._orient === "top" ? "bottom" : "middle"
       },
-      labelPadding: 0,
       r: d => d.tick ? 4 : 0,
       stroke: "#000",
       strokeWidth: 1,
