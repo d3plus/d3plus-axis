@@ -66,7 +66,7 @@ export default class Axis extends BaseClass {
           const rtl = detectRTL();
           return this._orient === "left" ? rtl ? "start" : "end"
             : this._orient === "right" ? rtl ? "end" : "start"
-            : "middle";
+            : this._rotateLabels ? "end" : "middle";
         },
         verticalAlign: () => this._orient === "bottom" ? "top" : this._orient === "top" ? "bottom" : "middle"
       },
@@ -646,9 +646,6 @@ export default class Axis extends BaseClass {
               y: this._orient === "bottom" ? size + p + (width - lineHeight * numLines) / 2 : -size - p - (width + height) / 2,
               width,
               height: height + 1
-            },
-            labelConfig: {
-              rotate: -90
             }
           });
         }
@@ -668,7 +665,8 @@ export default class Axis extends BaseClass {
       .data(tickData)
       .duration(this._duration)
       .labelConfig({
-        ellipsis: d => d && d.length ? `${d}...` : ""
+        ellipsis: d => d && d.length ? `${d}...` : "",
+        rotate: this._rotateLabels ? -90 : 0
       })
       .select(elem("g.ticks", {parent: group}).node())
       .config(this._shapeConfig)
