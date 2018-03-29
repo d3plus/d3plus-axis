@@ -48,6 +48,7 @@ export default class Axis extends BaseClass {
     this._padding = 5;
     this._paddingInner = 0.1;
     this._paddingOuter = 0.1;
+    this._rotateLabels = false;
     this._scale = "linear";
     this._shape = "Line";
     this._shapeConfig = {
@@ -391,7 +392,6 @@ export default class Axis extends BaseClass {
     });
 
     const labelHeight = max(textData, t => t.height) || 0;
-    const rotatedConfig = {};
 
     if (horizontal) {
       textData = labels.map((d, i) => {
@@ -407,6 +407,7 @@ export default class Axis extends BaseClass {
           .height(labelHeight);
 
         const res = wrap(tickFormat(d));
+
         const isTruncated = res.truncated;
 
         const xPos = this._getPosition(d);
@@ -417,13 +418,14 @@ export default class Axis extends BaseClass {
 
         const isOverlapping = prev ? xPos - maxWidth < this._getPosition(prev) + maxWidth : next ? xPos + maxWidth > this._getPosition(next) - maxWidth : false;
 
-        let lineTestResult;
         let width;
         let height;
+        let isTwoLine;
+        const lineHeight = this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : wrap.lineHeight();
         const isRotated = isTruncated || isOverlapping;
 
         if (isRotated) {
-          const lineHeight = this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : wrap.lineHeight();
+          this._rotateLabels = true;
 
           const fitsTwoLines = prev ? xPos - lineHeight * 2 > this._getPosition(prev) + lineHeight * 2 : next ? xPos + lineHeight * 2 < this._getPosition(next) - lineHeight * 2 : true;
 
@@ -431,24 +433,26 @@ export default class Axis extends BaseClass {
             .fontFamily(f)
             .fontSize(s)
             .lineHeight(this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : undefined)
-            .height(labelHeight);
+            .height(lineHeight * 2 + 1)
+            .width(this._width);
 
-          lineTestResult = lineTest(tickFormat(d));
+          const lineTestResult = lineTest(tickFormat(d));
 
-          const isTwoLine = lineTestResult.words.length > 1 && lineTestResult.widths[0] > 80;
+          isTwoLine = lineTestResult.words.length > 1 && lineTestResult.widths[0] > 80;
           width = fitsTwoLines && isTwoLine ? lineTestResult.widths[0] / 1.2 : lineTestResult.widths[0] * 1.6;
           height = fitsTwoLines && isTwoLine ? lineHeight * 2 : lineHeight;
-
-          rotatedConfig[d] = {width, height, lineHeight};
         }
 
         res.lines = res.lines.filter(d => d !== "");
+        res.lineHeight = lineHeight;
         res.d = d;
         res.fS = s;
         res.width = res.lines.length
           ? isRotated ? height : Math.ceil(max(res.lines.map(line => textWidth(line, {"font-family": f, "font-size": s})))) + s / 4
           : 0;
         res.height = res.lines.length ? isRotated ? width : Math.ceil(res.lines.length * (wrap.lineHeight() + 1)) : 0;
+        res.isRotated = isRotated;
+        res.numLines = isTwoLine ? 2 : res.lines.length;
         res.offset = 0;
         res.hidden = false;
         if (res.width % 2) res.width++;
@@ -630,15 +634,18 @@ export default class Axis extends BaseClass {
           [y]: yPos
         };
 
-        const config = rotatedConfig[d];
+        if (this._rotateLabels) {
+          const text = textData.find(val => val.d === d);
+          const {isRotated, lineHeight, numLines} = text;
+          const width = isRotated ? text.height : text.width;
+          const height = isRotated ? text.width : text.height;
 
-        if (config) {
           tickConfig = Object.assign(tickConfig, {
             labelBounds: {
-              x: -config.width / 2,
-              y: this._orient === "bottom" ? size + p + (config.width - config.lineHeight * 2) / 2 : -size - p - (config.width + config.height) / 2,
-              width: config.width,
-              height: config.height + 1
+              x: -width / 2,
+              y: this._orient === "bottom" ? size + p + (width - lineHeight * numLines) / 2 : -size - p - (width + height) / 2,
+              width,
+              height: height + 1
             },
             labelConfig: {
               rotate: -90
