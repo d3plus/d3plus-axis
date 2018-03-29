@@ -390,23 +390,25 @@ export default class Axis extends BaseClass {
 
     });
 
-    textData.forEach((d, i) => {
-      if (i) {
-        const prev = textData[i - 1];
-        if (!prev.offset && this._getPosition(d.d) - d[width] / 2 < this._getPosition(prev.d) + prev[width] / 2) {
-          d.offset = prev[height] + this._padding;
-        }
-      }
-    });
-
-    const maxOffset = max(textData, d => d.offset);
-    if (maxOffset) {
-      textData.forEach(d => {
-        if (d.offset) {
-          d.offset = maxOffset;
-          d[height] += maxOffset;
+    if (this._labelOffset) {
+      textData.forEach((d, i) => {
+        if (i) {
+          const prev = textData[i - 1];
+          if (!prev.offset && this._getPosition(d.d) - d[width] / 2 < this._getPosition(prev.d) + prev[width] / 2) {
+            d.offset = prev[height] + this._padding;
+          }
         }
       });
+
+      const maxOffset = max(textData, d => d.offset);
+      if (maxOffset) {
+        textData.forEach(d => {
+          if (d.offset) {
+            d.offset = maxOffset;
+            d[height] += maxOffset;
+          }
+        });
+      }
     }
 
     // Calculates new range, based on any text that may be overflowing.
