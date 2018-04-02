@@ -394,7 +394,8 @@ export default class Axis extends BaseClass {
     const labelHeight = max(textData, t => t.height) || 0;
 
     if (horizontal) {
-      textData = labels.map((d, i) => {
+      for (let i = 0; i < labels.length; i++) {
+        const d = labels[i];
 
         const f = this._shapeConfig.labelConfig.fontFamily(d, i),
               s = this._shapeConfig.labelConfig.fontSize(d, i);
@@ -418,49 +419,52 @@ export default class Axis extends BaseClass {
 
         const isOverlapping = prev ? xPos - maxWidth < this._getPosition(prev) + maxWidth : next ? xPos + maxWidth > this._getPosition(next) - maxWidth : false;
 
-        let width;
-        let height;
-        let isTwoLine;
-        const lineHeight = this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : wrap.lineHeight();
         const isRotated = isTruncated || isOverlapping;
 
         if (isRotated) {
           this._rotateLabels = true;
+          break;
+        }
+      }
+    }
 
-          const fitsTwoLines = prev ? xPos - lineHeight * 2 > this._getPosition(prev) + lineHeight * 2 : next ? xPos + lineHeight * 2 < this._getPosition(next) - lineHeight * 2 : true;
+    if (this._rotateLabels) {
+      textData = labels.map((d, i) => {
+        const text = textData[i];
 
-          const lineTest = textWrap()
+        const f = this._shapeConfig.labelConfig.fontFamily(d, i),
+              s = this._shapeConfig.labelConfig.fontSize(d, i);
+
+        const lineHeight = this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : s * 1.4;
+
+        const lineTest = textWrap()
             .fontFamily(f)
             .fontSize(s)
             .lineHeight(this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : undefined)
             .height(lineHeight * 2 + 1)
             .width(this._width);
 
-          const lineTestResult = lineTest(tickFormat(d));
+        const xPos = this._getPosition(d);
+        const prev = labels[i - 1] || false;
+        const next = labels[i + 1] || false;
 
-          isTwoLine = lineTestResult.words.length > 1 && lineTestResult.widths[0] > 80;
-          width = fitsTwoLines && isTwoLine ? lineTestResult.widths[0] / 1.2 : lineTestResult.widths[0] * 1.6;
-          height = fitsTwoLines && isTwoLine ? lineHeight * 2 : lineHeight;
-        }
+        const fitsTwoLines = prev ? xPos - lineHeight * 2 > this._getPosition(prev) + lineHeight * 2 : next ? xPos + lineHeight * 2 < this._getPosition(next) - lineHeight * 2 : true;
 
-        res.lines = res.lines.filter(d => d !== "");
-        res.lineHeight = lineHeight;
-        res.d = d;
-        res.fS = s;
-        res.width = res.lines.length
-          ? isRotated ? height : Math.ceil(max(res.lines.map(line => textWidth(line, {"font-family": f, "font-size": s})))) + s / 4
-          : 0;
-        res.height = res.lines.length ? isRotated ? width : Math.ceil(res.lines.length * (wrap.lineHeight() + 1)) : 0;
-        res.isRotated = isRotated;
-        res.numLines = isTwoLine ? 2 : res.lines.length;
-        res.offset = 0;
-        res.hidden = false;
-        if (res.width % 2) res.width++;
+        const lineTestResult = lineTest(tickFormat(d));
 
-        return res;
+        const isTwoLine = lineTestResult.words.length > 1 && lineTestResult.widths[0] > 80;
+        const height = fitsTwoLines && isTwoLine ? lineTestResult.widths[0] / 1.6 : lineTestResult.widths[0];
+        const width = fitsTwoLines && isTwoLine ? lineHeight * 2 : lineHeight;
 
+        return Object.assign(text, {
+          height,
+          lineHeight,
+          numLines: fitsTwoLines && isTwoLine ? 2 : 1,
+          width
+        });
       });
     }
+
 
     textData.forEach((d, i) => {
       if (i) {
@@ -636,9 +640,9 @@ export default class Axis extends BaseClass {
 
         const text = this._rotateLabels && textData.find(val => val.d === d);
         if (text) {
-          const {isRotated, lineHeight, numLines} = text;
-          const width = isRotated ? text.height : text.width;
-          const height = isRotated ? text.width : text.height;
+          const {lineHeight, numLines} = text;
+          const width = text.height;
+          const height = text.width;
 
           tickConfig = Object.assign(tickConfig, {
             labelBounds: {
