@@ -634,8 +634,8 @@ export default class Axis extends BaseClass {
           [y]: yPos
         };
 
-        if (this._rotateLabels) {
-          const text = textData.find(val => val.d === d);
+        const text = this._rotateLabels && textData.find(val => val.d === d);
+        if (text) {
           const {isRotated, lineHeight, numLines} = text;
           const width = isRotated ? text.height : text.width;
           const height = isRotated ? text.width : text.height;
