@@ -42,7 +42,7 @@ export default class Axis extends BaseClass {
       "stroke-width": 1
     };
     this._height = 400;
-    this._labelOffset = true;
+    this._labelOffset = false;
     this.orient("bottom");
     this._outerBounds = {width: 0, height: 0, x: 0, y: 0};
     this._padding = 5;
