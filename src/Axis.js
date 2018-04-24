@@ -442,7 +442,7 @@ export default class Axis extends BaseClass {
             .fontSize(s)
             .lineHeight(this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : undefined)
             .height(lineHeight * 2 + 1)
-            .width(this._width);
+            .width(this._maxSize ? this._maxSize - this._margin.top - this._margin.bottom - this._tickSize : this._height);
 
         const xPos = this._getPosition(d);
         const prev = labels[i - 1] || false;
@@ -457,10 +457,10 @@ export default class Axis extends BaseClass {
         const width = fitsTwoLines && isTwoLine ? lineHeight * 2 : lineHeight;
 
         return Object.assign(text, {
-          height,
+          height: height || 0,
           lineHeight,
           numLines: fitsTwoLines && isTwoLine ? 2 : 1,
-          width
+          width: width || 0
         });
       });
     }
@@ -806,6 +806,16 @@ export default class Axis extends BaseClass {
   */
   labelOffset(_) {
     return arguments.length ? (this._labelOffset = _, this) : this._labels;
+  }
+
+  /**
+      @memberof Axis
+      @desc If *value* is specified, sets the maximum size allowed for the space that contains the axis tick labels and title.
+      @param {Number}
+      @chainable
+   */
+  maxSize(_) {
+    return arguments.length ? (this._maxSize = _, this) : this._maxSize;
   }
 
   /**
