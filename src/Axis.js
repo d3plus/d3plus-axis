@@ -372,7 +372,7 @@ export default class Axis extends BaseClass {
         .fontFamily(f)
         .fontSize(s)
         .lineHeight(this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : undefined)
-        .width(horizontal ? this._space * 2 : this._width - hBuff - p)
+        .width(horizontal ? this._space * 2 : this._maxSize ? this._maxSize - hBuff - p - this._margin.left - this._margin.right - this._tickSize : this._width - hBuff - p)
         .height(horizontal ? this._height - hBuff - p : this._space * 2);
 
       const res = wrap(tickFormat(d));
@@ -614,7 +614,7 @@ export default class Axis extends BaseClass {
         next = next.length ? next[0] : false;
 
         const space = Math.min(prev ? xPos - this._getPosition(prev.d) : labelWidth, next ? this._getPosition(next.d) - xPos : labelWidth);
-        if (data.length && data[0].width > space) {
+        if (data.length && data[0].width > labelWidth) {
           data[0].hidden = true;
           data[0].offset = labelOffset = 0;
         }
