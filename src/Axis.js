@@ -393,7 +393,7 @@ export default class Axis extends BaseClass {
 
     const labelHeight = max(textData, t => t.height) || 0;
 
-    if (horizontal) {
+    if (horizontal && typeof this._labelRotation === "undefined") {
       for (let i = 0; i < labels.length; i++) {
         const d = labels[i];
 
@@ -427,6 +427,7 @@ export default class Axis extends BaseClass {
         }
       }
     }
+    else if (horizontal) this._rotateLabels = this._labelRotation;
 
     if (this._rotateLabels) {
       textData = labels.map((d, i) => {
@@ -806,6 +807,16 @@ export default class Axis extends BaseClass {
    */
   labelOffset(_) {
     return arguments.length ? (this._labelOffset = _, this) : this._labelOffset;
+  }
+
+  /**
+      @memberof Axis
+      @desc If *value* is specified, sets whether whether horizontal axis labels are rotated -90 degrees.
+      @param {Boolean}
+      @chainable
+   */
+  labelRotation(_) {
+    return arguments.length ? (this._labelRotation = _, this) : this._labelRotation;
   }
 
   /**
