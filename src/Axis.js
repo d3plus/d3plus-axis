@@ -66,7 +66,7 @@ export default class Axis extends BaseClass {
           const rtl = detectRTL();
           return this._orient === "left" ? rtl ? "start" : "end"
             : this._orient === "right" ? rtl ? "end" : "start"
-            : this._rotateLabels ? "end" : "middle";
+            : this._rotateLabels ? this._orient === "bottom" ? "end" : "start" : "middle";
         },
         verticalAlign: () => this._orient === "bottom" ? "top" : this._orient === "top" ? "bottom" : "middle"
       },
@@ -648,7 +648,7 @@ export default class Axis extends BaseClass {
           tickConfig = Object.assign(tickConfig, {
             labelBounds: {
               x: -width / 2,
-              y: this._orient === "bottom" ? size + p + (width - lineHeight * numLines) / 2 : -size - p - (width + height) / 2,
+              y: this._orient === "bottom" ? size + p + (width - lineHeight * numLines) / 2 : size - p * 2 - (width + lineHeight * numLines) / 2,
               width,
               height: height + 1
             }
