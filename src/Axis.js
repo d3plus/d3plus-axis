@@ -803,9 +803,9 @@ export default class Axis extends BaseClass {
       @desc If *value* is specified, sets whether offsets will be used to position some labels further away from the axis in order to allow space for the text.
       @param {Boolean} [*value* = true]
       @chainable
-  */
+   */
   labelOffset(_) {
-    return arguments.length ? (this._labelOffset = _, this) : this._labels;
+    return arguments.length ? (this._labelOffset = _, this) : this._labelOffset;
   }
 
   /**
