@@ -384,11 +384,12 @@ export default class Axis extends BaseClass {
           return d < 0 ? `-${n}` : n;
         }
 
-        return this._d3Scale.tickFormat
-          ? this._d3Scale.tickFormat(labels.length - 1)(d)
-          : this._format
-            ? formatAbbreviate(d)
+        if (!this._format) {
+          return this._d3Scale.tickFormat
+            ? this._d3Scale.tickFormat(labels.length - 1)(d)
             : d;
+        }
+        else return formatAbbreviate(d);
       };
 
     if (this._scale === "time") {
@@ -507,8 +508,6 @@ export default class Axis extends BaseClass {
 
       return res;
     });
-
-    console.log(textData);
 
     const labelHeight = max(textData, t => t.height) || 0;
 
