@@ -358,8 +358,6 @@ export default class Axis extends BaseClass {
     ticks = ticks.slice();
     labels = labels.slice();
 
-    if (this._format) labels = labels.map(label => label * 1);
-
     if (this._scale === "log") {
       labels = labels.filter(
         t =>
@@ -386,12 +384,11 @@ export default class Axis extends BaseClass {
           return d < 0 ? `-${n}` : n;
         }
 
-        if (!this._format) {
-          return this._d3Scale.tickFormat
-            ? this._d3Scale.tickFormat(labels.length - 1)(d)
+        return this._d3Scale.tickFormat
+          ? this._d3Scale.tickFormat(labels.length - 1)(d)
+          : this._format
+            ? formatAbbreviate(d)
             : d;
-        }
-        else return formatAbbreviate(d);
       };
 
     if (this._scale === "time") {
