@@ -521,7 +521,7 @@ export default class Axis extends BaseClass {
         const d = lastB - range[lastI];
         if (this._range === void 0 || this._range[this._range.length - 1] === void 0) {
           this._size -= d;
-          range[this._range.length - 1] -= d;
+          range[lastI] -= d;
         }
         else if (this._range) {
           rangeOuter[rangeOuter.length - 1] += d;
