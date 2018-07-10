@@ -519,12 +519,12 @@ export default class Axis extends BaseClass {
       const lastB = max([this._getPosition(last.d) + last[width] / 2, range[lastI] + wBuff]);
       if (lastB > range[lastI]) {
         const d = lastB - range[lastI];
-        if (this._range === void 0 || this._range[lastI] === void 0) {
+        if (this._range === void 0 || this._range[this._range.length - 1] === void 0) {
           this._size -= d;
-          range[lastI] -= d;
+          range[this._range.length - 1] -= d;
         }
         else if (this._range) {
-          rangeOuter[lastI] += d;
+          rangeOuter[rangeOuter.length - 1] += d;
         }
       }
 
