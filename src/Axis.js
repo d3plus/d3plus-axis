@@ -8,7 +8,15 @@ import * as scales from "d3-scale";
 import {select} from "d3-selection";
 import {transition} from "d3-transition";
 
-import {assign, attrize, BaseClass, closest, constant, elem} from "d3plus-common";
+import {
+  assign,
+  attrize,
+  BaseClass,
+  closest,
+  constant,
+  elem
+} from "d3plus-common";
+import {formatAbbreviate} from "d3plus-format";
 import * as shapes from "d3plus-shape";
 import {rtl as detectRTL, TextBox, textWidth, textWrap} from "d3plus-text";
 
@@ -27,7 +35,6 @@ export default class Axis extends BaseClass {
       @private
   */
   constructor() {
-
     super();
 
     this._align = "middle";
@@ -37,6 +44,7 @@ export default class Axis extends BaseClass {
     };
     this._domain = [0, 10];
     this._duration = 600;
+    this._format = false;
     this._gridConfig = {
       "stroke": "#ccc",
       "stroke-width": 1
@@ -64,11 +72,26 @@ export default class Axis extends BaseClass {
         padding: 0,
         textAnchor: () => {
           const rtl = detectRTL();
-          return this._orient === "left" ? rtl ? "start" : "end"
-            : this._orient === "right" ? rtl ? "end" : "start"
-            : this._rotateLabels ? this._orient === "bottom" ? "end" : "start" : "middle";
+          return this._orient === "left"
+            ? rtl
+              ? "start"
+              : "end"
+            : this._orient === "right"
+              ? rtl
+                ? "end"
+                : "start"
+              : this._rotateLabels
+                ? this._orient === "bottom"
+                  ? "end"
+                  : "start"
+                : "middle";
         },
-        verticalAlign: () => this._orient === "bottom" ? "top" : this._orient === "top" ? "bottom" : "middle"
+        verticalAlign: () =>
+          this._orient === "bottom"
+            ? "top"
+            : this._orient === "top"
+              ? "bottom"
+              : "middle"
       },
       r: d => d.tick ? 4 : 0,
       stroke: "#000",
@@ -82,7 +105,6 @@ export default class Axis extends BaseClass {
       textAnchor: "middle"
     };
     this._width = 400;
-
   }
 
   /**
@@ -92,19 +114,29 @@ export default class Axis extends BaseClass {
       @private
   */
   _barPosition(bar) {
-
     const {height, x, y, opposite} = this._position,
           domain = this._getDomain(),
           offset = this._margin[opposite],
-          position = ["top", "left"].includes(this._orient) ? this._outerBounds[y] + this._outerBounds[height] - offset : this._outerBounds[y] + offset;
+          position = ["top", "left"].includes(this._orient)
+            ? this._outerBounds[y] + this._outerBounds[height] - offset
+            : this._outerBounds[y] + offset;
 
     bar
       .call(attrize, this._barConfig)
-      .attr(`${x}1`, this._getPosition(domain[0]) - (this._scale === "band" ? this._d3Scale.step() - this._d3Scale.bandwidth() : 0))
-      .attr(`${x}2`, this._getPosition(domain[domain.length - 1]) + (this._scale === "band" ? this._d3Scale.step() : 0))
+      .attr(
+        `${x}1`,
+        this._getPosition(domain[0]) -
+          (this._scale === "band"
+            ? this._d3Scale.step() - this._d3Scale.bandwidth()
+            : 0)
+      )
+      .attr(
+        `${x}2`,
+        this._getPosition(domain[domain.length - 1]) +
+          (this._scale === "band" ? this._d3Scale.step() : 0)
+      )
       .attr(`${y}1`, position)
       .attr(`${y}2`, position);
-
   }
 
   /**
@@ -113,14 +145,12 @@ export default class Axis extends BaseClass {
       @private
   */
   _getDomain() {
-
     let ticks = [];
     if (this._d3ScaleNegative) ticks = this._d3ScaleNegative.domain();
     if (this._d3Scale) ticks = ticks.concat(this._d3Scale.domain());
 
     const domain = this._scale === "ordinal" ? ticks : extent(ticks);
     return ticks[0] > ticks[1] ? domain.reverse() : domain;
-
   }
 
   /**
@@ -130,7 +160,9 @@ export default class Axis extends BaseClass {
       @private
   */
   _getPosition(d) {
-    return d < 0 && this._d3ScaleNegative ? this._d3ScaleNegative(d) : this._d3Scale(d);
+    return d < 0 && this._d3ScaleNegative
+      ? this._d3ScaleNegative(d)
+      : this._d3Scale(d);
   }
 
   /**
@@ -139,12 +171,10 @@ export default class Axis extends BaseClass {
       @private
   */
   _getRange() {
-
     let ticks = [];
     if (this._d3ScaleNegative) ticks = this._d3ScaleNegative.range();
     if (this._d3Scale) ticks = ticks.concat(this._d3Scale.range());
     return ticks[0] > ticks[1] ? extent(ticks).reverse() : extent(ticks);
-
   }
 
   /**
@@ -153,7 +183,10 @@ export default class Axis extends BaseClass {
       @private
   */
   _getTicks() {
-    const tickScale = scales.scaleSqrt().domain([10, 400]).range([10, 50]);
+    const tickScale = scales
+      .scaleSqrt()
+      .domain([10, 400])
+      .range([10, 50]);
 
     let ticks = [];
     if (this._d3ScaleNegative) {
@@ -164,7 +197,9 @@ export default class Axis extends BaseClass {
     if (this._d3Scale) {
       const positiveRange = this._d3Scale.range();
       const size = positiveRange[1] - positiveRange[0];
-      ticks = ticks.concat(this._d3Scale.ticks(Math.floor(size / tickScale(size))));
+      ticks = ticks.concat(
+        this._d3Scale.ticks(Math.floor(size / tickScale(size)))
+      );
     }
 
     return ticks;
@@ -179,8 +214,12 @@ export default class Axis extends BaseClass {
   _gridPosition(lines, last = false) {
     const {height, x, y, opposite} = this._position,
           offset = this._margin[opposite],
-          position = ["top", "left"].includes(this._orient) ? this._outerBounds[y] + this._outerBounds[height] - offset : this._outerBounds[y] + offset,
-          scale = last ? this._lastScale || this._getPosition.bind(this) : this._getPosition.bind(this),
+          position = ["top", "left"].includes(this._orient)
+            ? this._outerBounds[y] + this._outerBounds[height] - offset
+            : this._outerBounds[y] + offset,
+          scale = last
+            ? this._lastScale || this._getPosition.bind(this)
+            : this._getPosition.bind(this),
           size = ["top", "left"].includes(this._orient) ? offset : -offset,
           xDiff = this._scale === "band" ? this._d3Scale.bandwidth() / 2 : 0,
           xPos = d => scale(d.id) + xDiff;
@@ -199,12 +238,14 @@ export default class Axis extends BaseClass {
       @chainable
   */
   render(callback) {
-
     if (this._select === void 0) {
-      this.select(select("body").append("svg")
-        .attr("width", `${this._width}px`)
-        .attr("height", `${this._height}px`)
-        .node());
+      this.select(
+        select("body")
+          .append("svg")
+          .attr("width", `${this._width}px`)
+          .attr("height", `${this._height}px`)
+          .node()
+      );
     }
 
     const {width, height, x, y, horizontal, opposite} = this._position,
@@ -219,7 +260,9 @@ export default class Axis extends BaseClass {
     if (range[1] === void 0) range[1] = this[`_${width}`] - p;
     this._size = range[1] - range[0];
     if (this._scale === "ordinal" && this._domain.length > range.length) {
-      range = d3Range(this._domain.length).map(d => this._size * (d / (this._domain.length - 1)) + range[0]);
+      range = d3Range(this._domain.length).map(
+        d => this._size * (d / (this._domain.length - 1)) + range[0]
+      );
     }
 
     const margin = this._margin = {top: 0, right: 0, bottom: 0, left: 0};
@@ -227,24 +270,33 @@ export default class Axis extends BaseClass {
     if (this._title) {
       const {fontFamily, fontSize, lineHeight} = this._titleConfig;
       const titleWrap = textWrap()
-        .fontFamily(typeof fontFamily === "function" ? fontFamily() : fontFamily)
+        .fontFamily(
+          typeof fontFamily === "function" ? fontFamily() : fontFamily
+        )
         .fontSize(typeof fontSize === "function" ? fontSize() : fontSize)
-        .lineHeight(typeof lineHeight === "function" ? lineHeight() : lineHeight)
+        .lineHeight(
+          typeof lineHeight === "function" ? lineHeight() : lineHeight
+        )
         .width(this._size)
         .height(this[`_${height}`] - this._tickSize - p);
       const lines = titleWrap(this._title).lines.length;
       margin[this._orient] = lines * titleWrap.lineHeight() + p;
     }
 
-    this._d3Scale = scales[`scale${this._scale.charAt(0).toUpperCase()}${this._scale.slice(1)}`]()
-      .domain(this._scale === "time" ? this._domain.map(date) : this._domain);
+    this._d3Scale = scales[
+      `scale${this._scale.charAt(0).toUpperCase()}${this._scale.slice(1)}`
+    ]().domain(this._scale === "time" ? this._domain.map(date) : this._domain);
 
     if (this._d3Scale.rangeRound) this._d3Scale.rangeRound(range);
     else this._d3Scale.range(range);
 
     if (this._d3Scale.round) this._d3Scale.round(true);
-    if (this._d3Scale.paddingInner) this._d3Scale.paddingInner(this._paddingInner);
-    if (this._d3Scale.paddingOuter) this._d3Scale.paddingOuter(this._paddingOuter);
+    if (this._d3Scale.paddingInner) {
+      this._d3Scale.paddingInner(this._paddingInner);
+    }
+    if (this._d3Scale.paddingOuter) {
+      this._d3Scale.paddingOuter(this._paddingOuter);
+    }
 
     this._d3ScaleNegative = null;
     if (this._scale === "log") {
@@ -253,20 +305,25 @@ export default class Axis extends BaseClass {
       if (domain[domain.length - 1] === 0) domain[domain.length - 1] = -1;
       const range = this._d3Scale.range();
       if (domain[0] < 0 && domain[domain.length - 1] < 0) {
-        this._d3ScaleNegative = this._d3Scale.copy()
+        this._d3ScaleNegative = this._d3Scale
+          .copy()
           .domain(domain)
           .range(range);
         this._d3Scale = null;
       }
       else if (domain[0] > 0 && domain[domain.length - 1] > 0) {
-        this._d3Scale
-          .domain(domain)
-          .range(range);
+        this._d3Scale.domain(domain).range(range);
       }
       else {
-        const percentScale = scales.scaleLog().domain([1, domain[domain[1] > 0 ? 1 : 0]]).range([0, 1]);
-        const leftPercentage = percentScale(Math.abs(domain[domain[1] < 0 ? 1 : 0]));
-        let zero = leftPercentage / (leftPercentage + 1) * (range[1] - range[0]);
+        const percentScale = scales
+          .scaleLog()
+          .domain([1, domain[domain[1] > 0 ? 1 : 0]])
+          .range([0, 1]);
+        const leftPercentage = percentScale(
+          Math.abs(domain[domain[1] < 0 ? 1 : 0])
+        );
+        let zero =
+          leftPercentage / (leftPercentage + 1) * (range[1] - range[0]);
         if (domain[0] > 0) zero = range[1] - range[0] - zero;
         this._d3ScaleNegative = this._d3Scale.copy();
         (domain[0] < 0 ? this._d3Scale : this._d3ScaleNegative)
@@ -279,33 +336,61 @@ export default class Axis extends BaseClass {
     }
 
     let ticks = this._ticks
-      ? this._scale === "time" ? this._ticks.map(date) : this._ticks
-      : (this._d3Scale ? this._d3Scale.ticks : this._d3ScaleNegative.ticks)
+      ? this._scale === "time"
+        ? this._ticks.map(date)
+        : this._ticks
+      : (this._d3Scale
+        ? this._d3Scale.ticks
+        : this._d3ScaleNegative.ticks)
         ? this._getTicks()
         : this._domain;
 
     let labels = this._labels
-      ? this._scale === "time" ? this._labels.map(date) : this._labels
-      : (this._d3Scale ? this._d3Scale.ticks : this._d3ScaleNegative.ticks)
+      ? this._scale === "time"
+        ? this._labels.map(date)
+        : this._labels
+      : (this._d3Scale
+        ? this._d3Scale.ticks
+        : this._d3ScaleNegative.ticks)
         ? this._getTicks()
         : ticks;
 
     ticks = ticks.slice();
     labels = labels.slice();
 
-    if (this._scale === "log") labels = labels.filter(t => Math.abs(t).toString().charAt(0) === "1" && (this._d3Scale ? t !== -1 : t !== 1));
+    if (this._scale === "log") {
+      labels = labels.filter(
+        t =>
+          Math.abs(t)
+            .toString()
+            .charAt(0) === "1" && (this._d3Scale ? t !== -1 : t !== 1)
+      );
+    }
 
     const superscript = "⁰¹²³⁴⁵⁶⁷⁸⁹";
-    const tickFormat = this._tickFormat ? this._tickFormat : d => {
-      if (this._scale === "log") {
-        const p = Math.round(Math.log(Math.abs(d)) / Math.LN10);
-        const t = Math.abs(d).toString().charAt(0);
-        let n = `10 ${`${p}`.split("").map(c => superscript[c]).join("")}`;
-        if (t !== "1") n = `${t} x ${n}`;
-        return d < 0 ? `-${n}` : n;
-      }
-      return this._d3Scale.tickFormat ? this._d3Scale.tickFormat(labels.length - 1)(d) : d;
-    };
+    const tickFormat = this._tickFormat
+      ? this._tickFormat
+      : d => {
+        if (this._scale === "log") {
+          const p = Math.round(Math.log(Math.abs(d)) / Math.LN10);
+          const t = Math.abs(d)
+              .toString()
+              .charAt(0);
+          let n = `10 ${`${p}`
+              .split("")
+              .map(c => superscript[c])
+              .join("")}`;
+          if (t !== "1") n = `${t} x ${n}`;
+          return d < 0 ? `-${n}` : n;
+        }
+
+        if (!this._format) {
+          return this._d3Scale.tickFormat
+            ? this._d3Scale.tickFormat(labels.length - 1)(d)
+            : d;
+        }
+        else return formatAbbreviate(d);
+      };
 
     if (this._scale === "time") {
       ticks = ticks.map(Number);
@@ -318,9 +403,12 @@ export default class Axis extends BaseClass {
     ticks = ticks.sort((a, b) => this._getPosition(a) - this._getPosition(b));
     labels = labels.sort((a, b) => this._getPosition(a) - this._getPosition(b));
 
-    const tickSize = this._shape === "Circle" ? this._shapeConfig.r
-      : this._shape === "Rect" ? this._shapeConfig[width]
-      : this._shapeConfig.strokeWidth;
+    const tickSize =
+      this._shape === "Circle"
+        ? this._shapeConfig.r
+        : this._shape === "Rect"
+          ? this._shapeConfig[width]
+          : this._shapeConfig.strokeWidth;
 
     const tickGet = typeof tickSize !== "function" ? () => tickSize : tickSize;
 
@@ -330,7 +418,9 @@ export default class Axis extends BaseClass {
       let s = tickGet({id: d, tick: true}, i);
       if (this._shape === "Circle") s *= 2;
       const t = this._getPosition(d);
-      if (!pixels.length || Math.abs(closest(t, pixels) - t) > s * 2) pixels.push(t);
+      if (!pixels.length || Math.abs(closest(t, pixels) - t) > s * 2) {
+        pixels.push(t);
+      }
       else pixels.push(false);
     });
 
@@ -338,10 +428,15 @@ export default class Axis extends BaseClass {
 
     this._visibleTicks = ticks;
 
-    let hBuff = this._shape === "Circle"
-          ? typeof this._shapeConfig.r === "function" ? this._shapeConfig.r({tick: true}) : this._shapeConfig.r
+    let hBuff =
+        this._shape === "Circle"
+          ? typeof this._shapeConfig.r === "function"
+            ? this._shapeConfig.r({tick: true})
+            : this._shapeConfig.r
           : this._shape === "Rect"
-            ? typeof this._shapeConfig[height] === "function" ? this._shapeConfig[height]({tick: true}) : this._shapeConfig[height]
+            ? typeof this._shapeConfig[height] === "function"
+              ? this._shapeConfig[height]({tick: true})
+              : this._shapeConfig[height]
             : this._tickSize,
         wBuff = tickGet({tick: true});
 
@@ -356,7 +451,8 @@ export default class Axis extends BaseClass {
     else if (labels.length > 1) {
       this._space = 0;
       for (let i = 0; i < labels.length - 1; i++) {
-        const s = this._getPosition(labels[i + 1]) - this._getPosition(labels[i]);
+        const s =
+          this._getPosition(labels[i + 1]) - this._getPosition(labels[i]);
         if (s > this._space) this._space = s;
       }
     }
@@ -364,15 +460,29 @@ export default class Axis extends BaseClass {
 
     // Measures size of ticks
     let textData = labels.map((d, i) => {
-
       const f = this._shapeConfig.labelConfig.fontFamily(d, i),
             s = this._shapeConfig.labelConfig.fontSize(d, i);
 
       const wrap = textWrap()
         .fontFamily(f)
         .fontSize(s)
-        .lineHeight(this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : undefined)
-        .width(horizontal ? this._space * 2 : this._maxSize ? this._maxSize - hBuff - p - this._margin.left - this._margin.right - this._tickSize : this._width - hBuff - p)
+        .lineHeight(
+          this._shapeConfig.lineHeight
+            ? this._shapeConfig.lineHeight(d, i)
+            : undefined
+        )
+        .width(
+          horizontal
+            ? this._space * 2
+            : this._maxSize
+              ? this._maxSize -
+                hBuff -
+                p -
+                this._margin.left -
+                this._margin.right -
+                this._tickSize
+              : this._width - hBuff - p
+        )
         .height(horizontal ? this._height - hBuff - p : this._space * 2);
 
       const res = wrap(tickFormat(d));
@@ -380,15 +490,23 @@ export default class Axis extends BaseClass {
       res.d = d;
       res.fS = s;
       res.width = res.lines.length
-        ? Math.ceil(max(res.lines.map(line => textWidth(line, {"font-family": f, "font-size": s})))) + s / 4
+        ? Math.ceil(
+          max(
+            res.lines.map(line =>
+              textWidth(line, {"font-family": f, "font-size": s})
+            )
+          )
+        ) +
+          s / 4
         : 0;
-      res.height = res.lines.length ? Math.ceil(res.lines.length * (wrap.lineHeight() + 1)) : 0;
+      res.height = res.lines.length
+        ? Math.ceil(res.lines.length * (wrap.lineHeight() + 1))
+        : 0;
       res.offset = 0;
       res.hidden = false;
       if (res.width % 2) res.width++;
 
       return res;
-
     });
 
     const labelHeight = max(textData, t => t.height) || 0;
@@ -403,7 +521,11 @@ export default class Axis extends BaseClass {
         const wrap = textWrap()
           .fontFamily(f)
           .fontSize(s)
-          .lineHeight(this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : undefined)
+          .lineHeight(
+            this._shapeConfig.lineHeight
+              ? this._shapeConfig.lineHeight(d, i)
+              : undefined
+          )
           .width(this._space)
           .height(labelHeight);
 
@@ -417,7 +539,11 @@ export default class Axis extends BaseClass {
 
         const maxWidth = Math.max(res.widths);
 
-        const isOverlapping = prev ? xPos - maxWidth < this._getPosition(prev) + maxWidth : next ? xPos + maxWidth > this._getPosition(next) - maxWidth : false;
+        const isOverlapping = prev
+          ? xPos - maxWidth < this._getPosition(prev) + maxWidth
+          : next
+            ? xPos + maxWidth > this._getPosition(next) - maxWidth
+            : false;
 
         const isRotated = isTruncated || isOverlapping;
 
@@ -436,25 +562,46 @@ export default class Axis extends BaseClass {
         const f = this._shapeConfig.labelConfig.fontFamily(d, i),
               s = this._shapeConfig.labelConfig.fontSize(d, i);
 
-        const lineHeight = this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : s * 1.4;
+        const lineHeight = this._shapeConfig.lineHeight
+          ? this._shapeConfig.lineHeight(d, i)
+          : s * 1.4;
 
         const lineTest = textWrap()
-            .fontFamily(f)
-            .fontSize(s)
-            .lineHeight(this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : undefined)
-            .height(lineHeight * 2 + 1)
-            .width(this._maxSize ? this._maxSize - this._margin.top - this._margin.bottom - this._tickSize : this._height);
+          .fontFamily(f)
+          .fontSize(s)
+          .lineHeight(
+            this._shapeConfig.lineHeight
+              ? this._shapeConfig.lineHeight(d, i)
+              : undefined
+          )
+          .height(lineHeight * 2 + 1)
+          .width(
+            this._maxSize
+              ? this._maxSize -
+                this._margin.top -
+                this._margin.bottom -
+                this._tickSize
+              : this._height
+          );
 
         const xPos = this._getPosition(d);
         const prev = labels[i - 1] || false;
         const next = labels[i + 1] || false;
 
-        const fitsTwoLines = prev ? xPos - lineHeight * 2 > this._getPosition(prev) + lineHeight * 2 : next ? xPos + lineHeight * 2 < this._getPosition(next) - lineHeight * 2 : true;
+        const fitsTwoLines = prev
+          ? xPos - lineHeight * 2 > this._getPosition(prev) + lineHeight * 2
+          : next
+            ? xPos + lineHeight * 2 < this._getPosition(next) - lineHeight * 2
+            : true;
 
         const lineTestResult = lineTest(tickFormat(d));
 
-        const isTwoLine = lineTestResult.words.length > 1 && lineTestResult.widths[0] > 80;
-        const height = fitsTwoLines && isTwoLine ? lineTestResult.widths[0] / 1.6 : lineTestResult.widths[0];
+        const isTwoLine =
+          lineTestResult.words.length > 1 && lineTestResult.widths[0] > 80;
+        const height =
+          fitsTwoLines && isTwoLine
+            ? lineTestResult.widths[0] / 1.6
+            : lineTestResult.widths[0];
         const width = fitsTwoLines && isTwoLine ? lineHeight * 2 : lineHeight;
 
         return Object.assign(text, {
@@ -466,11 +613,14 @@ export default class Axis extends BaseClass {
       });
     }
 
-
     textData.forEach((d, i) => {
       if (i) {
         const prev = textData[i - 1];
-        if (!prev.offset && this._getPosition(d.d) - d[width] / 2 < this._getPosition(prev.d) + prev[width] / 2) {
+        if (
+          !prev.offset &&
+          this._getPosition(d.d) - d[width] / 2 <
+            this._getPosition(prev.d) + prev[width] / 2
+        ) {
           d.offset = prev[height] + this._padding;
         }
       }
@@ -479,7 +629,11 @@ export default class Axis extends BaseClass {
       textData.forEach((d, i) => {
         if (i) {
           const prev = textData[i - 1];
-          if (!prev.offset && this._getPosition(d.d) - d[width] / 2 < this._getPosition(prev.d) + prev[width] / 2) {
+          if (
+            !prev.offset &&
+            this._getPosition(d.d) - d[width] / 2 <
+              this._getPosition(prev.d) + prev[width] / 2
+          ) {
             d.offset = prev[height] + this._padding;
           }
         }
@@ -500,11 +654,13 @@ export default class Axis extends BaseClass {
     const rangeOuter = range.slice();
     const lastI = range.length - 1;
     if (this._scale !== "band" && textData.length) {
-
       const first = textData[0],
             last = textData[textData.length - 1];
 
-      const firstB = min([this._getPosition(first.d) - first[width] / 2, range[0] - wBuff]);
+      const firstB = min([
+        this._getPosition(first.d) - first[width] / 2,
+        range[0] - wBuff
+      ]);
       if (firstB < range[0]) {
         const d = range[0] - firstB;
         if (this._range === void 0 || this._range[0] === void 0) {
@@ -516,7 +672,10 @@ export default class Axis extends BaseClass {
         }
       }
 
-      const lastB = max([this._getPosition(last.d) + last[width] / 2, range[lastI] + wBuff]);
+      const lastB = max([
+        this._getPosition(last.d) + last[width] / 2,
+        range[lastI] + wBuff
+      ]);
       if (lastB > range[lastI]) {
         const d = lastB - range[lastI];
         if (this._range === void 0 || this._range[this._range.length - 1] === void 0) {
@@ -528,11 +687,17 @@ export default class Axis extends BaseClass {
         }
       }
 
-      if (range.length > 2) range = d3Range(this._domain.length).map(d => this._size * (d / (range.length - 1)) + range[0]);
+      if (range.length > 2) {
+        range = d3Range(this._domain.length).map(
+          d => this._size * (d / (range.length - 1)) + range[0]
+        );
+      }
       range = range.map(Math.round);
       if (this._d3ScaleNegative) {
         const negativeRange = this._d3ScaleNegative.range();
-        this._d3ScaleNegative[this._d3ScaleNegative.rangeRound ? "rangeRound" : "range"](
+        this._d3ScaleNegative[
+          this._d3ScaleNegative.rangeRound ? "rangeRound" : "range"
+        ](
           this._d3Scale && this._d3Scale.range()[0] < negativeRange[0]
             ? [negativeRange[0], range[1]]
             : [range[0], this._d3Scale ? negativeRange[1] : range[1]]
@@ -549,7 +714,6 @@ export default class Axis extends BaseClass {
       else {
         this._d3Scale[this._d3Scale.rangeRound ? "rangeRound" : "range"](range);
       }
-
     }
 
     if (this._scale === "band") {
@@ -558,7 +722,8 @@ export default class Axis extends BaseClass {
     else if (labels.length > 1) {
       this._space = 0;
       for (let i = 0; i < labels.length - 1; i++) {
-        const s = this._getPosition(labels[i + 1]) - this._getPosition(labels[i]);
+        const s =
+          this._getPosition(labels[i + 1]) - this._getPosition(labels[i]);
         if (s > this._space) this._space = s;
       }
     }
@@ -566,104 +731,157 @@ export default class Axis extends BaseClass {
 
     const tBuff = this._shape === "Line" ? 0 : hBuff;
     const bounds = this._outerBounds = {
-      [height]: (max(textData, t => Math.ceil(t[height])) || 0) + (textData.length ? p : 0),
+      [height]:
+        (max(textData, t => Math.ceil(t[height])) || 0) +
+        (textData.length ? p : 0),
       [width]: rangeOuter[lastI] - rangeOuter[0],
       [x]: rangeOuter[0]
     };
 
     margin[this._orient] += hBuff;
-    margin[opposite] = this._gridSize !== void 0 ? max([this._gridSize, tBuff]) : this[`_${height}`] - margin[this._orient] - bounds[height] - p;
+    margin[opposite] =
+      this._gridSize !== void 0
+        ? max([this._gridSize, tBuff])
+        : this[`_${height}`] - margin[this._orient] - bounds[height] - p;
     bounds[height] += margin[opposite] + margin[this._orient];
-    bounds[y] = this._align === "start" ? this._padding
-      : this._align === "end" ? this[`_${height}`] - bounds[height] - this._padding
-      : this[`_${height}`] / 2 - bounds[height] / 2;
+    bounds[y] =
+      this._align === "start"
+        ? this._padding
+        : this._align === "end"
+          ? this[`_${height}`] - bounds[height] - this._padding
+          : this[`_${height}`] / 2 - bounds[height] / 2;
 
     const group = elem(`g#d3plus-Axis-${this._uuid}`, {parent});
     this._group = group;
 
-    const grid = elem("g.grid", {parent: group}).selectAll("line")
-      .data((this._gridSize !== 0 ? this._grid || ticks : []).map(d => ({id: d})), d => d.id);
+    const grid = elem("g.grid", {parent: group})
+      .selectAll("line")
+      .data(
+        (this._gridSize !== 0 ? this._grid || ticks : []).map(d => ({id: d})),
+        d => d.id
+      );
 
-    grid.exit().transition(t)
+    grid
+      .exit()
+      .transition(t)
       .attr("opacity", 0)
       .call(this._gridPosition.bind(this))
       .remove();
 
-    grid.enter().append("line")
-        .attr("opacity", 0)
-        .attr("clip-path", `url(#${clipId})`)
-        .call(this._gridPosition.bind(this), true)
-      .merge(grid).transition(t)
-        .attr("opacity", 1)
-        .call(this._gridPosition.bind(this));
+    grid
+      .enter()
+      .append("line")
+      .attr("opacity", 0)
+      .attr("clip-path", `url(#${clipId})`)
+      .call(this._gridPosition.bind(this), true)
+      .merge(grid)
+      .transition(t)
+      .attr("opacity", 1)
+      .call(this._gridPosition.bind(this));
 
-    const labelOnly = labels.filter((d, i) => textData[i].lines.length && !ticks.includes(d));
+    const labelOnly = labels.filter(
+      (d, i) => textData[i].lines.length && !ticks.includes(d)
+    );
 
-    let tickData = ticks.concat(labelOnly)
-      .map(d => {
-        const data = textData.filter(td => td.d === d);
-        const dataIndex = data.length ? textData.indexOf(data[0]) : undefined;
-        const xPos = this._getPosition(d);
+    let tickData = ticks.concat(labelOnly).map(d => {
+      const data = textData.filter(td => td.d === d);
+      const dataIndex = data.length ? textData.indexOf(data[0]) : undefined;
+      const xPos = this._getPosition(d);
 
-        let labelOffset = data.length && this._labelOffset ? data[0].offset : 0;
+      let labelOffset = data.length && this._labelOffset ? data[0].offset : 0;
 
-        const labelWidth = horizontal ? this._space : bounds.width - margin[this._position.opposite] - hBuff - margin[this._orient] + p;
+      const labelWidth = horizontal
+        ? this._space
+        : bounds.width -
+          margin[this._position.opposite] -
+          hBuff -
+          margin[this._orient] +
+          p;
 
-        let prev = data.length && dataIndex > 0 ? textData.filter((td, ti) => !td.hidden && td.offset >= labelOffset && ti < dataIndex) : false;
-        prev = prev.length ? prev[prev.length - 1] : false;
-        let next = data.length && dataIndex < textData.length - 1 ? textData.filter((td, ti) => !td.hidden && td.offset >= labelOffset && ti > dataIndex) : false;
-        next = next.length ? next[0] : false;
+      let prev =
+        data.length && dataIndex > 0
+          ? textData.filter(
+            (td, ti) =>
+              !td.hidden && td.offset >= labelOffset && ti < dataIndex
+          )
+          : false;
+      prev = prev.length ? prev[prev.length - 1] : false;
+      let next =
+        data.length && dataIndex < textData.length - 1
+          ? textData.filter(
+            (td, ti) =>
+              !td.hidden && td.offset >= labelOffset && ti > dataIndex
+          )
+          : false;
+      next = next.length ? next[0] : false;
 
-        const space = Math.min(prev ? xPos - this._getPosition(prev.d) : labelWidth, next ? this._getPosition(next.d) - xPos : labelWidth);
-        if (data.length && data[0].width > labelWidth) {
-          data[0].hidden = true;
-          data[0].offset = labelOffset = 0;
-        }
+      const space = Math.min(
+        prev ? xPos - this._getPosition(prev.d) : labelWidth,
+        next ? this._getPosition(next.d) - xPos : labelWidth
+      );
+      if (data.length && data[0].width > labelWidth) {
+        data[0].hidden = true;
+        data[0].offset = labelOffset = 0;
+      }
 
-        const offset = margin[opposite],
-              size = (hBuff + labelOffset) * (flip ? -1 : 1),
-              yPos = flip ? bounds[y] + bounds[height] - offset : bounds[y] + offset;
+      const offset = margin[opposite],
+            size = (hBuff + labelOffset) * (flip ? -1 : 1),
+            yPos = flip ? bounds[y] + bounds[height] - offset : bounds[y] + offset;
 
-        let tickConfig = {
-          id: d,
+      let tickConfig = {
+        id: d,
+        labelBounds: {
+          x: horizontal
+            ? -space / 2
+            : this._orient === "left"
+              ? -labelWidth - p + size
+              : size + p,
+          y: horizontal
+            ? this._orient === "bottom"
+              ? size + p
+              : size - p - labelHeight
+            : -space / 2,
+          width: horizontal ? space : labelWidth,
+          height: horizontal ? labelHeight : space
+        },
+        size: ticks.includes(d) ? size : 0,
+        text: labels.includes(d) ? tickFormat(d) : false,
+        tick: ticks.includes(d),
+        [x]:
+          xPos + (this._scale === "band" ? this._d3Scale.bandwidth() / 2 : 0),
+        [y]: yPos
+      };
+
+      const text = this._rotateLabels && textData.find(val => val.d === d);
+      if (text) {
+        const {lineHeight, numLines} = text;
+        const width = text.height;
+        const height = text.width;
+
+        tickConfig = Object.assign(tickConfig, {
           labelBounds: {
-            x: horizontal ? -space / 2 : this._orient === "left" ? -labelWidth - p + size : size + p,
-            y: horizontal ? this._orient === "bottom" ? size + p : size - p - labelHeight : -space / 2,
-            width: horizontal ? space : labelWidth,
-            height: horizontal ? labelHeight : space
-          },
-          size: ticks.includes(d) ? size : 0,
-          text: labels.includes(d) ? tickFormat(d) : false,
-          tick: ticks.includes(d),
-          [x]: xPos + (this._scale === "band" ? this._d3Scale.bandwidth() / 2 : 0),
-          [y]: yPos
-        };
+            x: -width / 2,
+            y:
+              this._orient === "bottom"
+                ? size + p + (width - lineHeight * numLines) / 2
+                : size - p * 2 - (width + lineHeight * numLines) / 2,
+            width,
+            height: height + 1
+          }
+        });
+      }
 
-        const text = this._rotateLabels && textData.find(val => val.d === d);
-        if (text) {
-          const {lineHeight, numLines} = text;
-          const width = text.height;
-          const height = text.width;
-
-          tickConfig = Object.assign(tickConfig, {
-            labelBounds: {
-              x: -width / 2,
-              y: this._orient === "bottom" ? size + p + (width - lineHeight * numLines) / 2 : size - p * 2 - (width + lineHeight * numLines) / 2,
-              width,
-              height: height + 1
-            }
-          });
-        }
-
-        return tickConfig;
-      });
+      return tickConfig;
+    });
 
     if (this._shape === "Line") {
-      tickData = tickData.concat(tickData.map(d => {
-        const dupe = Object.assign({}, d);
-        dupe[y] += d.size;
-        return dupe;
-      }));
+      tickData = tickData.concat(
+        tickData.map(d => {
+          const dupe = Object.assign({}, d);
+          dupe[y] += d.size;
+          return dupe;
+        })
+      );
     }
 
     new shapes[this._shape]()
@@ -679,13 +897,16 @@ export default class Axis extends BaseClass {
 
     const bar = group.selectAll("line.bar").data([null]);
 
-    bar.enter().append("line")
-        .attr("class", "bar")
-        .attr("opacity", 0)
-        .call(this._barPosition.bind(this))
-      .merge(bar).transition(t)
-        .attr("opacity", 1)
-        .call(this._barPosition.bind(this));
+    bar
+      .enter()
+      .append("line")
+      .attr("class", "bar")
+      .attr("opacity", 0)
+      .call(this._barPosition.bind(this))
+      .merge(bar)
+      .transition(t)
+      .attr("opacity", 1)
+      .call(this._barPosition.bind(this));
 
     this._titleClass
       .data(this._title ? [{text: this._title}] : [])
@@ -696,8 +917,23 @@ export default class Axis extends BaseClass {
       .text(d => d.text)
       .verticalAlign("middle")
       .width(bounds[width])
-      .x(horizontal ? bounds.x : this._orient === "left" ? bounds.x + margin[this._orient] / 2 - bounds[width] / 2 : bounds.x + bounds.width - margin[this._orient] / 2 - bounds[width] / 2)
-      .y(horizontal ? this._orient === "bottom" ? bounds.y + bounds.height - margin.bottom + p : bounds.y : bounds.y - margin[this._orient] / 2 + bounds[width] / 2)
+      .x(
+        horizontal
+          ? bounds.x
+          : this._orient === "left"
+            ? bounds.x + margin[this._orient] / 2 - bounds[width] / 2
+            : bounds.x +
+              bounds.width -
+              margin[this._orient] / 2 -
+              bounds[width] / 2
+      )
+      .y(
+        horizontal
+          ? this._orient === "bottom"
+            ? bounds.y + bounds.height - margin.bottom + p
+            : bounds.y
+          : bounds.y - margin[this._orient] / 2 + bounds[width] / 2
+      )
       .config(this._titleConfig)
       .render();
 
@@ -706,7 +942,6 @@ export default class Axis extends BaseClass {
     if (callback) setTimeout(callback, this._duration + 100);
 
     return this;
-
   }
 
   /**
@@ -726,7 +961,9 @@ export default class Axis extends BaseClass {
       @chainable
   */
   barConfig(_) {
-    return arguments.length ? (this._barConfig = Object.assign(this._barConfig, _), this) : this._barConfig;
+    return arguments.length
+      ? (this._barConfig = Object.assign(this._barConfig, _), this)
+      : this._barConfig;
   }
 
   /**
@@ -751,6 +988,16 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
+      @desc If *value* is specified, sets the abbreviate format in ticks.
+      @param {Boolean} [*value* = false]
+      @chainable
+   */
+  format(_) {
+    return arguments.length ? (this._format = _, this) : this._format;
+  }
+
+  /**
+      @memberof Axis
       @desc If *value* is specified, sets the grid values of the axis and returns the current class instance.
       @param {Array} [*value*]
       @chainable
@@ -766,7 +1013,9 @@ export default class Axis extends BaseClass {
       @chainable
   */
   gridConfig(_) {
-    return arguments.length ? (this._gridConfig = Object.assign(this._gridConfig, _), this) : this._gridConfig;
+    return arguments.length
+      ? (this._gridConfig = Object.assign(this._gridConfig, _), this)
+      : this._gridConfig;
   }
 
   /**
@@ -806,7 +1055,9 @@ export default class Axis extends BaseClass {
       @chainable
    */
   labelOffset(_) {
-    return arguments.length ? (this._labelOffset = _, this) : this._labelOffset;
+    return arguments.length
+      ? (this._labelOffset = _, this)
+      : this._labelOffset;
   }
 
   /**
@@ -816,7 +1067,9 @@ export default class Axis extends BaseClass {
       @chainable
    */
   labelRotation(_) {
-    return arguments.length ? (this._labelRotation = _, this) : this._labelRotation;
+    return arguments.length
+      ? (this._labelRotation = _, this)
+      : this._labelRotation;
   }
 
   /**
@@ -837,7 +1090,6 @@ export default class Axis extends BaseClass {
   */
   orient(_) {
     if (arguments.length) {
-
       const horizontal = ["top", "bottom"].includes(_),
             opps = {top: "bottom", right: "left", bottom: "top", left: "right"};
 
@@ -851,7 +1103,6 @@ export default class Axis extends BaseClass {
       };
 
       return this._orient = _, this;
-
     }
     return this._orient;
   }
@@ -883,7 +1134,9 @@ export default class Axis extends BaseClass {
       @chainable
   */
   paddingInner(_) {
-    return arguments.length ? (this._paddingInner = _, this) : this._paddingInner;
+    return arguments.length
+      ? (this._paddingInner = _, this)
+      : this._paddingInner;
   }
 
   /**
@@ -893,7 +1146,9 @@ export default class Axis extends BaseClass {
       @chainable
   */
   paddingOuter(_) {
-    return arguments.length ? (this._paddingOuter = _, this) : this._paddingOuter;
+    return arguments.length
+      ? (this._paddingOuter = _, this)
+      : this._paddingOuter;
   }
 
   /**
@@ -943,7 +1198,9 @@ export default class Axis extends BaseClass {
       @chainable
   */
   shapeConfig(_) {
-    return arguments.length ? (this._shapeConfig = assign(this._shapeConfig, _), this) : this._shapeConfig;
+    return arguments.length
+      ? (this._shapeConfig = assign(this._shapeConfig, _), this)
+      : this._shapeConfig;
   }
 
   /**
@@ -993,7 +1250,9 @@ export default class Axis extends BaseClass {
       @chainable
   */
   titleConfig(_) {
-    return arguments.length ? (this._titleConfig = Object.assign(this._titleConfig, _), this) : this._titleConfig;
+    return arguments.length
+      ? (this._titleConfig = Object.assign(this._titleConfig, _), this)
+      : this._titleConfig;
   }
 
   /**
@@ -1005,5 +1264,4 @@ export default class Axis extends BaseClass {
   width(_) {
     return arguments.length ? (this._width = _, this) : this._width;
   }
-
 }
