@@ -165,7 +165,7 @@ export default class Axis extends BaseClass {
     if (this._d3Scale) {
       const positiveRange = this._d3Scale.range();
       const size = positiveRange[1] - positiveRange[0];
-      ticks = this._scale === "time" ? ticks.concat(this._d3Scale.ticks(timeYear)) : ticks.concat(this._d3Scale.ticks(Math.floor(size$1 / tickScale(size$1))));
+      ticks = this._scale === "time" ? ticks.concat(this._d3Scale.ticks(timeYear)) : ticks.concat(this._d3Scale.ticks(Math.floor(size / tickScale(size))));
     }
 
     return ticks;
