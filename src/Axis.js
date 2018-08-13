@@ -6,6 +6,7 @@
 import {extent, max, min, range as d3Range} from "d3-array";
 import * as scales from "d3-scale";
 import {select} from "d3-selection";
+import {timeYear} from "d3-time";
 import {transition} from "d3-transition";
 
 import {assign, attrize, BaseClass, closest, constant, elem} from "d3plus-common";
@@ -164,7 +165,7 @@ export default class Axis extends BaseClass {
     if (this._d3Scale) {
       const positiveRange = this._d3Scale.range();
       const size = positiveRange[1] - positiveRange[0];
-      ticks = ticks.concat(this._d3Scale.ticks(Math.floor(size / tickScale(size))));
+      ticks = this._scale === "time" ? ticks.concat(this._d3Scale.ticks(timeYear)) : ticks.concat(this._d3Scale.ticks(Math.floor(size / tickScale(size))));
     }
 
     return ticks;
