@@ -295,7 +295,6 @@ export default class Axis extends BaseClass {
     labels = labels.slice();
 
     if (this._scale === "log") labels = labels.filter(t => Math.abs(t).toString().charAt(0) === "1" && (this._d3Scale ? t !== -1 : t !== 1));
-    if (this._scale === "time" && this._ticks) labels = ticks;
 
     const superscript = "⁰¹²³⁴⁵⁶⁷⁸⁹";
     const tickFormat = this._tickFormat ? this._tickFormat : d => {
