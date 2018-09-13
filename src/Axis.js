@@ -678,12 +678,12 @@ export default class Axis extends BaseClass {
       ]);
       if (lastB > range[lastI]) {
         const d = lastB - range[lastI];
-        if (this._range === void 0 || this._range[lastI] === void 0) {
+        if (this._range === void 0 || this._range[this._range.length - 1] === void 0) {
           this._size -= d;
           range[lastI] -= d;
         }
         else if (this._range) {
-          rangeOuter[lastI] += d;
+          rangeOuter[rangeOuter.length - 1] += d;
         }
       }
 
