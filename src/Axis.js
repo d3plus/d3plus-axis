@@ -762,12 +762,22 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
-      @desc If *value* is specified, sets the grid style of the axis and returns the current class instance.
+      @desc If *value* is specified, sets the grid config of the axis and returns the current class instance.
       @param {Object} [*value*]
       @chainable
   */
   gridConfig(_) {
     return arguments.length ? (this._gridConfig = Object.assign(this._gridConfig, _), this) : this._gridConfig;
+  }
+
+  /**
+      @memberof Axis
+      @desc If *value* is specified, sets the grid behavior of the axis when scale is logarithmic and returns the current class instance.
+      @param {Boolean} [*value* = false]
+      @chainable
+  */
+  gridLog(_) {
+    return arguments.length ? (this._gridLog = _, this) : this._gridLog;
   }
 
   /**
