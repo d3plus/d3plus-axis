@@ -41,6 +41,7 @@ export default class Axis extends BaseClass {
       "stroke": "#ccc",
       "stroke-width": 1
     };
+    this._gridLog = true;
     this._height = 400;
     this._labelOffset = false;
     this.orient("bottom");
@@ -582,7 +583,7 @@ export default class Axis extends BaseClass {
     this._group = group;
 
     const grid = elem("g.grid", {parent: group}).selectAll("line")
-      .data((this._gridSize !== 0 ? this._grid || ticks : []).map(d => ({id: d})), d => d.id);
+      .data((this._gridSize !== 0 ? this._grid || this._scale === "log" && !this._gridLog ? labels : ticks : []).map(d => ({id: d})), d => d.id);
 
     grid.exit().transition(t)
       .attr("opacity", 0)
@@ -632,7 +633,7 @@ export default class Axis extends BaseClass {
             width: horizontal ? space : labelWidth,
             height: horizontal ? labelHeight : space
           },
-          size: ticks.includes(d) ? size : 0,
+          size: labels.includes(d) ? size : 0,
           text: labels.includes(d) ? tickFormat(d) : false,
           tick: ticks.includes(d),
           [x]: xPos + (this._scale === "band" ? this._d3Scale.bandwidth() / 2 : 0),
