@@ -41,7 +41,7 @@ export default class Axis extends BaseClass {
       "stroke": "#ccc",
       "stroke-width": 1
     };
-    this._gridLog = true;
+    this._gridLog = false;
     this._height = 400;
     this._labelOffset = false;
     this.orient("bottom");
