@@ -38,6 +38,7 @@ export default class Axis extends BaseClass {
     };
     this._domain = [0, 10];
     this._duration = 600;
+    this._format = false;
     this._gridConfig = {
       "stroke": "#ccc",
       "stroke-width": 1
@@ -306,7 +307,10 @@ export default class Axis extends BaseClass {
         if (t !== "1") n = `${t} x ${n}`;
         return d < 0 ? `-${n}` : n;
       }
-      return this._d3Scale.tickFormat ? this._d3Scale.tickFormat(labels.length - 1)(d) : d;
+
+      if (!this._format) return this._d3Scale.tickFormat ? this._d3Scale.tickFormat(labels.length - 1)(d) : d;
+      else return formatAbbreviate(d);
+
     };
 
     if (this._scale === "time") {
