@@ -9,6 +9,7 @@ import {select} from "d3-selection";
 import {transition} from "d3-transition";
 
 import {assign, attrize, BaseClass, closest, constant, elem} from "d3plus-common";
+import {formatAbbreviate} from "d3plus-format";
 import * as shapes from "d3plus-shape";
 import {rtl as detectRTL, TextBox, textWidth, textWrap} from "d3plus-text";
 
@@ -748,6 +749,16 @@ export default class Axis extends BaseClass {
   */
   duration(_) {
     return arguments.length ? (this._duration = _, this) : this._duration;
+  }
+
+  /**
+      @memberof Axis
+      @desc If *value* is specified, sets the abbreviate format in ticks.
+      @param {Boolean} [*value* = false]
+      @chainable
+   */
+  format(_) {
+    return arguments.length ? (this._format = _, this) : this._format;
   }
 
   /**
