@@ -38,7 +38,6 @@ export default class Axis extends BaseClass {
     };
     this._domain = [0, 10];
     this._duration = 600;
-    this._format = false;
     this._gridConfig = {
       "stroke": "#ccc",
       "stroke-width": 1
@@ -308,9 +307,8 @@ export default class Axis extends BaseClass {
         return d < 0 ? `-${n}` : n;
       }
 
-      if (!this._format) return this._d3Scale.tickFormat ? this._d3Scale.tickFormat(labels.length - 1)(d) : d;
-      else return formatAbbreviate(d);
-
+      const n = this._d3Scale.tickFormat ? this._d3Scale.tickFormat(labels.length - 1)(d) : d;
+      return isNaN(parseFloat(n, 10)) ? n : formatAbbreviate(n);
     };
 
     if (this._scale === "time") {
@@ -753,16 +751,6 @@ export default class Axis extends BaseClass {
   */
   duration(_) {
     return arguments.length ? (this._duration = _, this) : this._duration;
-  }
-
-  /**
-      @memberof Axis
-      @desc If *value* is specified, sets the abbreviate format in ticks.
-      @param {Boolean} [*value* = false]
-      @chainable
-   */
-  format(_) {
-    return arguments.length ? (this._format = _, this) : this._format;
   }
 
   /**
