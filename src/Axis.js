@@ -307,7 +307,7 @@ export default class Axis extends BaseClass {
         return d < 0 ? `-${n}` : n;
       }
 
-      const n = this._d3Scale.tickFormat ? this._d3Scale.tickFormat(labels.length - 1)(d) : d;
+      const n = this._tickFormat ? this._d3Scale.tickFormat(labels.length - 1)(d) : d;
       return isNaN(parseFloat(n, 10)) ? n : formatAbbreviate(n);
     };
 
