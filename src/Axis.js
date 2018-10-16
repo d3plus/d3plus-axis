@@ -305,6 +305,9 @@ export default class Axis extends BaseClass {
         let n = `10 ${`${p}`.split("").map(c => superscript[c]).join("")}`;
         if (t !== "1") n = `${t} x ${n}`;
         return d < 0 ? `-${n}` : n;
+      } 
+      else if (this._scale === "time") {
+        return this._d3Scale.tickFormat(labels.length - 1)(d);
       }
 
       let n = this._d3Scale.tickFormat ? this._d3Scale.tickFormat(labels.length - 1)(d) : d;
