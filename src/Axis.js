@@ -309,8 +309,12 @@ export default class Axis extends BaseClass {
       else if (this._scale === "time") {
         return this._d3Scale.tickFormat(labels.length - 1)(d);
       }
+      else if (this._scale === "ordinal") {
+        return d;
+      }
 
       let n = this._d3Scale.tickFormat ? this._d3Scale.tickFormat(labels.length - 1)(d) : d;
+
       n = n.replace(/[^\d\.\-\+]/g, "") * 1;
       return isNaN(n) ? n : formatAbbreviate(n);
     };
