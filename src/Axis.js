@@ -307,7 +307,7 @@ export default class Axis extends BaseClass {
         return d < 0 ? `-${n}` : n;
       } 
       else if (this._scale === "time") {
-        return this._d3Scale.tickFormat(labels.length - 1)(d);
+        return this._d3Scale.tickFormat(labels.length - 1, this._tickSpecifier)(d);
       }
       else if (this._scale === "ordinal") {
         return d;
