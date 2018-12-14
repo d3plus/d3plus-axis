@@ -1000,8 +1000,8 @@ export default class Axis extends BaseClass {
   }
 
   /**
-      @memberof Timeline
-      @desc Allows to set ticks using custom specifiers.  If *value* is not specified, the default time format is returned.
+      @memberof Axis
+      @desc Sets the tick specifier for the [tickFormat](https://github.com/d3/d3-scale#continuous_tickFormat) function. If this method is called without any arguments, the default tick specifier is returned.
       @param {String} [*value* = undefined]
       @chainable
   */
