@@ -78,6 +78,7 @@ export default class Axis extends BaseClass {
       width: d => d.tick ? 8 : 0
     };
     this._tickSize = 5;
+    this._tickSpecifier = undefined;
     this._titleClass = new TextBox();
     this._titleConfig = {
       fontSize: 12,
@@ -996,6 +997,16 @@ export default class Axis extends BaseClass {
   */
   tickSize(_) {
     return arguments.length ? (this._tickSize = _, this) : this._tickSize;
+  }
+
+  /**
+      @memberof Timeline
+      @desc Allows to set ticks using custom specifiers.  If *value* is not specified, the default time format is returned.
+      @param {String} [*value* = undefined]
+      @chainable
+  */
+  tickSpecifier(_) {
+    return arguments.length ? (this._tickSpecifier = _, this) : this._tickSpecifier;
   }
 
   /**
