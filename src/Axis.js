@@ -3,7 +3,9 @@
     @see https://github.com/d3plus/d3plus-common#BaseClass
 */
 
-import {extent, max, min, range as d3Range} from "d3-array";
+import {extent, max, min, range as d3Range, ticks as d3Ticks} from "d3-array";
+import {timeYear, timeMonth, timeWeek, timeDay, timeHour, timeMinute, timeSecond} from "d3-time";
+import {timeFormat} from "d3-time-format";
 import * as scales from "d3-scale";
 import {select} from "d3-selection";
 import {transition} from "d3-transition";
@@ -11,9 +13,18 @@ import {transition} from "d3-transition";
 import {assign, attrize, BaseClass, closest, constant, elem} from "d3plus-common";
 import {formatAbbreviate} from "d3plus-format";
 import * as shapes from "d3plus-shape";
-import {rtl as detectRTL, TextBox, textWidth, textWrap} from "d3plus-text";
+import {rtl as detectRTL, TextBox, textWrap} from "d3plus-text";
 
 import {default as date} from "./date";
+
+const formatDay = timeFormat("%a %d"),
+      formatHour = timeFormat("%I %p"),
+      formatMillisecond = timeFormat(".%L"),
+      formatMinute = timeFormat("%I:%M"),
+      formatMonth = timeFormat("%b"),
+      formatSecond = timeFormat(":%S"),
+      formatWeek = timeFormat("%b %d"),
+      formatYear = timeFormat("%Y");
 
 /**
     @class Axis
@@ -44,7 +55,7 @@ export default class Axis extends BaseClass {
     };
     this._gridLog = false;
     this._height = 400;
-    this._labelOffset = false;
+    this._labelOffset = true;
     this.orient("bottom");
     this._outerBounds = {width: 0, height: 0, x: 0, y: 0};
     this._padding = 5;
@@ -203,6 +214,10 @@ export default class Axis extends BaseClass {
   */
   render(callback) {
 
+    /**
+     * Creates an SVG element to contain the axis if none
+     * has been specified using the "select" method.
+     */
     if (this._select === void 0) {
       this.select(select("body").append("svg")
         .attr("width", `${this._width}px`)
@@ -210,105 +225,224 @@ export default class Axis extends BaseClass {
         .node());
     }
 
+    /**
+     * Declares some commonly used variables.
+     */
     const {width, height, x, y, horizontal, opposite} = this._position,
           clipId = `d3plus-Axis-clip-${this._uuid}`,
           flip = ["top", "left"].includes(this._orient),
           p = this._padding,
           parent = this._select,
+          rangeOuter = [p, this[`_${width}`] - p],
+          sizeOuter = rangeOuter[1] - rangeOuter[0],
           t = transition().duration(this._duration);
 
-    let range = this._range ? this._range.slice() : [undefined, undefined];
-    if (range[0] === void 0) range[0] = p;
-    if (range[1] === void 0) range[1] = this[`_${width}`] - p;
-    this._size = range[1] - range[0];
-    if (this._scale === "ordinal" && this._domain.length > range.length) {
-      range = d3Range(this._domain.length).map(d => this._size * (d / (this._domain.length - 1)) + range[0]);
-    }
+    const tickValue = this._shape === "Circle" ? this._shapeConfig.r
+      : this._shape === "Rect" ? this._shapeConfig[width]
+      : this._shapeConfig.strokeWidth;
+    const tickGet = typeof tickValue !== "function" ? () => tickValue : tickValue;
 
+    /**
+     * Zeros out the margins for re-calculation.
+     */
     const margin = this._margin = {top: 0, right: 0, bottom: 0, left: 0};
 
+    let labels, range, ticks;
+
+    /**
+     * (Re)calculates the internal d3 scale
+     * @param {} newRange
+     */
+    function setScale(newRange = this._range) {
+
+      /**
+       * Calculates the internal "range" array to use, including
+       * fallbacks if not specified with the "range" method.
+       */
+      range = newRange ? newRange.slice() : [undefined, undefined];
+      const [minRange, maxRange] = rangeOuter;
+      if (range[0] === void 0 || range[0] < minRange) range[0] = minRange;
+      if (range[1] === void 0 || range[1] > maxRange) range[1] = maxRange;
+      if (this._scale === "ordinal" && this._domain.length > range.length) {
+        if (newRange === this._range) {
+          const buckets = this._domain.length + 1;
+          range = d3Range(buckets)
+            .map(d => sizeOuter * (d / (buckets - 1)) + range[0])
+            .slice(1, this._domain.length + 1);
+          range = range.map(d => d - range[0] / 2);
+        }
+        else {
+          const buckets = this._domain.length;
+          const size = range[1] - range[0];
+          range = d3Range(buckets)
+            .map(d => range[0] + size * (d / (buckets - 1)));
+        }
+      }
+      else if (newRange === this._range) {
+        const size = range[1] - range[0];
+        const tickScale = scales.scaleSqrt().domain([10, 400]).range([10, 50]);
+        const domain = this._scale === "time" ? this._domain.map(date) : this._domain;
+        const scaleTicks = d3Ticks(domain[0], domain[1], Math.floor(size / tickScale(size)));
+        ticks = (this._ticks
+          ? this._scale === "time" ? this._ticks.map(date) : this._ticks
+          : scaleTicks).slice();
+
+        labels = (this._labels
+          ? this._scale === "time" ? this._labels.map(date) : this._labels
+          : scaleTicks).slice();
+        const buckets = labels.length;
+        const pad = Math.ceil(size / buckets / 2);
+        range = [range[0] + pad, range[1] - pad];
+      }
+
+      /**
+       * Sets up the initial d3 scale, using this._domain and the
+       * previously defined range variable.
+       */
+      this._d3Scale = scales[`scale${this._scale.charAt(0).toUpperCase()}${this._scale.slice(1)}`]()
+        .domain(this._scale === "time" ? this._domain.map(date) : this._domain);
+      if (this._d3Scale.round) this._d3Scale.round(true);
+      if (this._d3Scale.paddingInner) this._d3Scale.paddingInner(this._paddingInner);
+      if (this._d3Scale.paddingOuter) this._d3Scale.paddingOuter(this._paddingOuter);
+
+      if (this._d3Scale.rangeRound) this._d3Scale.rangeRound(range);
+      else this._d3Scale.range(range);
+
+      /**
+       * Constructs a separate "negative only" scale for logarithmic
+       * domains, as they cannot pass zero.
+       */
+      this._d3ScaleNegative = null;
+      if (this._scale === "log") {
+        const domain = this._d3Scale.domain();
+        if (domain[0] === 0) domain[0] = 1;
+        if (domain[domain.length - 1] === 0) domain[domain.length - 1] = -1;
+        const range = this._d3Scale.range();
+        if (domain[0] < 0 && domain[domain.length - 1] < 0) {
+          this._d3ScaleNegative = this._d3Scale.copy()
+            .domain(domain)
+            .range(range);
+          this._d3Scale = null;
+        }
+        else if (domain[0] > 0 && domain[domain.length - 1] > 0) {
+          this._d3Scale
+            .domain(domain)
+            .range(range);
+        }
+        else {
+          const percentScale = scales.scaleLog().domain([1, domain[domain[1] > 0 ? 1 : 0]]).range([0, 1]);
+          const leftPercentage = percentScale(Math.abs(domain[domain[1] < 0 ? 1 : 0]));
+          let zero = leftPercentage / (leftPercentage + 1) * (range[1] - range[0]);
+          if (domain[0] > 0) zero = range[1] - range[0] - zero;
+          this._d3ScaleNegative = this._d3Scale.copy();
+          (domain[0] < 0 ? this._d3Scale : this._d3ScaleNegative)
+            .domain([Math.sign(domain[1]), domain[1]])
+            .range([range[0] + zero, range[1]]);
+          (domain[0] < 0 ? this._d3ScaleNegative : this._d3Scale)
+            .domain([domain[0], Math.sign(domain[0])])
+            .range([range[0], range[0] + zero]);
+        }
+      }
+
+      /**
+       * Determines the of values array to use
+       * for the "ticks" and the "labels"
+       */
+      ticks = (this._ticks
+        ? this._scale === "time" ? this._ticks.map(date) : this._ticks
+        : (this._d3Scale ? this._d3Scale.ticks : this._d3ScaleNegative.ticks)
+          ? this._getTicks() : this._domain).slice();
+
+      labels = (this._labels
+        ? this._scale === "time" ? this._labels.map(date) : this._labels
+        : (this._d3Scale ? this._d3Scale.ticks : this._d3ScaleNegative.ticks)
+          ? this._getTicks() : ticks).slice();
+
+      if (this._scale === "log") {
+        labels = labels.filter(t =>
+          Math.abs(t).toString().charAt(0) === "1" &&
+          (this._d3Scale ? t !== -1 : t !== 1)
+        );
+      }
+      else if (this._scale === "time") {
+        ticks = ticks.map(Number);
+        labels = labels.map(Number);
+      }
+
+      ticks = ticks.sort((a, b) => this._getPosition(a) - this._getPosition(b));
+      labels = labels.sort((a, b) => this._getPosition(a) - this._getPosition(b));
+
+      /**
+       * Removes ticks when they overlap other ticks.
+       */
+      const pixels = [];
+      this._availableTicks = ticks;
+      ticks.forEach((d, i) => {
+        let s = tickGet({id: d, tick: true}, i);
+        if (this._shape === "Circle") s *= 2;
+        const t = this._getPosition(d);
+        if (!pixels.length || Math.abs(closest(t, pixels) - t) > s * 2) pixels.push(t);
+        else pixels.push(false);
+      });
+      ticks = ticks.filter((d, i) => pixels[i] !== false);
+      this._visibleTicks = ticks;
+
+    }
+    setScale.bind(this)();
+
+    /**
+     * Calculates the space available for a given label.
+     * @param {Object} datum
+     */
+    function calculateSpace(datum, diff = 1) {
+      const {i, position} = datum;
+      if (this._scale === "band") {
+        return this._d3Scale.bandwidth();
+      }
+      else {
+        const prevPosition = i - diff < 0 ? rangeOuter[0] : position - (position - textData[i - diff].position) / 2;
+        const prevSpace = Math.abs(position - prevPosition);
+        const nextPosition = i + diff > textData.length - 1 ? rangeOuter[1] : position - (position - textData[i + diff].position) / 2;
+        const nextSpace = Math.abs(position - nextPosition);
+        return min([prevSpace, nextSpace]) * 2;
+      }
+    }
+
+    /**
+     * Pre-calculates the size of the title, if defined, in order
+     * to adjust the internal margins.
+     */
     if (this._title) {
       const {fontFamily, fontSize, lineHeight} = this._titleConfig;
       const titleWrap = textWrap()
         .fontFamily(typeof fontFamily === "function" ? fontFamily() : fontFamily)
         .fontSize(typeof fontSize === "function" ? fontSize() : fontSize)
         .lineHeight(typeof lineHeight === "function" ? lineHeight() : lineHeight)
-        .width(this._size)
+        .width(sizeOuter)
         .height(this[`_${height}`] - this._tickSize - p);
       const lines = titleWrap(this._title).lines.length;
       margin[this._orient] = lines * titleWrap.lineHeight() + p;
     }
 
-    this._d3Scale = scales[`scale${this._scale.charAt(0).toUpperCase()}${this._scale.slice(1)}`]()
-      .domain(this._scale === "time" ? this._domain.map(date) : this._domain);
-
-    if (this._d3Scale.rangeRound) this._d3Scale.rangeRound(range);
-    else this._d3Scale.range(range);
-
-    if (this._d3Scale.round) this._d3Scale.round(true);
-    if (this._d3Scale.paddingInner) this._d3Scale.paddingInner(this._paddingInner);
-    if (this._d3Scale.paddingOuter) this._d3Scale.paddingOuter(this._paddingOuter);
-
-    this._d3ScaleNegative = null;
-    if (this._scale === "log") {
-      const domain = this._d3Scale.domain();
-      if (domain[0] === 0) domain[0] = 1;
-      if (domain[domain.length - 1] === 0) domain[domain.length - 1] = -1;
-      const range = this._d3Scale.range();
-      if (domain[0] < 0 && domain[domain.length - 1] < 0) {
-        this._d3ScaleNegative = this._d3Scale.copy()
-          .domain(domain)
-          .range(range);
-        this._d3Scale = null;
-      }
-      else if (domain[0] > 0 && domain[domain.length - 1] > 0) {
-        this._d3Scale
-          .domain(domain)
-          .range(range);
-      }
-      else {
-        const percentScale = scales.scaleLog().domain([1, domain[domain[1] > 0 ? 1 : 0]]).range([0, 1]);
-        const leftPercentage = percentScale(Math.abs(domain[domain[1] < 0 ? 1 : 0]));
-        let zero = leftPercentage / (leftPercentage + 1) * (range[1] - range[0]);
-        if (domain[0] > 0) zero = range[1] - range[0] - zero;
-        this._d3ScaleNegative = this._d3Scale.copy();
-        (domain[0] < 0 ? this._d3Scale : this._d3ScaleNegative)
-          .domain([Math.sign(domain[1]), domain[1]])
-          .range([range[0] + zero, range[1]]);
-        (domain[0] < 0 ? this._d3ScaleNegative : this._d3Scale)
-          .domain([domain[0], Math.sign(domain[0])])
-          .range([range[0], range[0] + zero]);
-      }
-    }
-
-    let ticks = this._ticks
-      ? this._scale === "time" ? this._ticks.map(date) : this._ticks
-      : (this._d3Scale ? this._d3Scale.ticks : this._d3ScaleNegative.ticks)
-        ? this._getTicks()
-        : this._domain;
-
-    let labels = this._labels
-      ? this._scale === "time" ? this._labels.map(date) : this._labels
-      : (this._d3Scale ? this._d3Scale.ticks : this._d3ScaleNegative.ticks)
-        ? this._getTicks()
-        : ticks;
-
-    ticks = ticks.slice();
-    labels = labels.slice();
-
-    if (this._scale === "log") labels = labels.filter(t => Math.abs(t).toString().charAt(0) === "1" && (this._d3Scale ? t !== -1 : t !== 1));
-
-    const superscript = "⁰¹²³⁴⁵⁶⁷⁸⁹";
+    /**
+     * Constructs the tick formatter function.
+     */
     const tickFormat = this._tickFormat ? this._tickFormat : d => {
       if (this._scale === "log") {
         const p = Math.round(Math.log(Math.abs(d)) / Math.LN10);
         const t = Math.abs(d).toString().charAt(0);
-        let n = `10 ${`${p}`.split("").map(c => superscript[c]).join("")}`;
+        let n = `10 ${`${p}`.split("").map(c => "⁰¹²³⁴⁵⁶⁷⁸⁹"[c]).join("")}`;
         if (t !== "1") n = `${t} x ${n}`;
         return d < 0 ? `-${n}` : n;
-      } 
+      }
       else if (this._scale === "time") {
-        return this._d3Scale.tickFormat(labels.length - 1, this._tickSpecifier)(d);
+        return (timeSecond(d) < d ? formatMillisecond
+          : timeMinute(d) < d ? formatSecond
+          : timeHour(d) < d ? formatMinute
+          : timeDay(d) < d ? formatHour
+          : timeMonth(d) < d ? timeWeek(d) < d ? formatDay : formatWeek
+          : timeYear(d) < d ? formatMonth
+          : formatYear)(d);
       }
       else if (this._scale === "ordinal") {
         return d;
@@ -319,37 +453,6 @@ export default class Axis extends BaseClass {
       n = n.replace(/[^\d\.\-\+]/g, "") * 1;
       return isNaN(n) ? n : formatAbbreviate(n);
     };
-
-    if (this._scale === "time") {
-      ticks = ticks.map(Number);
-      labels = labels.map(Number);
-    }
-    else if (this._scale === "ordinal") {
-      labels = labels.filter(label => ticks.includes(label));
-    }
-
-    ticks = ticks.sort((a, b) => this._getPosition(a) - this._getPosition(b));
-    labels = labels.sort((a, b) => this._getPosition(a) - this._getPosition(b));
-
-    const tickSize = this._shape === "Circle" ? this._shapeConfig.r
-      : this._shape === "Rect" ? this._shapeConfig[width]
-      : this._shapeConfig.strokeWidth;
-
-    const tickGet = typeof tickSize !== "function" ? () => tickSize : tickSize;
-
-    const pixels = [];
-    this._availableTicks = ticks;
-    ticks.forEach((d, i) => {
-      let s = tickGet({id: d, tick: true}, i);
-      if (this._shape === "Circle") s *= 2;
-      const t = this._getPosition(d);
-      if (!pixels.length || Math.abs(closest(t, pixels) - t) > s * 2) pixels.push(t);
-      else pixels.push(false);
-    });
-
-    ticks = ticks.filter((d, i) => pixels[i] !== false);
-
-    this._visibleTicks = ticks;
 
     let hBuff = this._shape === "Circle"
           ? typeof this._shapeConfig.r === "function" ? this._shapeConfig.r({tick: true}) : this._shapeConfig.r
@@ -363,229 +466,151 @@ export default class Axis extends BaseClass {
     if (typeof wBuff === "function") wBuff = max(ticks.map(wBuff));
     if (this._shape !== "Circle") wBuff /= 2;
 
-    if (this._scale === "band") {
-      this._space = this._d3Scale.bandwidth();
-    }
-    else if (labels.length > 1) {
-      this._space = 0;
-      for (let i = 0; i < labels.length - 1; i++) {
-        const s = this._getPosition(labels[i + 1]) - this._getPosition(labels[i]);
-        if (s > this._space) this._space = s;
-      }
-    }
-    else this._space = this._size;
+    /**
+     * Calculates the space each label would take up, given
+     * the provided this._space size.
+     */
+    let textData = labels
+      .map((d, i) => {
 
-    // Measures size of ticks
-    let textData = labels.map((d, i) => {
+        const fF = this._shapeConfig.labelConfig.fontFamily(d, i),
+              fS = this._shapeConfig.labelConfig.fontSize(d, i),
+              position = this._getPosition(d);
 
-      const f = this._shapeConfig.labelConfig.fontFamily(d, i),
-            s = this._shapeConfig.labelConfig.fontSize(d, i);
+        const lineHeight = this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : fS * 1.4;
+        return {d, i, fF, fS, lineHeight, position};
+
+      });
+
+    /**
+     * Calculates the text wrapping and size of a given textData object.
+     * @param {Object} datum
+     */
+    function calculateLabelSize(datum) {
+      const {d, i, fF, fS, rotate, space} = datum;
+
+      const h = rotate ? "width" : "height",
+            w = rotate ? "height" : "width";
 
       const wrap = textWrap()
-        .fontFamily(f)
-        .fontSize(s)
+        .fontFamily(fF)
+        .fontSize(fS)
         .lineHeight(this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : undefined)
-        .width(horizontal ? this._space * 2 : this._maxSize ? this._maxSize - hBuff - p - this._margin.left - this._margin.right - this._tickSize : this._width - hBuff - p)
-        .height(horizontal ? this._height - hBuff - p : this._space * 2);
+        [w](horizontal ? space : min([this._maxSize, this._width]) - hBuff - p - this._margin.left - this._margin.right)
+        [h](horizontal ? min([this._maxSize, this._height]) - hBuff - p - this._margin.top - this._margin.bottom : space);
 
       const res = wrap(tickFormat(d));
       res.lines = res.lines.filter(d => d !== "");
-      res.d = d;
-      res.fS = s;
-      res.width = res.lines.length
-        ? Math.ceil(max(res.lines.map(line => textWidth(line, {"font-family": f, "font-size": s})))) + s / 4
-        : 0;
-      res.height = res.lines.length ? Math.ceil(res.lines.length * (wrap.lineHeight() + 1)) : 0;
-      res.offset = 0;
-      res.hidden = false;
+
+      res.width = res.lines.length ? Math.ceil(max(res.widths)) + fS / 4 : 0;
       if (res.width % 2) res.width++;
+
+      res.height = res.lines.length ? Math.ceil(res.lines.length * wrap.lineHeight()) + fS / 4 : 0;
+      if (res.height % 2) res.height++;
 
       return res;
 
-    });
-
-    const labelHeight = max(textData, t => t.height) || 0;
-
-    if (horizontal && typeof this._labelRotation === "undefined") {
-      for (let i = 0; i < labels.length; i++) {
-        const d = labels[i];
-
-        const f = this._shapeConfig.labelConfig.fontFamily(d, i),
-              s = this._shapeConfig.labelConfig.fontSize(d, i);
-
-        const wrap = textWrap()
-          .fontFamily(f)
-          .fontSize(s)
-          .lineHeight(this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : undefined)
-          .width(this._space)
-          .height(labelHeight);
-
-        const res = wrap(tickFormat(d));
-
-        const isTruncated = res.truncated;
-
-        const xPos = this._getPosition(d);
-        const prev = labels[i - 1] || false;
-        const next = labels[i + 1] || false;
-
-        const maxWidth = Math.max(res.widths);
-
-        const isOverlapping = prev ? xPos - maxWidth < this._getPosition(prev) + maxWidth : next ? xPos + maxWidth > this._getPosition(next) - maxWidth : false;
-
-        const isRotated = isTruncated || isOverlapping;
-
-        if (isRotated) {
-          this._rotateLabels = true;
-          break;
-        }
-      }
     }
-    else if (horizontal) this._rotateLabels = this._labelRotation;
+
+    textData = textData
+      .map(datum => {
+        datum.rotate = this._labelRotation;
+        datum.space = calculateSpace.bind(this)(datum);
+        const res = calculateLabelSize.bind(this)(datum);
+        return Object.assign(res, datum);
+      });
+
+    this._rotateLabels = horizontal && this._labelRotation === undefined
+      ? textData.some(d => d.truncated) : this._labelRotation;
 
     if (this._rotateLabels) {
-      textData = labels.map((d, i) => {
-        const text = textData[i];
-
-        const f = this._shapeConfig.labelConfig.fontFamily(d, i),
-              s = this._shapeConfig.labelConfig.fontSize(d, i);
-
-        const lineHeight = this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : s * 1.4;
-
-        const lineTest = textWrap()
-            .fontFamily(f)
-            .fontSize(s)
-            .lineHeight(this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : undefined)
-            .height(lineHeight * 2 + 1)
-            .width(this._maxSize ? this._maxSize - this._margin.top - this._margin.bottom - this._tickSize : this._height);
-
-        const xPos = this._getPosition(d);
-        const prev = labels[i - 1] || false;
-        const next = labels[i + 1] || false;
-
-        const fitsTwoLines = prev ? xPos - lineHeight * 2 > this._getPosition(prev) + lineHeight * 2 : next ? xPos + lineHeight * 2 < this._getPosition(next) - lineHeight * 2 : true;
-
-        const lineTestResult = lineTest(tickFormat(d));
-
-        const isTwoLine = lineTestResult.words.length > 1 && lineTestResult.widths[0] > 80;
-        const height = fitsTwoLines && isTwoLine ? lineTestResult.widths[0] / 1.6 : lineTestResult.widths[0];
-        const width = fitsTwoLines && isTwoLine ? lineHeight * 2 : lineHeight;
-
-        return Object.assign(text, {
-          height: height || 0,
-          lineHeight,
-          numLines: fitsTwoLines && isTwoLine ? 2 : 1,
-          width: width || 0
+      textData = textData
+        .map(datum => {
+          datum.rotate = true;
+          const res = calculateLabelSize.bind(this)(datum);
+          return Object.assign(datum, res);
         });
-      });
     }
 
+    /**
+     * "spillover" will contain the pixel spillover of the first and last label,
+     * and then adjust the scale range accordingly.
+     */
+    const spillover = [];
+    for (let index = 0; index < 2; index++) {
+      const datum = textData[index ? textData.length - 1 : 0];
+      const {height, position, rotate, width} = datum;
+      const compPosition = index ? rangeOuter[1] : rangeOuter[0];
+      const halfSpace = (rotate || !horizontal ? height : width) / 2;
+      const spill = index ? position + halfSpace - compPosition : position - halfSpace - compPosition;
+      spillover.push(Math.floor(spill));
+      if (spillover.length === 2) break;
+    }
+    if (spillover.some(d => d !== 0)) {
+      const first = range[0];
+      const last = range[range.length - 1];
+      setScale.bind(this)([first - spillover[0], last - spillover[1]]);
+      textData
+        .forEach(d => {
+          d.position = this._getPosition(d.d);
+        });
+      textData = textData
+        .map(datum => {
+          datum.position = this._getPosition(datum.d);
+          datum.space = calculateSpace.bind(this)(datum);
+          const res = calculateLabelSize.bind(this)(datum);
+          return Object.assign(res, datum);
+        });
+    }
 
-    textData.forEach((d, i) => {
-      if (i) {
+    const labelHeight = max(textData, t => t.height) || 0;
+    this._rotateLabels = horizontal && this._labelRotation === undefined
+      ? textData.some(datum => {
+        const {i, height, position, truncated} = datum;
         const prev = textData[i - 1];
-        if (!prev.offset && this._getPosition(d.d) - d[width] / 2 < this._getPosition(prev.d) + prev[width] / 2) {
-          d.offset = prev[height] + this._padding;
-        }
-      }
-    });
-    if (this._labelOffset) {
-      textData.forEach((d, i) => {
-        if (i) {
-          const prev = textData[i - 1];
-          if (!prev.offset && this._getPosition(d.d) - d[width] / 2 < this._getPosition(prev.d) + prev[width] / 2) {
-            d.offset = prev[height] + this._padding;
-          }
-        }
-      });
+        return truncated || i && prev.position + prev.height / 2 > position - height / 2;
+      }) : this._labelRotation;
 
-      const maxOffset = max(textData, d => d.offset);
-      if (maxOffset) {
-        textData.forEach(d => {
-          if (d.offset) {
-            d.offset = maxOffset;
-            d[height] += maxOffset;
+    if (this._rotateLabels) {
+
+      let offset = 0;
+      textData = textData
+        .map(datum => {
+
+          datum.space = calculateSpace.bind(this)(datum, 2);
+          const res = calculateLabelSize.bind(this)(datum);
+          datum = Object.assign(datum, res);
+
+          const prev = textData[datum.i - 1];
+          if (!prev) {
+            offset = 1;
           }
+          else if (prev.position + prev.height / 2 > datum.position) {
+            if (offset) {
+              datum.offset = prev.width;
+              offset = 0;
+            }
+            else offset = 1;
+          }
+
+          return datum;
+
         });
-      }
-    }
-
-    // Calculates new range, based on any text that may be overflowing.
-    const rangeOuter = range.slice();
-    const lastI = range.length - 1;
-    if (this._scale !== "band" && textData.length) {
-
-      const first = textData[0],
-            last = textData[textData.length - 1];
-
-      const firstB = min([this._getPosition(first.d) - first[width] / 2, range[0] - wBuff]);
-      if (firstB < range[0]) {
-        const d = range[0] - firstB;
-        if (this._range === void 0 || this._range[0] === void 0) {
-          this._size -= d;
-          range[0] += d;
-        }
-        else if (this._range) {
-          rangeOuter[0] -= d;
-        }
-      }
-
-      const lastB = max([this._getPosition(last.d) + last[width] / 2, range[lastI] + wBuff]);
-      if (lastB > range[lastI]) {
-        const d = lastB - range[lastI];
-        if (this._range === void 0 || this._range[this._range.length - 1] === void 0) {
-          this._size -= d;
-          range[lastI] -= d;
-        }
-        else if (this._range) {
-          rangeOuter[rangeOuter.length - 1] += d;
-        }
-      }
-
-      if (range.length > 2) range = d3Range(this._domain.length).map(d => this._size * (d / (range.length - 1)) + range[0]);
-      range = range.map(Math.round);
-      if (this._d3ScaleNegative) {
-        const negativeRange = this._d3ScaleNegative.range();
-        this._d3ScaleNegative[this._d3ScaleNegative.rangeRound ? "rangeRound" : "range"](
-          this._d3Scale && this._d3Scale.range()[0] < negativeRange[0]
-            ? [negativeRange[0], range[1]]
-            : [range[0], this._d3Scale ? negativeRange[1] : range[1]]
-        );
-        if (this._d3Scale) {
-          const positiveRange = this._d3Scale.range();
-          this._d3Scale[this._d3Scale.rangeRound ? "rangeRound" : "range"](
-            range[0] < negativeRange[0]
-              ? [range[0], positiveRange[1]]
-              : [positiveRange[0], range[1]]
-          );
-        }
-      }
-      else {
-        this._d3Scale[this._d3Scale.rangeRound ? "rangeRound" : "range"](range);
-      }
 
     }
 
-    if (this._scale === "band") {
-      this._space = this._d3Scale.bandwidth();
-    }
-    else if (labels.length > 1) {
-      this._space = 0;
-      for (let i = 0; i < labels.length - 1; i++) {
-        const s = this._getPosition(labels[i + 1]) - this._getPosition(labels[i]);
-        if (s > this._space) this._space = s;
-      }
-    }
-    else this._space = this._size;
+    const globalOffset = this._labelOffset ? max(textData, d => d.offset || 0) : 0;
+    textData.forEach(datum => datum.offset = datum.offset ? globalOffset : 0);
 
     const tBuff = this._shape === "Line" ? 0 : hBuff;
     const bounds = this._outerBounds = {
-      [height]: (max(textData, t => Math.ceil(t[height])) || 0) + (textData.length ? p : 0),
-      [width]: rangeOuter[lastI] - rangeOuter[0],
+      [height]: (max(textData, t => Math.ceil(t[t.rotate || !horizontal ? "width" : "height"] + t.offset)) || 0) + (textData.length ? p : 0),
+      [width]: rangeOuter[rangeOuter.length - 1] - rangeOuter[0],
       [x]: rangeOuter[0]
     };
 
     margin[this._orient] += hBuff;
-    margin[opposite] = this._gridSize !== void 0 ? max([this._gridSize, tBuff]) : this[`_${height}`] - margin[this._orient] - bounds[height] - p;
+    margin[opposite] = this._gridSize !== undefined ? max([this._gridSize, tBuff]) : this[`_${height}`] - margin[this._orient] - bounds[height] - p;
     bounds[height] += margin[opposite] + margin[this._orient];
     bounds[y] = this._align === "start" ? this._padding
       : this._align === "end" ? this[`_${height}`] - bounds[height] - this._padding
@@ -612,39 +637,39 @@ export default class Axis extends BaseClass {
 
     const labelOnly = labels.filter((d, i) => textData[i].lines.length && !ticks.includes(d));
 
+    const rotated = textData.some(d => d.rotate);
     let tickData = ticks.concat(labelOnly)
       .map(d => {
-        const data = textData.filter(td => td.d === d);
-        const dataIndex = data.length ? textData.indexOf(data[0]) : undefined;
+
+        const data = textData.find(td => td.d === d);
         const xPos = this._getPosition(d);
+        const space = data ? data.space : 0;
+        const lines = data ? data.lines.length : 1;
+        const lineHeight = data ? data.lineHeight : 1;
 
-        let labelOffset = data.length && this._labelOffset ? data[0].offset : 0;
+        const labelOffset = data && this._labelOffset ? data.offset : 0;
 
-        const labelWidth = horizontal ? this._space : bounds.width - margin[this._position.opposite] - hBuff - margin[this._orient] + p;
-
-        let prev = data.length && dataIndex > 0 ? textData.filter((td, ti) => !td.hidden && td.offset >= labelOffset && ti < dataIndex) : false;
-        prev = prev.length ? prev[prev.length - 1] : false;
-        let next = data.length && dataIndex < textData.length - 1 ? textData.filter((td, ti) => !td.hidden && td.offset >= labelOffset && ti > dataIndex) : false;
-        next = next.length ? next[0] : false;
-
-        const space = Math.min(prev ? xPos - this._getPosition(prev.d) : labelWidth, next ? this._getPosition(next.d) - xPos : labelWidth);
-        if (data.length && data[0].width > labelWidth) {
-          data[0].hidden = true;
-          data[0].offset = labelOffset = 0;
-        }
+        const labelWidth = horizontal ? space : bounds.width - margin[this._position.opposite] - hBuff - margin[this._orient] + p;
 
         const offset = margin[opposite],
               size = (hBuff + labelOffset) * (flip ? -1 : 1),
               yPos = flip ? bounds[y] + bounds[height] - offset : bounds[y] + offset;
 
-        let tickConfig = {
+        const tickConfig = {
           id: d,
-          labelBounds: {
-            x: horizontal ? -space / 2 : this._orient === "left" ? -labelWidth - p + size : size + p,
-            y: horizontal ? this._orient === "bottom" ? size + p : size - p - labelHeight : -space / 2,
-            width: horizontal ? space : labelWidth,
-            height: horizontal ? labelHeight : space
-          },
+          labelBounds: rotated && data
+            ? {
+              x: -data.width / 2 + data.fS / 4,
+              y: this._orient === "bottom" ? size + p + (data.width - lineHeight * lines) / 2 : size - p * 2 - (data.width + lineHeight * lines) / 2,
+              width: data.width,
+              height: data.height
+            } : {
+              x: horizontal ? -space / 2 : this._orient === "left" ? -labelWidth - p + size : size + p,
+              y: horizontal ? this._orient === "bottom" ? size + p : size - p - labelHeight : -space / 2,
+              width: horizontal ? space : labelWidth,
+              height: horizontal ? labelHeight : space
+            },
+          rotate: data ? data.rotate : false,
           size: labels.includes(d) ? size : 0,
           text: labels.includes(d) ? tickFormat(d) : false,
           tick: ticks.includes(d),
@@ -652,23 +677,8 @@ export default class Axis extends BaseClass {
           [y]: yPos
         };
 
-        const text = this._rotateLabels && textData.find(val => val.d === d);
-        if (text) {
-          const {lineHeight, numLines} = text;
-          const width = text.height;
-          const height = text.width;
-
-          tickConfig = Object.assign(tickConfig, {
-            labelBounds: {
-              x: -width / 2,
-              y: this._orient === "bottom" ? size + p + (width - lineHeight * numLines) / 2 : size - p * 2 - (width + lineHeight * numLines) / 2,
-              width,
-              height: height + 1
-            }
-          });
-        }
-
         return tickConfig;
+
       });
 
     if (this._shape === "Line") {
@@ -684,7 +694,7 @@ export default class Axis extends BaseClass {
       .duration(this._duration)
       .labelConfig({
         ellipsis: d => d && d.length ? `${d}...` : "",
-        rotate: this._rotateLabels ? -90 : 0
+        rotate: d => d.rotate ? -90 : 0
       })
       .select(elem("g.ticks", {parent: group}).node())
       .config(this._shapeConfig)
