@@ -260,15 +260,20 @@ export default class Axis extends BaseClass {
        * fallbacks if not specified with the "range" method.
        */
       range = newRange ? newRange.slice() : [undefined, undefined];
-      const [minRange, maxRange] = rangeOuter;
-      if (range[0] === void 0 || range[0] < minRange) range[0] = minRange;
-      if (range[1] === void 0 || range[1] > maxRange) range[1] = maxRange;
+      let [minRange, maxRange] = rangeOuter;
+      if (this._range) {
+        if (this._range[0] !== undefined) minRange = this._range[0];
+        if (this._range[this._range.length - 1] !== undefined) maxRange = this._range[this._range.length - 1];
+      }
+      if (range[0] === undefined || range[0] < minRange) range[0] = minRange;
+      if (range[1] === undefined || range[1] > maxRange) range[1] = maxRange;
+      const sizeInner = maxRange - minRange;
       if (this._scale === "ordinal" && this._domain.length > range.length) {
         if (newRange === this._range) {
           const buckets = this._domain.length + 1;
           range = d3Range(buckets)
-            .map(d => sizeOuter * (d / (buckets - 1)) + range[0])
-            .slice(1, this._domain.length + 1);
+            .map(d => range[0] + sizeInner * (d / (buckets - 1)))
+            .slice(1, buckets);
           range = range.map(d => d - range[0] / 2);
         }
         else {
@@ -279,10 +284,9 @@ export default class Axis extends BaseClass {
         }
       }
       else if (newRange === this._range) {
-        const size = range[1] - range[0];
         const tickScale = scales.scaleSqrt().domain([10, 400]).range([10, 50]);
         const domain = this._scale === "time" ? this._domain.map(date) : this._domain;
-        const scaleTicks = d3Ticks(domain[0], domain[1], Math.floor(size / tickScale(size)));
+        const scaleTicks = d3Ticks(domain[0], domain[1], Math.floor(sizeInner / tickScale(sizeInner)));
         ticks = (this._ticks
           ? this._scale === "time" ? this._ticks.map(date) : this._ticks
           : scaleTicks).slice();
@@ -291,7 +295,7 @@ export default class Axis extends BaseClass {
           ? this._scale === "time" ? this._labels.map(date) : this._labels
           : scaleTicks).slice();
         const buckets = labels.length;
-        const pad = Math.ceil(size / buckets / 2);
+        const pad = Math.ceil(sizeInner / buckets / 2);
         range = [range[0] + pad, range[1] - pad];
       }
 
@@ -546,17 +550,33 @@ export default class Axis extends BaseClass {
       spillover.push(Math.floor(spill));
       if (spillover.length === 2) break;
     }
-    if (spillover.some(d => d !== 0)) {
-      const first = range[0];
-      const last = range[range.length - 1];
-      setScale.bind(this)([first - spillover[0], last - spillover[1]]);
-      textData
-        .forEach(d => {
-          d.position = this._getPosition(d.d);
+
+    const first = range[0];
+    const last = range[range.length - 1];
+    const newRange = [first - spillover[0], last - spillover[1]];
+    if (this._range) {
+      if (this._range[0] !== undefined) newRange[0] = this._range[0];
+      if (this._range[this._range.length - 1] !== undefined) newRange[1] = this._range[this._range.length - 1];
+    }
+
+    if (newRange[0] !== first || newRange[1] !== last) {
+      setScale.bind(this)(newRange);
+
+      textData = labels
+        .map((d, i) => {
+
+          const fF = this._shapeConfig.labelConfig.fontFamily(d, i),
+                fS = this._shapeConfig.labelConfig.fontSize(d, i),
+                position = this._getPosition(d);
+
+          const lineHeight = this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : fS * 1.4;
+          return {d, i, fF, fS, lineHeight, position};
+
         });
+
       textData = textData
         .map(datum => {
-          datum.position = this._getPosition(datum.d);
+          datum.rotate = this._rotateLabels;
           datum.space = calculateSpace.bind(this)(datum);
           const res = calculateLabelSize.bind(this)(datum);
           return Object.assign(res, datum);
