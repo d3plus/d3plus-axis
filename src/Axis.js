@@ -413,22 +413,6 @@ export default class Axis extends BaseClass {
     }
 
     /**
-     * Pre-calculates the size of the title, if defined, in order
-     * to adjust the internal margins.
-     */
-    if (this._title) {
-      const {fontFamily, fontSize, lineHeight} = this._titleConfig;
-      const titleWrap = textWrap()
-        .fontFamily(typeof fontFamily === "function" ? fontFamily() : fontFamily)
-        .fontSize(typeof fontSize === "function" ? fontSize() : fontSize)
-        .lineHeight(typeof lineHeight === "function" ? lineHeight() : lineHeight)
-        .width(sizeOuter)
-        .height(this[`_${height}`] - this._tickSize - p);
-      const lines = titleWrap(this._title).lines.length;
-      margin[this._orient] = lines * titleWrap.lineHeight() + p;
-    }
-
-    /**
      * Constructs the tick formatter function.
      */
     const tickFormat = this._tickFormat ? this._tickFormat : d => {
@@ -457,6 +441,22 @@ export default class Axis extends BaseClass {
       n = n.replace(/[^\d\.\-\+]/g, "") * 1;
       return isNaN(n) ? n : formatAbbreviate(n);
     };
+
+    /**
+     * Pre-calculates the size of the title, if defined, in order
+     * to adjust the internal margins.
+     */
+    if (this._title) {
+      const {fontFamily, fontSize, lineHeight} = this._titleConfig;
+      const titleWrap = textWrap()
+        .fontFamily(typeof fontFamily === "function" ? fontFamily() : fontFamily)
+        .fontSize(typeof fontSize === "function" ? fontSize() : fontSize)
+        .lineHeight(typeof lineHeight === "function" ? lineHeight() : lineHeight)
+        .width(range[range.length - 1] - range[0] - p * 2)
+        .height(this[`_${height}`] - this._tickSize - p * 2);
+      const lines = titleWrap(this._title).lines.length;
+      margin[this._orient] = lines * titleWrap.lineHeight() + p;
+    }
 
     let hBuff = this._shape === "Circle"
           ? typeof this._shapeConfig.r === "function" ? this._shapeConfig.r({tick: true}) : this._shapeConfig.r
@@ -738,9 +738,9 @@ export default class Axis extends BaseClass {
       .select(elem("g.d3plus-Axis-title", {parent: group}).node())
       .text(d => d.text)
       .verticalAlign("middle")
-      .width(bounds[width])
-      .x(horizontal ? bounds.x : this._orient === "left" ? bounds.x + margin[this._orient] / 2 - bounds[width] / 2 : bounds.x + bounds.width - margin[this._orient] / 2 - bounds[width] / 2)
-      .y(horizontal ? this._orient === "bottom" ? bounds.y + bounds.height - margin.bottom + p : bounds.y : bounds.y - margin[this._orient] / 2 + bounds[width] / 2)
+      .width(range[range.length - 1] - range[0])
+      .x(horizontal ? range[0] : this._orient === "left" ? margin[this._orient] / 2 - (range[range.length - 1] - range[0]) / 2 + p : p - margin.right / 2)
+      .y(horizontal ? this._orient === "bottom" ? bounds.height - margin.bottom + p : bounds.y : range[0] + (range[range.length - 1] - range[0]) / 2 - margin[this._orient] / 2)
       .config(this._titleConfig)
       .render();
 
