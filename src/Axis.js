@@ -540,15 +540,15 @@ export default class Axis extends BaseClass {
      * "spillover" will contain the pixel spillover of the first and last label,
      * and then adjust the scale range accordingly.
      */
-    const spillover = [];
+    const spillover = [0, 0];
     for (let index = 0; index < 2; index++) {
       const datum = textData[index ? textData.length - 1 : 0];
+      if (!datum) break;
       const {height, position, rotate, width} = datum;
       const compPosition = index ? rangeOuter[1] : rangeOuter[0];
       const halfSpace = (rotate || !horizontal ? height : width) / 2;
       const spill = index ? position + halfSpace - compPosition : position - halfSpace - compPosition;
-      spillover.push(Math.floor(spill));
-      if (spillover.length === 2) break;
+      spillover[index] = spill;
     }
 
     const first = range[0];
