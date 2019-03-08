@@ -234,7 +234,6 @@ export default class Axis extends BaseClass {
           p = this._padding,
           parent = this._select,
           rangeOuter = [p, this[`_${width}`] - p],
-          sizeOuter = rangeOuter[1] - rangeOuter[0],
           t = transition().duration(this._duration);
 
     const tickValue = this._shape === "Circle" ? this._shapeConfig.r
