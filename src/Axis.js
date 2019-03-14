@@ -294,8 +294,12 @@ export default class Axis extends BaseClass {
           ? this._scale === "time" ? this._labels.map(date) : this._labels
           : scaleTicks).slice();
         const buckets = labels.length;
-        const pad = Math.ceil(sizeInner / buckets / 2);
-        range = [range[0] + pad, range[1] - pad];
+
+        if (buckets) {
+          const pad = Math.ceil(sizeInner / buckets / 2);
+          range = [range[0] + pad, range[1] - pad];
+        }
+
       }
 
       /**
