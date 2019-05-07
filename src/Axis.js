@@ -11,7 +11,7 @@ import {select} from "d3-selection";
 import {transition} from "d3-transition";
 
 import {assign, attrize, BaseClass, closest, constant, elem} from "d3plus-common";
-import {formatAbbreviate} from "d3plus-format";
+import {formatAbbreviate, formatLocale} from "d3plus-format";
 import * as shapes from "d3plus-shape";
 import {rtl as detectRTL, TextBox, textWrap} from "d3plus-text";
 
@@ -91,6 +91,8 @@ export default class Axis extends BaseClass {
     };
     this._tickSize = 5;
     this._tickSpecifier = undefined;
+    this._tickSuffix = "normal";
+    this._tickUnit = 1;
     this._titleClass = new TextBox();
     this._titleConfig = {
       fontSize: 12,
@@ -381,6 +383,23 @@ export default class Axis extends BaseClass {
       labels = labels.sort((a, b) => this._getPosition(a) - this._getPosition(b));
 
       /**
+       * Get the smallest suffix.
+       */
+      if (this._scale === "linear" && this._tickSuffix === "smallest") {
+        let i = 1;
+        while (i && i < 7) {
+          const n = Math.pow(10, 3 * i);
+          if (ticks[ticks.length - 1] / n >= 1) {
+            this._suffixUnit = i;
+            i += 1;
+          }
+          else {
+            break;
+          }
+        }
+      }
+
+      /**
        * Removes ticks when they overlap other ticks.
        */
       const pixels = [];
@@ -443,7 +462,15 @@ export default class Axis extends BaseClass {
       let n = this._d3Scale.tickFormat ? this._d3Scale.tickFormat(labels.length - 1)(d) : d;
 
       n = n.replace(/[^\d\.\-\+]/g, "") * 1;
-      return isNaN(n) ? n : formatAbbreviate(n, this._locale);
+      if (this._tickSuffix === "normal") {
+        return isNaN(n) ? n : formatAbbreviate(n, this._locale);
+      }
+      else if (this._tickSuffix === "smallest") {
+        const locale = formatLocale[this._locale];
+        const {separator, suffixes} = locale;
+        const suff = suffixes[this._suffixUnit + 8];
+        return isNaN(n) ? n : `${n / Math.pow(10, 3 * this._unit)}${separator}${suff}`;
+      }
     };
 
     /**
@@ -1051,6 +1078,16 @@ export default class Axis extends BaseClass {
   */
   tickSpecifier(_) {
     return arguments.length ? (this._tickSpecifier = _, this) : this._tickSpecifier;
+  }
+
+  /**
+      @memberof Axis
+      @desc Sets the behavior of the abbreviations when you are using linear scale. This method accepts two options: "normal" (uses formatAbbreviate to determinate the abbreviation) and "smallest" (uses suffix from the smallest tick as reference in every tick). 
+      @param {String} [*value* = "normal"]
+      @chainable
+  */
+  tickSuffix(_) {
+    return arguments.length ? (this._tickSuffix = _, this) : this._tickSuffix;
   }
 
   /**
