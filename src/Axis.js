@@ -473,7 +473,8 @@ export default class Axis extends BaseClass {
         const locale = formatLocale[this._locale];
         const {separator, suffixes} = locale;
         const suff = n >= 1000 ? suffixes[this._tickUnit + 8] : "";
-        return `${this._d3Scale.tickFormat()(n / Math.pow(10, 3 * this._tickUnit))}${separator}${suff}`;
+        const number = n > 1 ? this._d3Scale.tickFormat()(n / Math.pow(10, 3 * this._tickUnit)) : n;
+        return `${number}${separator}${suff}`;
       }
       else {
         return formatAbbreviate(n, this._locale);
