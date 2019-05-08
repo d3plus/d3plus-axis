@@ -386,16 +386,19 @@ export default class Axis extends BaseClass {
        * Get the smallest suffix.
        */
       if (this._scale === "linear" && this._tickSuffix === "smallest") {
-        let i = 1;
-        const min = Math.min(...ticks);
-        while (i && i < 7) {
-          const n = Math.pow(10, 3 * i);
-          if (min / n >= 1) {
-            this._tickUnit = i;
-            i += 1;
-          }
-          else {
-            break;
+        const suffixes = labels.filter(d => d >= 1000);
+        if (suffixes.length > 0) {
+          const min = Math.min(...suffixes);
+          let i = 1;
+          while (i && i < 7) {
+            const n = Math.pow(10, 3 * i);
+            if (min / n >= 1) {
+              this._tickUnit = i;
+              i += 1;
+            }
+            else {
+              break;
+            }
           }
         }
       }
@@ -469,8 +472,8 @@ export default class Axis extends BaseClass {
       else if (this._scale === "linear" && this._tickSuffix === "smallest") {
         const locale = formatLocale[this._locale];
         const {separator, suffixes} = locale;
-        const suff = suffixes[this._tickUnit + 8];
-        return `${n / Math.pow(10, 3 * this._tickUnit)}${separator}${suff}`;
+        const suff = n >= 1000 ? suffixes[this._tickUnit + 8] : "";
+        return `${this._d3Scale.tickFormat()(n / Math.pow(10, 3 * this._tickUnit))}${separator}${suff}`;
       }
       else {
         return formatAbbreviate(n, this._locale);
