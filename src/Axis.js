@@ -390,7 +390,7 @@ export default class Axis extends BaseClass {
         while (i && i < 7) {
           const n = Math.pow(10, 3 * i);
           if (ticks[ticks.length - 1] / n >= 1) {
-            this._suffixUnit = i;
+            this._tickUnit = i;
             i += 1;
           }
           else {
@@ -468,8 +468,8 @@ export default class Axis extends BaseClass {
       else if (this._tickSuffix === "smallest") {
         const locale = formatLocale[this._locale];
         const {separator, suffixes} = locale;
-        const suff = suffixes[this._suffixUnit + 8];
-        return isNaN(n) ? n : `${n / Math.pow(10, 3 * this._unit)}${separator}${suff}`;
+        const suff = suffixes[this._tickUnit + 8];
+        return isNaN(n) ? n : `${n / Math.pow(10, 3 * this._tickUnit)}${separator}${suff}`;
       }
     };
 
