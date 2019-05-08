@@ -462,14 +462,18 @@ export default class Axis extends BaseClass {
       let n = this._d3Scale.tickFormat ? this._d3Scale.tickFormat(labels.length - 1)(d) : d;
 
       n = n.replace(/[^\d\.\-\+]/g, "") * 1;
-      if (this._tickSuffix === "normal") {
-        return isNaN(n) ? n : formatAbbreviate(n, this._locale);
+
+      if (isNaN(n)) {
+        return n;
       }
-      else if (this._tickSuffix === "smallest") {
+      else if (this._scale === "linear" && this._tickSuffix === "smallest") {
         const locale = formatLocale[this._locale];
         const {separator, suffixes} = locale;
         const suff = suffixes[this._tickUnit + 8];
-        return isNaN(n) ? n : `${n / Math.pow(10, 3 * this._tickUnit)}${separator}${suff}`;
+        return `${n / Math.pow(10, 3 * this._tickUnit)}${separator}${suff}`;
+      }
+      else {
+        return formatAbbreviate(n, this._locale);
       }
     };
 
