@@ -92,7 +92,7 @@ export default class Axis extends BaseClass {
     this._tickSize = 5;
     this._tickSpecifier = undefined;
     this._tickSuffix = "normal";
-    this._tickUnit = 1;
+    this._tickUnit = 0;
     this._titleClass = new TextBox();
     this._titleConfig = {
       fontSize: 12,
@@ -387,9 +387,10 @@ export default class Axis extends BaseClass {
        */
       if (this._scale === "linear" && this._tickSuffix === "smallest") {
         let i = 1;
+        const min = Math.min(...ticks);
         while (i && i < 7) {
           const n = Math.pow(10, 3 * i);
-          if (ticks[ticks.length - 1] / n >= 1) {
+          if (min / n >= 1) {
             this._tickUnit = i;
             i += 1;
           }
@@ -460,7 +461,6 @@ export default class Axis extends BaseClass {
       }
 
       let n = this._d3Scale.tickFormat ? this._d3Scale.tickFormat(labels.length - 1)(d) : d;
-
       n = n.replace(/[^\d\.\-\+]/g, "") * 1;
 
       if (isNaN(n)) {
