@@ -914,7 +914,7 @@ export default class Axis extends BaseClass {
   /**
       @memberof Viz
       @desc If *value* is specified, sets the locale to the specified string and returns the current class instance.
-      @param {String} [*value* = "en-US"]
+      @param {Object|String} [*value* = "en-US"]
       @chainable
   */
   locale(_) {
