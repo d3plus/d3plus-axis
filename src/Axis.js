@@ -472,9 +472,10 @@ export default class Axis extends BaseClass {
       else if (this._scale === "linear" && this._tickSuffix === "smallest") {
         const locale = typeof this._locale === "object" ? this._locale : formatLocale[this._locale];
         const {separator, suffixes} = locale;
+        const thousands = locale.delimiters && locale.delimiters.thousands ? locale.delimiters.thousands : ",";
         const suff = n >= 1000 ? suffixes[this._tickUnit + 8] : "";
         const number = n > 1 ? this._d3Scale.tickFormat()(n / Math.pow(10, 3 * this._tickUnit)) : n;
-        return `${number}${separator}${suff}`;
+        return `${number.toString().replace(",", thousands)}${separator}${suff}`;
       }
       else {
         return formatAbbreviate(n, this._locale);
