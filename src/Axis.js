@@ -4,6 +4,7 @@
 */
 
 import {extent, max, min, range as d3Range, ticks as d3Ticks} from "d3-array";
+import {formatLocale as formatLocaleD3} from "d3-format";
 import {timeYear, timeMonth, timeWeek, timeDay, timeHour, timeMinute, timeSecond} from "d3-time";
 import {timeFormat} from "d3-time-format";
 import * as scales from "d3-scale";
@@ -471,9 +472,17 @@ export default class Axis extends BaseClass {
       }
       else if (this._scale === "linear" && this._tickSuffix === "smallest") {
         const locale = typeof this._locale === "object" ? this._locale : formatLocale[this._locale];
-        const {separator, suffixes} = locale;
+        const {currency, delimiters, grouping, separator, suffixes} = locale;
+        const d3plusFormatLocale = formatLocaleD3({
+          currency: currency || ["$", ""],
+          decimal: delimiters.decimal || ".",
+          grouping: grouping || [3],
+          thousands: delimiters.thousands || ","
+        });
         const suff = n >= 1000 ? suffixes[this._tickUnit + 8] : "";
-        const number = n > 1 ? this._d3Scale.tickFormat()(n / Math.pow(10, 3 * this._tickUnit)) : n;
+        let number = n > 1 ? n / Math.pow(10, 3 * this._tickUnit) : n;
+        const len = number.toString().length;
+        if (n > 1) number = d3plusFormatLocale.format(`,.${len}r`)(number);
         return `${number}${separator}${suff}`;
       }
       else {
