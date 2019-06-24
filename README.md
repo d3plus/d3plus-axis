@@ -117,7 +117,7 @@ Creates an SVG scale based on an array of data.
 
 
 
-<a name="Axis.render" href="#Axis.render">#</a> Axis.**render**([*callback*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L218)
+<a name="Axis.render" href="#Axis.render">#</a> Axis.**render**([*callback*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L217)
 
 Renders the current Axis to the page. If a *callback* is specified, it will be called once the legend is done drawing.
 
@@ -125,7 +125,7 @@ Renders the current Axis to the page. If a *callback* is specified, it will be c
 This is a static method of [<code>Axis</code>](#Axis), and is chainable with other methods of this Class.
 
 
-<a name="Axis.align" href="#Axis.align">#</a> Axis.**align**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L800)
+<a name="Axis.align" href="#Axis.align">#</a> Axis.**align**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L799)
 
 If *value* is specified, sets the horizontal alignment to the specified value and returns the current class instance.
 
@@ -133,7 +133,7 @@ If *value* is specified, sets the horizontal alignment to the specified value an
 This is a static method of [<code>Axis</code>](#Axis), and is chainable with other methods of this Class.
 
 
-<a name="Axis.barConfig" href="#Axis.barConfig">#</a> Axis.**barConfig**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L810)
+<a name="Axis.barConfig" href="#Axis.barConfig">#</a> Axis.**barConfig**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L809)
 
 If *value* is specified, sets the axis line style and returns the current class instance.
 
@@ -141,7 +141,7 @@ If *value* is specified, sets the axis line style and returns the current class 
 This is a static method of [<code>Axis</code>](#Axis), and is chainable with other methods of this Class.
 
 
-<a name="Axis.domain" href="#Axis.domain">#</a> Axis.**domain**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L820)
+<a name="Axis.domain" href="#Axis.domain">#</a> Axis.**domain**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L819)
 
 If *value* is specified, sets the scale domain of the axis and returns the current class instance.
 
@@ -149,7 +149,7 @@ If *value* is specified, sets the scale domain of the axis and returns the curre
 This is a static method of [<code>Axis</code>](#Axis), and is chainable with other methods of this Class.
 
 
-<a name="Axis.duration" href="#Axis.duration">#</a> Axis.**duration**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L830)
+<a name="Axis.duration" href="#Axis.duration">#</a> Axis.**duration**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L829)
 
 If *value* is specified, sets the transition duration of the axis and returns the current class instance.
 
@@ -157,7 +157,7 @@ If *value* is specified, sets the transition duration of the axis and returns th
 This is a static method of [<code>Axis</code>](#Axis), and is chainable with other methods of this Class.
 
 
-<a name="Axis.grid" href="#Axis.grid">#</a> Axis.**grid**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L840)
+<a name="Axis.grid" href="#Axis.grid">#</a> Axis.**grid**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L839)
 
 If *value* is specified, sets the grid values of the axis and returns the current class instance.
 
@@ -165,7 +165,7 @@ If *value* is specified, sets the grid values of the axis and returns the curren
 This is a static method of [<code>Axis</code>](#Axis), and is chainable with other methods of this Class.
 
 
-<a name="Axis.gridConfig" href="#Axis.gridConfig">#</a> Axis.**gridConfig**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L850)
+<a name="Axis.gridConfig" href="#Axis.gridConfig">#</a> Axis.**gridConfig**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L849)
 
 If *value* is specified, sets the grid config of the axis and returns the current class instance.
 
@@ -173,7 +173,7 @@ If *value* is specified, sets the grid config of the axis and returns the curren
 This is a static method of [<code>Axis</code>](#Axis), and is chainable with other methods of this Class.
 
 
-<a name="Axis.gridLog" href="#Axis.gridLog">#</a> Axis.**gridLog**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L860)
+<a name="Axis.gridLog" href="#Axis.gridLog">#</a> Axis.**gridLog**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L859)
 
 If *value* is specified, sets the grid behavior of the axis when scale is logarithmic and returns the current class instance.
 
@@ -181,7 +181,7 @@ If *value* is specified, sets the grid behavior of the axis when scale is logari
 This is a static method of [<code>Axis</code>](#Axis), and is chainable with other methods of this Class.
 
 
-<a name="Axis.gridSize" href="#Axis.gridSize">#</a> Axis.**gridSize**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L870)
+<a name="Axis.gridSize" href="#Axis.gridSize">#</a> Axis.**gridSize**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L869)
 
 If *value* is specified, sets the grid size of the axis and returns the current class instance.
 
@@ -189,7 +189,7 @@ If *value* is specified, sets the grid size of the axis and returns the current 
 This is a static method of [<code>Axis</code>](#Axis), and is chainable with other methods of this Class.
 
 
-<a name="Axis.height" href="#Axis.height">#</a> Axis.**height**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L880)
+<a name="Axis.height" href="#Axis.height">#</a> Axis.**height**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L879)
 
 If *value* is specified, sets the overall height of the axis and returns the current class instance.
 
@@ -197,7 +197,7 @@ If *value* is specified, sets the overall height of the axis and returns the cur
 This is a static method of [<code>Axis</code>](#Axis), and is chainable with other methods of this Class.
 
 
-<a name="Axis.labels" href="#Axis.labels">#</a> Axis.**labels**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L890)
+<a name="Axis.labels" href="#Axis.labels">#</a> Axis.**labels**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L889)
 
 If *value* is specified, sets the visible tick labels of the axis and returns the current class instance.
 
@@ -205,7 +205,7 @@ If *value* is specified, sets the visible tick labels of the axis and returns th
 This is a static method of [<code>Axis</code>](#Axis), and is chainable with other methods of this Class.
 
 
-<a name="Axis.labelOffset" href="#Axis.labelOffset">#</a> Axis.**labelOffset**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L900)
+<a name="Axis.labelOffset" href="#Axis.labelOffset">#</a> Axis.**labelOffset**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L899)
 
 If *value* is specified, sets whether offsets will be used to position some labels further away from the axis in order to allow space for the text.
 
@@ -213,7 +213,7 @@ If *value* is specified, sets whether offsets will be used to position some labe
 This is a static method of [<code>Axis</code>](#Axis), and is chainable with other methods of this Class.
 
 
-<a name="Axis.labelRotation" href="#Axis.labelRotation">#</a> Axis.**labelRotation**(_) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L910)
+<a name="Axis.labelRotation" href="#Axis.labelRotation">#</a> Axis.**labelRotation**(_) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L909)
 
 If *value* is specified, sets whether whether horizontal axis labels are rotated -90 degrees.
 
@@ -221,7 +221,7 @@ If *value* is specified, sets whether whether horizontal axis labels are rotated
 This is a static method of [<code>Axis</code>](#Axis), and is chainable with other methods of this Class.
 
 
-<a name="Axis.maxSize" href="#Axis.maxSize">#</a> Axis.**maxSize**(_) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L930)
+<a name="Axis.maxSize" href="#Axis.maxSize">#</a> Axis.**maxSize**(_) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L919)
 
 If *value* is specified, sets the maximum size allowed for the space that contains the axis tick labels and title.
 
@@ -229,7 +229,7 @@ If *value* is specified, sets the maximum size allowed for the space that contai
 This is a static method of [<code>Axis</code>](#Axis), and is chainable with other methods of this Class.
 
 
-<a name="Axis.orient" href="#Axis.orient">#</a> Axis.**orient**([*orient*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L940)
+<a name="Axis.orient" href="#Axis.orient">#</a> Axis.**orient**([*orient*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L929)
 
 If *orient* is specified, sets the orientation of the shape and returns the current class instance. If *orient* is not specified, returns the current orientation.
 
@@ -237,7 +237,7 @@ If *orient* is specified, sets the orientation of the shape and returns the curr
 This is a static method of [<code>Axis</code>](#Axis), and is chainable with other methods of this Class.
 
 
-<a name="Axis.outerBounds" href="#Axis.outerBounds">#</a> Axis.**outerBounds**() [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L967)
+<a name="Axis.outerBounds" href="#Axis.outerBounds">#</a> Axis.**outerBounds**() [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L956)
 
 If called after the elements have been drawn to DOM, will returns the outer bounds of the axis content.
 
@@ -250,7 +250,7 @@ This is a static method of [<code>Axis</code>](#Axis).
 ```
 
 
-<a name="Axis.padding" href="#Axis.padding">#</a> Axis.**padding**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L977)
+<a name="Axis.padding" href="#Axis.padding">#</a> Axis.**padding**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L966)
 
 If *value* is specified, sets the padding between each tick label to the specified number and returns the current class instance.
 
@@ -258,7 +258,7 @@ If *value* is specified, sets the padding between each tick label to the specifi
 This is a static method of [<code>Axis</code>](#Axis), and is chainable with other methods of this Class.
 
 
-<a name="Axis.paddingInner" href="#Axis.paddingInner">#</a> Axis.**paddingInner**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L987)
+<a name="Axis.paddingInner" href="#Axis.paddingInner">#</a> Axis.**paddingInner**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L976)
 
 If *value* is specified, sets the inner padding of band scale to the specified number and returns the current class instance.
 
@@ -266,7 +266,7 @@ If *value* is specified, sets the inner padding of band scale to the specified n
 This is a static method of [<code>Axis</code>](#Axis), and is chainable with other methods of this Class.
 
 
-<a name="Axis.paddingOuter" href="#Axis.paddingOuter">#</a> Axis.**paddingOuter**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L997)
+<a name="Axis.paddingOuter" href="#Axis.paddingOuter">#</a> Axis.**paddingOuter**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L986)
 
 If *value* is specified, sets the outer padding of band scales to the specified number and returns the current class instance.
 
@@ -274,7 +274,7 @@ If *value* is specified, sets the outer padding of band scales to the specified 
 This is a static method of [<code>Axis</code>](#Axis), and is chainable with other methods of this Class.
 
 
-<a name="Axis.range" href="#Axis.range">#</a> Axis.**range**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L1007)
+<a name="Axis.range" href="#Axis.range">#</a> Axis.**range**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L996)
 
 If *value* is specified, sets the scale range (in pixels) of the axis and returns the current class instance. The given array must have 2 values, but one may be `undefined` to allow the default behavior for that value.
 
@@ -282,7 +282,7 @@ If *value* is specified, sets the scale range (in pixels) of the axis and return
 This is a static method of [<code>Axis</code>](#Axis), and is chainable with other methods of this Class.
 
 
-<a name="Axis.scale" href="#Axis.scale">#</a> Axis.**scale**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L1017)
+<a name="Axis.scale" href="#Axis.scale">#</a> Axis.**scale**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L1006)
 
 If *value* is specified, sets the scale of the axis and returns the current class instance.
 
@@ -290,7 +290,7 @@ If *value* is specified, sets the scale of the axis and returns the current clas
 This is a static method of [<code>Axis</code>](#Axis), and is chainable with other methods of this Class.
 
 
-<a name="Axis.select" href="#Axis.select">#</a> Axis.**select**([*selector*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L1027)
+<a name="Axis.select" href="#Axis.select">#</a> Axis.**select**([*selector*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L1016)
 
 If *selector* is specified, sets the SVG container element to the specified d3 selector or DOM element and returns the current class instance. If *selector* is not specified, returns the current SVG container element.
 
@@ -298,7 +298,7 @@ If *selector* is specified, sets the SVG container element to the specified d3 s
 This is a static method of [<code>Axis</code>](#Axis), and is chainable with other methods of this Class.
 
 
-<a name="Axis.shape" href="#Axis.shape">#</a> Axis.**shape**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L1037)
+<a name="Axis.shape" href="#Axis.shape">#</a> Axis.**shape**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L1026)
 
 If *value* is specified, sets the tick shape constructor and returns the current class instance.
 
@@ -306,7 +306,7 @@ If *value* is specified, sets the tick shape constructor and returns the current
 This is a static method of [<code>Axis</code>](#Axis), and is chainable with other methods of this Class.
 
 
-<a name="Axis.shapeConfig" href="#Axis.shapeConfig">#</a> Axis.**shapeConfig**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L1047)
+<a name="Axis.shapeConfig" href="#Axis.shapeConfig">#</a> Axis.**shapeConfig**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L1036)
 
 If *value* is specified, sets the tick style of the axis and returns the current class instance.
 
@@ -314,7 +314,7 @@ If *value* is specified, sets the tick style of the axis and returns the current
 This is a static method of [<code>Axis</code>](#Axis), and is chainable with other methods of this Class.
 
 
-<a name="Axis.tickFormat" href="#Axis.tickFormat">#</a> Axis.**tickFormat**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L1057)
+<a name="Axis.tickFormat" href="#Axis.tickFormat">#</a> Axis.**tickFormat**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L1046)
 
 If *value* is specified, sets the tick formatter and returns the current class instance.
 
@@ -322,7 +322,7 @@ If *value* is specified, sets the tick formatter and returns the current class i
 This is a static method of [<code>Axis</code>](#Axis), and is chainable with other methods of this Class.
 
 
-<a name="Axis.ticks" href="#Axis.ticks">#</a> Axis.**ticks**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L1067)
+<a name="Axis.ticks" href="#Axis.ticks">#</a> Axis.**ticks**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L1056)
 
 If *value* is specified, sets the tick values of the axis and returns the current class instance.
 
@@ -330,7 +330,7 @@ If *value* is specified, sets the tick values of the axis and returns the curren
 This is a static method of [<code>Axis</code>](#Axis), and is chainable with other methods of this Class.
 
 
-<a name="Axis.tickSize" href="#Axis.tickSize">#</a> Axis.**tickSize**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L1077)
+<a name="Axis.tickSize" href="#Axis.tickSize">#</a> Axis.**tickSize**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L1066)
 
 If *value* is specified, sets the tick size of the axis and returns the current class instance.
 
@@ -338,7 +338,7 @@ If *value* is specified, sets the tick size of the axis and returns the current 
 This is a static method of [<code>Axis</code>](#Axis), and is chainable with other methods of this Class.
 
 
-<a name="Axis.tickSpecifier" href="#Axis.tickSpecifier">#</a> Axis.**tickSpecifier**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L1087)
+<a name="Axis.tickSpecifier" href="#Axis.tickSpecifier">#</a> Axis.**tickSpecifier**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L1076)
 
 Sets the tick specifier for the [tickFormat](https://github.com/d3/d3-scale#continuous_tickFormat) function. If this method is called without any arguments, the default tick specifier is returned.
 
@@ -346,7 +346,7 @@ Sets the tick specifier for the [tickFormat](https://github.com/d3/d3-scale#cont
 This is a static method of [<code>Axis</code>](#Axis), and is chainable with other methods of this Class.
 
 
-<a name="Axis.tickSuffix" href="#Axis.tickSuffix">#</a> Axis.**tickSuffix**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L1097)
+<a name="Axis.tickSuffix" href="#Axis.tickSuffix">#</a> Axis.**tickSuffix**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L1086)
 
 Sets the behavior of the abbreviations when you are using linear scale. This method accepts two options: "normal" (uses formatAbbreviate to determinate the abbreviation) and "smallest" (uses suffix from the smallest tick as reference in every tick).
 
@@ -354,7 +354,7 @@ Sets the behavior of the abbreviations when you are using linear scale. This met
 This is a static method of [<code>Axis</code>](#Axis), and is chainable with other methods of this Class.
 
 
-<a name="Axis.title" href="#Axis.title">#</a> Axis.**title**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L1107)
+<a name="Axis.title" href="#Axis.title">#</a> Axis.**title**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L1096)
 
 If *value* is specified, sets the title of the axis and returns the current class instance.
 
@@ -362,7 +362,7 @@ If *value* is specified, sets the title of the axis and returns the current clas
 This is a static method of [<code>Axis</code>](#Axis), and is chainable with other methods of this Class.
 
 
-<a name="Axis.titleConfig" href="#Axis.titleConfig">#</a> Axis.**titleConfig**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L1117)
+<a name="Axis.titleConfig" href="#Axis.titleConfig">#</a> Axis.**titleConfig**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L1106)
 
 If *value* is specified, sets the title configuration of the axis and returns the current class instance.
 
@@ -370,7 +370,7 @@ If *value* is specified, sets the title configuration of the axis and returns th
 This is a static method of [<code>Axis</code>](#Axis), and is chainable with other methods of this Class.
 
 
-<a name="Axis.width" href="#Axis.width">#</a> Axis.**width**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L1127)
+<a name="Axis.width" href="#Axis.width">#</a> Axis.**width**([*value*]) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/Axis.js#L1116)
 
 If *value* is specified, sets the overall width of the axis and returns the current class instance.
 
@@ -455,4 +455,4 @@ This is a global function.
 
 
 
-###### <sub>Documentation generated on Wed, 15 May 2019 16:45:54 GMT</sub>
+###### <sub>Documentation generated on Fri, 31 May 2019 17:04:34 GMT</sub>

@@ -56,7 +56,6 @@ export default class Axis extends BaseClass {
     this._gridLog = false;
     this._height = 400;
     this._labelOffset = true;
-    this._locale = "en-US";
     this.orient("bottom");
     this._outerBounds = {width: 0, height: 0, x: 0, y: 0};
     this._padding = 5;
@@ -910,16 +909,6 @@ export default class Axis extends BaseClass {
    */
   labelRotation(_) {
     return arguments.length ? (this._labelRotation = _, this) : this._labelRotation;
-  }
-
-  /**
-      @memberof Viz
-      @desc If *value* is specified, sets the locale to the specified string and returns the current class instance.
-      @param {Object|String} [*value* = "en-US"]
-      @chainable
-  */
-  locale(_) {
-    return arguments.length ? (this._locale = _, this) : this._locale;
   }
 
   /**
