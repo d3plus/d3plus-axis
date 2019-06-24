@@ -472,7 +472,8 @@ export default class Axis extends BaseClass {
         const locale = typeof this._locale === "object" ? this._locale : formatLocale[this._locale];
         const {separator, suffixes} = locale;
         const suff = n >= 1000 ? suffixes[this._tickUnit + 8] : "";
-        const number = formatAbbreviate(n / Math.pow(10, 3 * this._tickUnit), locale, false);
+        const tick = n / Math.pow(10, 3 * this._tickUnit);
+        const number = formatAbbreviate(tick, locale, `,.${tick.toString().length}r`);
         return `${number}${separator}${suff}`;
       }
       else {
