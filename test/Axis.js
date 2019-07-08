@@ -1,4 +1,4 @@
-import test from "zora";
+import {test} from "zora";
 import {default as Axis} from "../src/Axis.js";
 
 test("Axis", function *(assert) {
