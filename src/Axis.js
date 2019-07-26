@@ -5,7 +5,7 @@
 
 import {extent, max, min, range as d3Range, ticks as d3Ticks} from "d3-array";
 import {timeYear, timeMonth, timeWeek, timeDay, timeHour, timeMinute, timeSecond} from "d3-time";
-import {timeFormat} from "d3-time-format";
+import {timeFormat, timeFormatDefaultLocale} from "d3-time-format";
 import * as scales from "d3-scale";
 import {select} from "d3-selection";
 import {transition} from "d3-transition";
@@ -16,15 +16,7 @@ import * as shapes from "d3plus-shape";
 import {rtl as detectRTL, TextBox, textWrap} from "d3plus-text";
 
 import {default as date} from "./date";
-
-const formatDay = timeFormat("%a %d"),
-      formatHour = timeFormat("%I %p"),
-      formatMillisecond = timeFormat(".%L"),
-      formatMinute = timeFormat("%I:%M"),
-      formatMonth = timeFormat("%b"),
-      formatSecond = timeFormat(":%S"),
-      formatWeek = timeFormat("%b %d"),
-      formatYear = timeFormat("%Y");
+import {default as locale} from "./locale";
 
 /**
     @class Axis
@@ -92,6 +84,7 @@ export default class Axis extends BaseClass {
     this._tickSpecifier = undefined;
     this._tickSuffix = "normal";
     this._tickUnit = 0;
+    this._timeLocale = undefined;
     this._titleClass = new TextBox();
     this._titleConfig = {
       fontSize: 12,
@@ -226,6 +219,18 @@ export default class Axis extends BaseClass {
         .attr("height", `${this._height}px`)
         .node());
     }
+
+    const timeLocale = this._timeLocale || locale[this._locale] || locale["en-US"];
+    timeFormatDefaultLocale(timeLocale).format();
+
+    const formatDay = timeFormat("%a %d"),
+          formatHour = timeFormat("%I %p"),
+          formatMillisecond = timeFormat(".%L"),
+          formatMinute = timeFormat("%I:%M"),
+          formatMonth = timeFormat("%b"),
+          formatSecond = timeFormat(":%S"),
+          formatWeek = timeFormat("%b %d"),
+          formatYear = timeFormat("%Y");
 
     /**
      * Declares some commonly used variables.
@@ -1086,6 +1091,16 @@ export default class Axis extends BaseClass {
   */
   tickSuffix(_) {
     return arguments.length ? (this._tickSuffix = _, this) : this._tickSuffix;
+  }
+
+  /**
+      @memberof Axis
+      @desc Defines a custom locale object to be used in time scale. This object must include the following properties: dateTime, date, time, periods, days, shortDays, months, shortMonths. For more information, you can revise [d3p.d3-time-format](https://github.com/d3/d3-time-format/blob/master/README.md#timeFormatLocale).
+      @param {Object} [*value* = undefined]
+      @chainable
+  */
+  timeLocale(_) {
+    return arguments.length ? (this._timeLocale = _, this) : this._timeLocale;
   }
 
   /**
