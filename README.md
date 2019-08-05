@@ -464,4 +464,4 @@ This is a global function.
 
 
 
-###### <sub>Documentation generated on Fri, 26 Jul 2019 19:07:39 GMT</sub>
+###### <sub>Documentation generated on Mon, 05 Aug 2019 21:15:09 GMT</sub>
