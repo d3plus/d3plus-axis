@@ -783,7 +783,7 @@ export default class Axis extends BaseClass {
       .text(d => d.text)
       .verticalAlign("middle")
       .width(range[range.length - 1] - range[0])
-      .x(horizontal ? range[0] : this._orient === "left" ? margin.left / 2 - (range[range.length - 1] - range[0]) / 2 + p : bounds.width - (range[range.length - 1] - range[0]) / 2 - margin.right / 2)
+      .x(horizontal ? range[0] : this._orient === "left" ? margin.left / 2 - (range[range.length - 1] - range[0]) / 2 + p : bounds.x + bounds.width - margin.right / 2 - (range[range.length - 1] - range[0]) / 2)
       .y(horizontal ? this._orient === "bottom" ? bounds.height - margin.bottom + p : bounds.y : range[0] + (range[range.length - 1] - range[0]) / 2 - margin[this._orient] / 2)
       .config(this._titleConfig)
       .render();
