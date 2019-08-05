@@ -783,7 +783,7 @@ export default class Axis extends BaseClass {
       .text(d => d.text)
       .verticalAlign("middle")
       .width(range[range.length - 1] - range[0])
-      .x(horizontal ? range[0] : this._orient === "left" ? margin[this._orient] / 2 - (range[range.length - 1] - range[0]) / 2 + p : p - margin.right / 2)
+      .x(horizontal ? range[0] : this._orient === "left" ? margin.left / 2 - (range[range.length - 1] - range[0]) / 2 + p : bounds.width - (range[range.length - 1] - range[0]) / 2 - margin.right / 2)
       .y(horizontal ? this._orient === "bottom" ? bounds.height - margin.bottom + p : bounds.y : range[0] + (range[range.length - 1] - range[0]) / 2 - margin[this._orient] / 2)
       .config(this._titleConfig)
       .render();
@@ -1085,7 +1085,7 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
-      @desc Sets the behavior of the abbreviations when you are using linear scale. This method accepts two options: "normal" (uses formatAbbreviate to determinate the abbreviation) and "smallest" (uses suffix from the smallest tick as reference in every tick). 
+      @desc Sets the behavior of the abbreviations when you are using linear scale. This method accepts two options: "normal" (uses formatAbbreviate to determinate the abbreviation) and "smallest" (uses suffix from the smallest tick as reference in every tick).
       @param {String} [*value* = "normal"]
       @chainable
   */
