@@ -282,7 +282,7 @@ export default class Axis extends BaseClass {
       if (range[0] === undefined || range[0] < minRange) range[0] = minRange;
       if (range[1] === undefined || range[1] > maxRange) range[1] = maxRange;
       const sizeInner = maxRange - minRange;
-      if (this._scale === ["band", "ordinal", "point"].includes(this._scale) && this._domain.length > range.length) {
+      if (["band", "ordinal", "point"].includes(this._scale) && this._domain.length > range.length) {
         if (newRange === this._range) {
           const buckets = this._domain.length + 1;
           range = d3Range(buckets)
