@@ -107,10 +107,18 @@ export default class Axis extends BaseClass {
           offset = this._margin[opposite],
           position = ["top", "left"].includes(this._orient) ? this._outerBounds[y] + this._outerBounds[height] - offset : this._outerBounds[y] + offset;
 
+    const x1mod = this._scale === "band" ? this._d3Scale.step() - this._d3Scale.bandwidth()
+      : this._scale === "point" ? this._d3Scale.step() * this._d3Scale.padding()
+      : 0;
+
+    const x2mod = this._scale === "band" ? this._d3Scale.step()
+      : this._scale === "point" ? this._d3Scale.step() * this._d3Scale.padding()
+      : 0;
+
     bar
       .call(attrize, this._barConfig)
-      .attr(`${x}1`, this._getPosition(domain[0]) - (this._scale === "band" ? this._d3Scale.step() - this._d3Scale.bandwidth() : 0))
-      .attr(`${x}2`, this._getPosition(domain[domain.length - 1]) + (this._scale === "band" ? this._d3Scale.step() : 0))
+      .attr(`${x}1`, this._getPosition(domain[0]) - x1mod)
+      .attr(`${x}2`, this._getPosition(domain[domain.length - 1]) + x2mod)
       .attr(`${y}1`, position)
       .attr(`${y}2`, position);
 
@@ -127,7 +135,7 @@ export default class Axis extends BaseClass {
     if (this._d3ScaleNegative) ticks = this._d3ScaleNegative.domain();
     if (this._d3Scale) ticks = ticks.concat(this._d3Scale.domain());
 
-    const domain = this._scale === "ordinal" ? ticks : extent(ticks);
+    const domain = ["band", "ordinal", "point"].includes(this._scale) ? ticks : extent(ticks);
     return ticks[0] > ticks[1] ? domain.reverse() : domain;
 
   }
@@ -274,7 +282,7 @@ export default class Axis extends BaseClass {
       if (range[0] === undefined || range[0] < minRange) range[0] = minRange;
       if (range[1] === undefined || range[1] > maxRange) range[1] = maxRange;
       const sizeInner = maxRange - minRange;
-      if (this._scale === "ordinal" && this._domain.length > range.length) {
+      if (this._scale === ["band", "ordinal", "point"].includes(this._scale) && this._domain.length > range.length) {
         if (newRange === this._range) {
           const buckets = this._domain.length + 1;
           range = d3Range(buckets)
@@ -316,6 +324,7 @@ export default class Axis extends BaseClass {
       this._d3Scale = scales[`scale${this._scale.charAt(0).toUpperCase()}${this._scale.slice(1)}`]()
         .domain(this._scale === "time" ? this._domain.map(date) : this._domain);
       if (this._d3Scale.round) this._d3Scale.round(true);
+      if (this._d3Scale.padding) this._d3Scale.padding(0.5);
       if (this._d3Scale.paddingInner) this._d3Scale.paddingInner(this._paddingInner);
       if (this._d3Scale.paddingOuter) this._d3Scale.paddingOuter(this._paddingOuter);
 
@@ -463,7 +472,7 @@ export default class Axis extends BaseClass {
           : timeYear(d) < d ? formatMonth
           : formatYear)(d);
       }
-      else if (this._scale === "ordinal") {
+      else if (["band", "ordinal", "point"].includes(this._scale)) {
         return d;
       }
 
