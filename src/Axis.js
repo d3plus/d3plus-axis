@@ -55,6 +55,7 @@ export default class Axis extends BaseClass {
     this._paddingOuter = 0.1;
     this._rotateLabels = false;
     this._scale = "linear";
+    this._scalePadding = 0.5;
     this._shape = "Line";
     this._shapeConfig = {
       fill: "#000",
@@ -282,7 +283,7 @@ export default class Axis extends BaseClass {
       if (range[0] === undefined || range[0] < minRange) range[0] = minRange;
       if (range[1] === undefined || range[1] > maxRange) range[1] = maxRange;
       const sizeInner = maxRange - minRange;
-      if (["band", "ordinal", "point"].includes(this._scale) && this._domain.length > range.length) {
+      if (this._scale === "ordinal" && this._domain.length > range.length) {
         if (newRange === this._range) {
           const buckets = this._domain.length + 1;
           range = d3Range(buckets)
@@ -324,7 +325,7 @@ export default class Axis extends BaseClass {
       this._d3Scale = scales[`scale${this._scale.charAt(0).toUpperCase()}${this._scale.slice(1)}`]()
         .domain(this._scale === "time" ? this._domain.map(date) : this._domain);
       if (this._d3Scale.round) this._d3Scale.round(true);
-      if (this._d3Scale.padding) this._d3Scale.padding(0.5);
+      if (this._d3Scale.padding) this._d3Scale.padding(this._scalePadding);
       if (this._d3Scale.paddingInner) this._d3Scale.paddingInner(this._paddingInner);
       if (this._d3Scale.paddingOuter) this._d3Scale.paddingOuter(this._paddingOuter);
 
@@ -1020,6 +1021,16 @@ export default class Axis extends BaseClass {
   */
   scale(_) {
     return arguments.length ? (this._scale = _, this) : this._scale;
+  }
+
+  /**
+      @memberof Axis
+      @desc Sets the "padding" property of the scale, often used in point scales.
+      @param {Number} [*value* = 0.5]
+      @chainable
+  */
+  scalePadding(_) {
+    return arguments.length ? (this._scalePadding = _, this) : this._scalePadding;
   }
 
   /**
