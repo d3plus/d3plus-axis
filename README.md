@@ -1,6 +1,6 @@
 # d3plus-axis
 
-[![NPM Release](http://img.shields.io/npm/v/d3plus-axis.svg?style=flat)](https://www.npmjs.org/package/d3plus-axis) [![Build Status](https://travis-ci.org/d3plus/d3plus-axis.svg?branch=master)](https://travis-ci.org/d3plus/d3plus-axis) [![Dependency Status](http://img.shields.io/david/d3plus/d3plus-axis.svg?style=flat)](https://david-dm.org/d3plus/d3plus-axis) [![Gitter](https://img.shields.io/badge/-chat_on_gitter-brightgreen.svg?style=flat&logo=gitter-white)](https://gitter.im/d3plus/) [![1.0 progress](https://img.shields.io/badge/1.0_progress-83%25-yellowgreen.svg?style=flat)](https://github.com/d3plus/d3plus-axis/projects/1)
+[![NPM Release](http://img.shields.io/npm/v/d3plus-axis.svg?style=flat)](https://www.npmjs.org/package/d3plus-axis) [![Build Status](https://travis-ci.org/d3plus/d3plus-axis.svg?branch=master)](https://travis-ci.org/d3plus/d3plus-axis) [![Dependency Status](http://img.shields.io/david/d3plus/d3plus-axis.svg?style=flat)](https://david-dm.org/d3plus/d3plus-axis) [![Gitter](https://img.shields.io/badge/-chat_on_gitter-brightgreen.svg?style=flat&logo=gitter-white)](https://gitter.im/d3plus/) [![1.0 progress](https://img.shields.io/badge/1.0_progress-71%25-yellow.svg?style=flat)](https://github.com/d3plus/d3plus-axis/projects/1)
 
 Beautiful javascript scales and axes.
 
@@ -473,4 +473,4 @@ This is a global function.
 
 
 
-###### <sub>Documentation generated on Wed, 07 Aug 2019 20:23:28 GMT</sub>
+###### <sub>Documentation generated on Thu, 03 Oct 2019 20:57:32 GMT</sub>
