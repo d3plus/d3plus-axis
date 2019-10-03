@@ -445,9 +445,9 @@ export default class Axis extends BaseClass {
         return this._d3Scale.bandwidth();
       }
       else {
-        const prevPosition = i - diff < 0 ? rangeOuter[0] : position - (position - textData[i - diff].position) / 2;
+        const prevPosition = i - diff < 0 ? textData.length === 1 || !this._range ? rangeOuter[0] : (position - textData[i + diff].position) / 2 - position : position - (position - textData[i - diff].position) / 2;
         const prevSpace = Math.abs(position - prevPosition);
-        const nextPosition = i + diff > textData.length - 1 ? rangeOuter[1] : position - (position - textData[i + diff].position) / 2;
+        const nextPosition = i + diff > textData.length - 1 ? textData.length === 1 || !this._range ? rangeOuter[1] : (position - textData[i - diff].position) / 2 - position : position - (position - textData[i + diff].position) / 2;
         const nextSpace = Math.abs(position - nextPosition);
         return min([prevSpace, nextSpace]) * 2;
       }
