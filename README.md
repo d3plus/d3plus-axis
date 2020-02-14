@@ -1,6 +1,6 @@
 # d3plus-axis
 
-[![NPM Release](http://img.shields.io/npm/v/d3plus-axis.svg?style=flat)](https://www.npmjs.org/package/d3plus-axis) [![Build Status](https://travis-ci.org/d3plus/d3plus-axis.svg?branch=master)](https://travis-ci.org/d3plus/d3plus-axis) [![Dependency Status](http://img.shields.io/david/d3plus/d3plus-axis.svg?style=flat)](https://david-dm.org/d3plus/d3plus-axis) [![Gitter](https://img.shields.io/badge/-chat_on_gitter-brightgreen.svg?style=flat&logo=gitter-white)](https://gitter.im/d3plus/) [![1.0 progress](https://img.shields.io/badge/1.0_progress-71%25-yellow.svg?style=flat)](https://github.com/d3plus/d3plus-axis/projects/1)
+[![NPM Release](http://img.shields.io/npm/v/d3plus-axis.svg?style=flat)](https://www.npmjs.org/package/d3plus-axis) [![Build Status](https://travis-ci.org/d3plus/d3plus-axis.svg?branch=master)](https://travis-ci.org/d3plus/d3plus-axis) [![Dependency Status](http://img.shields.io/david/d3plus/d3plus-axis.svg?style=flat)](https://david-dm.org/d3plus/d3plus-axis) [![Gitter](https://img.shields.io/badge/-chat_on_gitter-brightgreen.svg?style=flat&logo=gitter-white)](https://gitter.im/d3plus/) [![1.0 progress](https://img.shields.io/badge/1.0_progress-86%25-yellowgreen.svg?style=flat)](https://github.com/d3plus/d3plus-axis/projects/1)
 
 Beautiful javascript scales and axes.
 
@@ -46,11 +46,11 @@ All four orientations available as shorthand methods for the generalized [Axis](
 
 ### More Examples
 
+ * [Hiding Specific Axis Ticks](http://d3plus.org/examples/d3plus-axis/ticks/)
  * [Axis w/ Time Scale](http://d3plus.org/examples/d3plus-axis/scale-time/)
  * [Custom Axis Tick Formatting](http://d3plus.org/examples/d3plus-axis/tickFormat/)
- * [Hiding Specific Axis Ticks](http://d3plus.org/examples/d3plus-axis/ticks/)
- * [Changing Axis Orientation](http://d3plus.org/examples/d3plus-axis/axis-orient/)
  * [Hiding Specific Axis Labels](http://d3plus.org/examples/d3plus-axis/labels/)
+ * [Changing Axis Orientation](http://d3plus.org/examples/d3plus-axis/axis-orient/)
 
 ## API Reference
 
@@ -473,4 +473,4 @@ This is a global function.
 
 
 
-###### <sub>Documentation generated on Thu, 03 Oct 2019 20:57:32 GMT</sub>
+###### <sub>Documentation generated on Fri, 14 Feb 2020 16:27:19 GMT</sub>
