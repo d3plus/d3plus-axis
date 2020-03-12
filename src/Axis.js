@@ -550,12 +550,15 @@ export default class Axis extends BaseClass {
       const h = rotate ? "width" : "height",
             w = rotate ? "height" : "width";
 
+      const wSize = min([this._maxSize, this._width]);
+      const hSize = min([this._maxSize, this._height]);
+
       const wrap = textWrap()
         .fontFamily(fF)
         .fontSize(fS)
         .lineHeight(this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : undefined)
-        [w](horizontal ? space : min([this._maxSize, this._width]) - hBuff - p - this._margin.left - this._margin.right)
-        [h](horizontal ? min([this._maxSize, this._height]) - hBuff - p - this._margin.top - this._margin.bottom : space);
+        [w](horizontal ? space : wSize - hBuff - p - this._margin.left - this._margin.right)
+        [h](horizontal ? hSize - hBuff - p - this._margin.top - this._margin.bottom : space);
 
       const res = wrap(tickFormat(d));
       res.lines = res.lines.filter(d => d !== "");
@@ -682,6 +685,8 @@ export default class Axis extends BaseClass {
       [width]: rangeOuter[rangeOuter.length - 1] - rangeOuter[0],
       [x]: rangeOuter[0]
     };
+
+    bounds[height] = max([this._minSize, bounds[height]]);
 
     margin[this._orient] += hBuff;
     margin[opposite] = this._gridSize !== undefined ? max([this._gridSize, tBuff]) : this[`_${height}`] - margin[this._orient] - bounds[height] - p;
@@ -934,6 +939,16 @@ export default class Axis extends BaseClass {
    */
   maxSize(_) {
     return arguments.length ? (this._maxSize = _, this) : this._maxSize;
+  }
+
+  /**
+      @memberof Axis
+      @desc If *value* is specified, sets the minimum size alloted for the space that contains the axis tick labels and title.
+      @param {Number}
+      @chainable
+   */
+  minSize(_) {
+    return arguments.length ? (this._minSize = _, this) : this._minSize;
   }
 
   /**
