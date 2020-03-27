@@ -432,6 +432,7 @@ export default class Axis extends BaseClass {
       });
       ticks = ticks.filter((d, i) => pixels[i] !== false);
       this._visibleTicks = ticks;
+      return true;
 
     }
     setScale.bind(this)();
