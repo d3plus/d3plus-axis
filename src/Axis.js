@@ -383,12 +383,13 @@ export default class Axis extends BaseClass {
           ? this._getTicks() : ticks).slice();
 
       if (this._scale === "log") {
-        labels = labels.filter(t =>
+        const tens = labels.filter(t =>
           Math.abs(t).toString().charAt(0) === "1" &&
           (this._d3Scale ? t !== -1 : t !== 1)
         );
+        if (tens.length > 3) return labels = tens;
       }
-      else if (this._scale === "time") {
+      if (this._scale === "time") {
         ticks = ticks.map(Number);
         labels = labels.map(Number);
       }
@@ -457,14 +458,7 @@ export default class Axis extends BaseClass {
      * Constructs the tick formatter function.
      */
     const tickFormat = this._tickFormat ? this._tickFormat : d => {
-      if (this._scale === "log") {
-        const p = Math.round(Math.log(Math.abs(d)) / Math.LN10);
-        const t = Math.abs(d).toString().charAt(0);
-        let n = `10 ${`${p}`.split("").map(c => "⁰¹²³⁴⁵⁶⁷⁸⁹"[c]).join("")}`;
-        if (t !== "1") n = `${t} x ${n}`;
-        return d < 0 ? `-${n}` : n;
-      }
-      else if (this._scale === "time") {
+      if (this._scale === "time") {
         return (timeSecond(d) < d ? formatMillisecond
           : timeMinute(d) < d ? formatSecond
           : timeHour(d) < d ? formatMinute
@@ -477,9 +471,8 @@ export default class Axis extends BaseClass {
         return d;
       }
 
-      let n = this._d3Scale.tickFormat ? this._d3Scale.tickFormat(labels.length - 1)(d) : d;
+      let n = this._d3Scale.tickFormat && this._scale !== "log" ? this._d3Scale.tickFormat(labels.length - 1)(d) : d;
       n = typeof n === "string" ? n.replace(/[^\d\.\-\+]/g, "") * 1 : n;
-
       if (isNaN(n)) {
         return n;
       }
