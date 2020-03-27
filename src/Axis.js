@@ -387,13 +387,24 @@ export default class Axis extends BaseClass {
           Math.abs(t).toString().charAt(0) === "1" &&
           (this._d3Scale ? t !== -1 : t !== 1)
         );
-        if (tens.length > 3) return labels = tens;
+        if (tens.length > 2) {
+          labels = tens;
+          ticks = tens;
+        }
+        else if (labels.length >= 10) {
+          let step = 2;
+          let newLabels = labels.slice();
+          while (newLabels.length >= 10) {
+            newLabels = labels.filter((t, i) => i % step === 0);
+            step += 1;
+          }
+          labels = newLabels;
+        }
       }
       if (this._scale === "time") {
         ticks = ticks.map(Number);
         labels = labels.map(Number);
       }
-
       ticks = ticks.sort((a, b) => this._getPosition(a) - this._getPosition(b));
       labels = labels.sort((a, b) => this._getPosition(a) - this._getPosition(b));
 
@@ -432,7 +443,6 @@ export default class Axis extends BaseClass {
       });
       ticks = ticks.filter((d, i) => pixels[i] !== false);
       this._visibleTicks = ticks;
-      return true;
 
     }
     setScale.bind(this)();
@@ -474,6 +484,7 @@ export default class Axis extends BaseClass {
 
       let n = this._d3Scale.tickFormat && this._scale !== "log" ? this._d3Scale.tickFormat(labels.length - 1)(d) : d;
       n = typeof n === "string" ? n.replace(/[^\d\.\-\+]/g, "") * 1 : n;
+
       if (isNaN(n)) {
         return n;
       }
@@ -711,10 +722,12 @@ export default class Axis extends BaseClass {
     const labelOnly = labels.filter((d, i) => textData[i].lines.length && !ticks.includes(d));
 
     const rotated = textData.some(d => d.rotate);
+
     let tickData = ticks.concat(labelOnly)
       .map(d => {
 
         const data = textData.find(td => td.d === d);
+
         const xPos = this._getPosition(d);
         const space = data ? data.space : 0;
         const lines = data ? data.lines.length : 1;
