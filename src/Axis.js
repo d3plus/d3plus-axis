@@ -357,14 +357,12 @@ export default class Axis extends BaseClass {
        */
       const scale = `scale${this._scale.charAt(0).toUpperCase()}${this._scale.slice(1)}`;
       this._d3Scale = scales[scale]()
-        .domain(this._scale === "time" ? this._domain.map(date) : this._domain);
-      if (this._d3Scale.round) this._d3Scale.round(true);
+        .domain(this._scale === "time" ? this._domain.map(date) : this._domain)
+        .range(range);
+
       if (this._d3Scale.padding) this._d3Scale.padding(this._scalePadding);
       if (this._d3Scale.paddingInner) this._d3Scale.paddingInner(this._paddingInner);
       if (this._d3Scale.paddingOuter) this._d3Scale.paddingOuter(this._paddingOuter);
-
-      if (this._d3Scale.rangeRound) this._d3Scale.rangeRound(range);
-      else this._d3Scale.range(range);
 
       /**
        * Constructs a separate "negative only" scale for logarithmic
