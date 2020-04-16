@@ -265,6 +265,39 @@ export default class Axis extends BaseClass {
     let labels, range, ticks;
 
     /**
+     * Constructs the tick formatter function.
+     */
+    const tickFormat = this._tickFormat ? this._tickFormat : d => {
+      if (this._scale === "time") {
+        return (timeSecond(d) < d ? formatMillisecond
+          : timeMinute(d) < d ? formatSecond
+          : timeHour(d) < d ? formatMinute
+          : timeDay(d) < d ? formatHour
+          : timeMonth(d) < d ? timeWeek(d) < d ? formatDay : formatWeek
+          : timeYear(d) < d ? formatMonth
+          : formatYear)(d);
+      }
+      else if (["band", "ordinal", "point"].includes(this._scale)) {
+        return d;
+      }
+
+      if (isNaN(d)) {
+        return d;
+      }
+      else if (this._scale === "linear" && this._tickSuffix === "smallest") {
+        const locale = typeof this._locale === "object" ? this._locale : formatLocale[this._locale];
+        const {separator, suffixes} = locale;
+        const suff = d >= 1000 ? suffixes[this._tickUnit + 8] : "";
+        const tick = d / Math.pow(10, 3 * this._tickUnit);
+        const number = formatAbbreviate(tick, locale, `,.${tick.toString().length}r`);
+        return `${number}${separator}${suff}`;
+      }
+      else {
+        return formatAbbreviate(d, this._locale);
+      }
+    };
+
+    /**
      * (Re)calculates the internal d3 scale
      * @param {} newRange
      */
@@ -322,7 +355,8 @@ export default class Axis extends BaseClass {
        * Sets up the initial d3 scale, using this._domain and the
        * previously defined range variable.
        */
-      this._d3Scale = scales[`scale${this._scale.charAt(0).toUpperCase()}${this._scale.slice(1)}`]()
+      const scale = `scale${this._scale.charAt(0).toUpperCase()}${this._scale.slice(1)}`;
+      this._d3Scale = scales[scale]()
         .domain(this._scale === "time" ? this._domain.map(date) : this._domain);
       if (this._d3Scale.round) this._d3Scale.round(true);
       if (this._d3Scale.padding) this._d3Scale.padding(this._scalePadding);
@@ -339,8 +373,14 @@ export default class Axis extends BaseClass {
       this._d3ScaleNegative = null;
       if (this._scale === "log") {
         const domain = this._d3Scale.domain();
-        if (domain[0] === 0) domain[0] = 1;
-        if (domain[domain.length - 1] === 0) domain[domain.length - 1] = -1;
+        if (domain[0] === 0) {
+          domain[0] = Math.abs(domain[domain.length - 1]) <= 1 ? 1e-6 : 1;
+          if (domain[domain.length - 1] < 0) domain[0] *= -1;
+        }
+        else if (domain[domain.length - 1] === 0) {
+          domain[domain.length - 1] = Math.abs(domain[0]) <= 1 ? 1e-6 : 1;
+          if (domain[0] < 0) domain[domain.length - 1] *= -1;
+        }
         const range = this._d3Scale.range();
         if (domain[0] < 0 && domain[domain.length - 1] < 0) {
           this._d3ScaleNegative = this._d3Scale.copy()
@@ -392,13 +432,7 @@ export default class Axis extends BaseClass {
           ticks = tens;
         }
         else if (labels.length >= 10) {
-          let step = 2;
-          let newLabels = labels.slice();
-          while (newLabels.length >= 10) {
-            newLabels = labels.filter((t, i) => i % step === 0);
-            step += 1;
-          }
-          labels = newLabels;
+          labels = labels.filter(t => t % 5 === 0 || tickFormat(t).substr(-1) === "1");
         }
       }
       if (this._scale === "time") {
@@ -464,42 +498,6 @@ export default class Axis extends BaseClass {
         return min([prevSpace, nextSpace]) * 2;
       }
     }
-
-    /**
-     * Constructs the tick formatter function.
-     */
-    const tickFormat = this._tickFormat ? this._tickFormat : d => {
-      if (this._scale === "time") {
-        return (timeSecond(d) < d ? formatMillisecond
-          : timeMinute(d) < d ? formatSecond
-          : timeHour(d) < d ? formatMinute
-          : timeDay(d) < d ? formatHour
-          : timeMonth(d) < d ? timeWeek(d) < d ? formatDay : formatWeek
-          : timeYear(d) < d ? formatMonth
-          : formatYear)(d);
-      }
-      else if (["band", "ordinal", "point"].includes(this._scale)) {
-        return d;
-      }
-
-      let n = this._d3Scale.tickFormat && this._scale !== "log" ? this._d3Scale.tickFormat(labels.length - 1)(d) : d;
-      n = typeof n === "string" ? n.replace(/[^\d\.\-\+]/g, "") * 1 : n;
-
-      if (isNaN(n)) {
-        return n;
-      }
-      else if (this._scale === "linear" && this._tickSuffix === "smallest") {
-        const locale = typeof this._locale === "object" ? this._locale : formatLocale[this._locale];
-        const {separator, suffixes} = locale;
-        const suff = n >= 1000 ? suffixes[this._tickUnit + 8] : "";
-        const tick = n / Math.pow(10, 3 * this._tickUnit);
-        const number = formatAbbreviate(tick, locale, `,.${tick.toString().length}r`);
-        return `${number}${separator}${suff}`;
-      }
-      else {
-        return formatAbbreviate(n, this._locale);
-      }
-    };
 
     /**
      * Pre-calculates the size of the title, if defined, in order
