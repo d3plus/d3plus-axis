@@ -109,11 +109,11 @@ export default class Axis extends BaseClass {
           position = ["top", "left"].includes(this._orient) ? this._outerBounds[y] + this._outerBounds[height] - offset : this._outerBounds[y] + offset;
 
     const x1mod = this._scale === "band" ? this._d3Scale.step() - this._d3Scale.bandwidth()
-      : this._scale === "point" ? this._d3Scale.step() * this._d3Scale.padding()
+      : this._scale === "point" ? this._d3Scale.step() * this._d3Scale.padding() * -1
       : 0;
 
     const x2mod = this._scale === "band" ? this._d3Scale.step()
-      : this._scale === "point" ? this._d3Scale.step() * this._d3Scale.padding()
+      : this._scale === "point" ? this._d3Scale.step() * this._d3Scale.padding() * -1
       : 0;
 
     bar
