@@ -9,7 +9,7 @@ Beautiful javascript scales and axes.
 If you use NPM, run `npm install d3plus-axis --save`. Otherwise, download the [latest release](https://github.com/d3plus/d3plus-axis/releases/latest). The released bundle supports AMD, CommonJS, and vanilla environments. You can also load directly from [d3plus.org](https://d3plus.org):
 
 ```html
-<script src="https://d3plus.org/js/d3plus-axis.v0.5.full.min.js"></script>
+<script src="https://d3plus.org/js/d3plus-axis.v0.6.full.min.js"></script>
 ```
 
 [width]: 600
@@ -482,4 +482,4 @@ This is a global function.
 
 
 
-###### <sub>Documentation generated on Wed, 03 Jun 2020 14:59:27 GMT</sub>
+###### <sub>Documentation generated on Tue, 14 Jul 2020 20:53:45 GMT</sub>
