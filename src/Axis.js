@@ -104,22 +104,23 @@ export default class Axis extends BaseClass {
   _barPosition(bar) {
 
     const {height, x, y, opposite} = this._position,
-          domain = this._getDomain(),
           offset = this._margin[opposite],
           position = ["top", "left"].includes(this._orient) ? this._outerBounds[y] + this._outerBounds[height] - offset : this._outerBounds[y] + offset;
 
     const x1mod = this._scale === "band" ? this._d3Scale.step() - this._d3Scale.bandwidth()
-      : this._scale === "point" ? this._d3Scale.step() * this._d3Scale.padding() * -1
+      : this._scale === "point" ? this._d3Scale.step() * this._d3Scale.padding()
       : 0;
 
     const x2mod = this._scale === "band" ? this._d3Scale.step()
-      : this._scale === "point" ? this._d3Scale.step() * this._d3Scale.padding() * -1
+      : this._scale === "point" ? this._d3Scale.step() * this._d3Scale.padding()
       : 0;
+
+    const sortedDomain = this._d3Scale.domain();
 
     bar
       .call(attrize, this._barConfig)
-      .attr(`${x}1`, this._getPosition(domain[0]) - x1mod)
-      .attr(`${x}2`, this._getPosition(domain[domain.length - 1]) + x2mod)
+      .attr(`${x}1`, this._getPosition(sortedDomain[0]) - x1mod)
+      .attr(`${x}2`, this._getPosition(sortedDomain[sortedDomain.length - 1]) + x2mod)
       .attr(`${y}1`, position)
       .attr(`${y}2`, position);
 
