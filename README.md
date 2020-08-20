@@ -482,4 +482,4 @@ This is a global function.
 
 
 
-###### <sub>Documentation generated on Fri, 17 Jul 2020 15:34:00 GMT</sub>
+###### <sub>Documentation generated on Thu, 20 Aug 2020 17:39:45 GMT</sub>
