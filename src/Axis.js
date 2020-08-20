@@ -422,13 +422,13 @@ export default class Axis extends BaseClass {
           ? this._getTicks() : ticks).slice();
 
       if (this._scale === "log") {
-        const tens = labels.filter(t =>
+        const tens = labels.filter((t, i) =>
+          !i || i === labels.length - 1 ||
           Math.abs(t).toString().charAt(0) === "1" &&
           (this._d3Scale ? t !== -1 : t !== 1)
         );
         if (tens.length > 2) {
           labels = tens;
-          ticks = tens;
         }
         else if (labels.length >= 10) {
           labels = labels.filter(t => t % 5 === 0 || tickFormat(t).substr(-1) === "1");
