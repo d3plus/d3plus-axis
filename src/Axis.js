@@ -115,7 +115,7 @@ export default class Axis extends BaseClass {
       : this._scale === "point" ? this._d3Scale.step() * this._d3Scale.padding()
       : 0;
 
-    const sortedDomain = this._d3Scale.domain();
+    const sortedDomain = (this._d3Scale ? this._d3Scale.domain() : []).concat(this._d3ScaleNegative ? this._d3ScaleNegative.domain() : []);
 
     bar
       .call(attrize, this._barConfig)
