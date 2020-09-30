@@ -575,6 +575,29 @@ export default class Axis extends BaseClass {
 
     }
 
+    /** Calculates label offsets */
+    function calculateOffset(arr = []) {
+      let offset = 0;
+
+      arr.forEach(datum => {
+        const prev = arr[datum.i - 1];
+
+        const h = datum.rotate && horizontal || !datum.rotate && !horizontal ? "width" : "height",
+              w = datum.rotate && horizontal || !datum.rotate && !horizontal ? "height" : "width";
+
+        if (!prev) {
+          offset = 1;
+        }
+        else if (prev.position + prev[w] / 2 > datum.position - datum[w] / 2) {
+          if (offset) {
+            datum.offset = prev[h];
+            offset = 0;
+          }
+          else offset = 1;
+        }
+      });
+    }
+
     textData = textData
       .map(datum => {
         datum.rotate = this._labelRotation;
@@ -586,6 +609,8 @@ export default class Axis extends BaseClass {
     this._rotateLabels = horizontal && this._labelRotation === undefined
       ? textData.some(d => d.truncated) : this._labelRotation;
 
+    const offsetEnabled = this._labelOffset && textData.some(d => d.truncated);
+
     if (this._rotateLabels) {
       textData = textData
         .map(datum => {
@@ -593,6 +618,19 @@ export default class Axis extends BaseClass {
           const res = calculateLabelSize.bind(this)(datum);
           return Object.assign(datum, res);
         });
+    }
+    else if (offsetEnabled) {
+
+      textData = textData
+        .map(datum => {
+
+          datum.space = calculateSpace.bind(this)(datum, 2);
+          const res = calculateLabelSize.bind(this)(datum);
+          return Object.assign(datum, res);
+        });
+
+      calculateOffset.bind(this)(textData);
+
     }
 
     /**
@@ -636,10 +674,11 @@ export default class Axis extends BaseClass {
       textData = textData
         .map(datum => {
           datum.rotate = this._rotateLabels;
-          datum.space = calculateSpace.bind(this)(datum);
+          datum.space = calculateSpace.bind(this)(datum, offsetEnabled ? 2 : 1);
           const res = calculateLabelSize.bind(this)(datum);
           return Object.assign(res, datum);
         });
+      calculateOffset.bind(this)(textData);
     }
 
     const labelHeight = max(textData, t => t.height) || 0;
@@ -649,34 +688,6 @@ export default class Axis extends BaseClass {
         const prev = textData[i - 1];
         return truncated || i && prev.position + prev.height / 2 > position - height / 2;
       }) : this._labelRotation;
-
-    if (this._rotateLabels) {
-
-      let offset = 0;
-      textData = textData
-        .map(datum => {
-
-          datum.space = calculateSpace.bind(this)(datum, 2);
-          const res = calculateLabelSize.bind(this)(datum);
-          datum = Object.assign(datum, res);
-
-          const prev = textData[datum.i - 1];
-          if (!prev) {
-            offset = 1;
-          }
-          else if (prev.position + prev.height / 2 > datum.position) {
-            if (offset) {
-              datum.offset = prev.width;
-              offset = 0;
-            }
-            else offset = 1;
-          }
-
-          return datum;
-
-        });
-
-    }
 
     const globalOffset = this._labelOffset ? max(textData, d => d.offset || 0) : 0;
     textData.forEach(datum => datum.offset = datum.offset ? globalOffset : 0);
