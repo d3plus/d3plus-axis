@@ -433,6 +433,9 @@ export default class Axis extends BaseClass {
         else if (labels.length >= 10) {
           labels = labels.filter(t => t % 5 === 0 || tickFormat(t).substr(-1) === "1");
         }
+        if (labels.includes(-1) && labels.includes (1) && labels.some(d => d > 10 || d < 10)) {
+          labels.splice(labels.indexOf(-1), 1);
+        }
       }
       if (this._scale === "time") {
         ticks = ticks.map(Number);
