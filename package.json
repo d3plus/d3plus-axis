@@ -30,7 +30,7 @@
     "d3plus-common": "^0.7.0",
     "d3plus-format": "^0.1.18",
     "d3plus-shape": "^0.17.0",
-    "d3plus-text": "^0.10.0"
+    "d3plus-text": "^0.10.1"
   },
   "scripts": {
     "build": "d3plus-build",
@@ -42,7 +42,7 @@
     "test": "d3plus-test"
   },
   "devDependencies": {
-    "d3plus-dev": "^0.7.6"
+    "d3plus-dev": "^0.7.9"
   },
   "module": "es/index",
   "sideEffects": false,
