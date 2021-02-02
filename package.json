@@ -2,7 +2,7 @@
   "name": "d3plus-axis",
   "version": "0.6.3",
   "description": "Beautiful javascript scales and axes.",
-  "main": "build/d3plus-axis.js",
+  "main": "build/d3plus-axis.full.js",
   "jsnext:main": "es/index",
   "license": "MIT",
   "homepage": "https://d3plus.org",
