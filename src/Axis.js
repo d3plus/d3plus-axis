@@ -11,6 +11,7 @@ import {select} from "d3-selection";
 import {transition} from "d3-transition";
 
 import {assign, attrize, BaseClass, closest, constant, elem} from "d3plus-common";
+import {colorDefaults} from "d3plus-color";
 import {formatAbbreviate, formatLocale} from "d3plus-format";
 import * as shapes from "d3plus-shape";
 import {rtl as detectRTL, TextBox, textWrap} from "d3plus-text";
@@ -36,13 +37,13 @@ export default class Axis extends BaseClass {
 
     this._align = "middle";
     this._barConfig = {
-      "stroke": "#000",
+      "stroke": "#999",
       "stroke-width": 1
     };
     this._domain = [0, 10];
     this._duration = 600;
     this._gridConfig = {
-      "stroke": "#ccc",
+      "stroke": "#eee",
       "stroke-width": 1
     };
     this._gridLog = false;
@@ -58,15 +59,15 @@ export default class Axis extends BaseClass {
     this._scalePadding = 0.5;
     this._shape = "Line";
     this._shapeConfig = {
-      fill: "#000",
+      fill: "#999",
       height: d => d.tick ? 8 : 0,
       label: d => d.text,
       labelBounds: d => d.labelBounds,
       labelConfig: {
-        fontColor: "#000",
+        fontColor: "#999",
         fontFamily: new TextBox().fontFamily(),
         fontResize: false,
-        fontSize: constant(10),
+        fontSize: constant(14),
         padding: 0,
         textAnchor: () => {
           const rtl = detectRTL();
@@ -77,7 +78,7 @@ export default class Axis extends BaseClass {
         verticalAlign: () => this._orient === "bottom" ? "top" : this._orient === "top" ? "bottom" : "middle"
       },
       r: d => d.tick ? 4 : 0,
-      stroke: "#000",
+      stroke: "#999",
       strokeWidth: 1,
       width: d => d.tick ? 8 : 0
     };
@@ -88,6 +89,7 @@ export default class Axis extends BaseClass {
     this._timeLocale = undefined;
     this._titleClass = new TextBox();
     this._titleConfig = {
+      fontColor: colorDefaults.dark,
       fontSize: 12,
       textAnchor: "middle"
     };
@@ -529,6 +531,8 @@ export default class Axis extends BaseClass {
     if (typeof wBuff === "function") wBuff = max(ticks.map(wBuff));
     if (this._shape !== "Circle") wBuff /= 2;
 
+    const {fontFamily, fontSize} = this._shapeConfig.labelConfig;
+
     /**
      * Calculates the space each label would take up, given
      * the provided this._space size.
@@ -536,8 +540,8 @@ export default class Axis extends BaseClass {
     let textData = labels
       .map((d, i) => {
 
-        const fF = this._shapeConfig.labelConfig.fontFamily(d, i),
-              fS = this._shapeConfig.labelConfig.fontSize(d, i),
+        const fF = typeof fontFamily === "function" ? fontFamily(d, i) : fontFamily,
+              fS = typeof fontSize === "function" ? fontSize(d, i) : fontSize,
               position = this._getPosition(d);
 
         const lineHeight = this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : fS * 1.4;
@@ -665,8 +669,8 @@ export default class Axis extends BaseClass {
       textData = labels
         .map((d, i) => {
 
-          const fF = this._shapeConfig.labelConfig.fontFamily(d, i),
-                fS = this._shapeConfig.labelConfig.fontSize(d, i),
+          const fF = typeof fontFamily === "function" ? fontFamily(d, i) : fontFamily,
+                fS = typeof fontSize === "function" ? fontSize(d, i) : fontSize,
                 position = this._getPosition(d);
 
           const lineHeight = this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : fS * 1.4;
