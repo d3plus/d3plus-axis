@@ -83,7 +83,6 @@ export default class Axis extends BaseClass {
       width: d => d.tick ? 8 : 0
     };
     this._tickSize = 5;
-    this._tickSpecifier = undefined;
     this._tickSuffix = "normal";
     this._tickUnit = 0;
     this._timeLocale = undefined;
@@ -1128,16 +1127,6 @@ export default class Axis extends BaseClass {
   */
   tickSize(_) {
     return arguments.length ? (this._tickSize = _, this) : this._tickSize;
-  }
-
-  /**
-      @memberof Axis
-      @desc Sets the tick specifier for the [tickFormat](https://github.com/d3/d3-scale#continuous_tickFormat) function. If this method is called without any arguments, the default tick specifier is returned.
-      @param {String} [*value* = undefined]
-      @chainable
-  */
-  tickSpecifier(_) {
-    return arguments.length ? (this._tickSpecifier = _, this) : this._tickSpecifier;
   }
 
   /**
