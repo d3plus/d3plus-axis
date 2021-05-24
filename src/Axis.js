@@ -19,6 +19,34 @@ import {rtl as detectRTL, TextBox, textWrap} from "d3plus-text";
 import {default as date} from "./date";
 import {default as locale} from "./locale";
 
+
+/**
+ * Calculates ticks from a given scale (negative and/or positive)
+ * @param {scale} scale A d3-scale object
+ * @private
+ */
+function calculateTicks(scale, useData = false) {
+
+  const tickScale = scales.scaleSqrt().domain([10, 400]).range([10, 50]);
+  const negativeRange = scale.range();
+  const size = Math.abs(negativeRange[1] - negativeRange[0]);
+  let step = Math.floor(size / tickScale(size));
+
+  if (this._scale === "time" && this._data && this._data.length) {
+    const dataExtent = extent(this._data);
+    const distance = this._data.reduce((n, d, i, arr) => {
+      if (i) {
+        const dist = Math.abs(d - arr[i - 1]);
+        if (dist < n) n = dist;
+      }
+      return n;
+    }, Infinity);
+    const newStep = Math.round((dataExtent[1] - dataExtent[0]) / distance);
+    step = useData ? min([step * 2, newStep]) : min([step, newStep]);
+  }
+  return scale.ticks(step);
+}
+
 /**
     @class Axis
     @extends external:BaseClass
@@ -48,13 +76,13 @@ export default class Axis extends BaseClass {
     };
     this._gridLog = false;
     this._height = 400;
-    this._labelOffset = true;
+    this._labelOffset = false;
+    this._labelRotation = false;
     this.orient("bottom");
     this._outerBounds = {width: 0, height: 0, x: 0, y: 0};
     this._padding = 5;
     this._paddingInner = 0.1;
     this._paddingOuter = 0.1;
-    this._rotateLabels = false;
     this._scale = "linear";
     this._scalePadding = 0.5;
     this._shape = "Line";
@@ -73,7 +101,7 @@ export default class Axis extends BaseClass {
           const rtl = detectRTL();
           return this._orient === "left" ? rtl ? "start" : "end"
             : this._orient === "right" ? rtl ? "end" : "start"
-            : this._rotateLabels ? this._orient === "bottom" ? "end" : "start" : "middle";
+            : this._labelRotation ? this._orient === "bottom" ? "end" : "start" : "middle";
         },
         verticalAlign: () => this._orient === "bottom" ? "top" : this._orient === "top" ? "bottom" : "middle"
       },
@@ -82,7 +110,7 @@ export default class Axis extends BaseClass {
       strokeWidth: 1,
       width: d => d.tick ? 8 : 0
     };
-    this._tickSize = 5;
+    this._tickSize = 8;
     this._tickSuffix = "normal";
     this._tickUnit = 0;
     this._timeLocale = undefined;
@@ -169,24 +197,25 @@ export default class Axis extends BaseClass {
 
   /**
       @memberof Axis
+      @desc Returns the scale's labels, taking into account negative and positive log scales.
+      @private
+  */
+  _getLabels() {
+    let labels = [];
+    if (this._d3ScaleNegative) labels = labels.concat(calculateTicks.bind(this)(this._d3ScaleNegative, false));
+    if (this._d3Scale) labels = labels.concat(calculateTicks.bind(this)(this._d3Scale, false));
+    return labels;
+  }
+
+  /**
+      @memberof Axis
       @desc Returns the scale's ticks, taking into account negative and positive log scales.
       @private
   */
   _getTicks() {
-    const tickScale = scales.scaleSqrt().domain([10, 400]).range([10, 50]);
-
     let ticks = [];
-    if (this._d3ScaleNegative) {
-      const negativeRange = this._d3ScaleNegative.range();
-      const size = negativeRange[1] - negativeRange[0];
-      ticks = this._d3ScaleNegative.ticks(Math.floor(size / tickScale(size)));
-    }
-    if (this._d3Scale) {
-      const positiveRange = this._d3Scale.range();
-      const size = positiveRange[1] - positiveRange[0];
-      ticks = ticks.concat(this._d3Scale.ticks(Math.floor(size / tickScale(size))));
-    }
-
+    if (this._d3ScaleNegative) ticks = ticks.concat(calculateTicks.bind(this)(this._d3ScaleNegative, true));
+    if (this._d3Scale) ticks = ticks.concat(calculateTicks.bind(this)(this._d3Scale, true));
     return ticks;
   }
 
@@ -234,13 +263,15 @@ export default class Axis extends BaseClass {
     const timeLocale = this._timeLocale || locale[this._locale] || locale["en-US"];
     timeFormatDefaultLocale(timeLocale).format();
 
-    const formatDay = timeFormat("%a %d"),
+    const formatDay = timeFormat("%-d"),
           formatHour = timeFormat("%I %p"),
           formatMillisecond = timeFormat(".%L"),
           formatMinute = timeFormat("%I:%M"),
           formatMonth = timeFormat("%b"),
+          formatMonthDay = timeFormat("%b %-d"),
+          formatMonthDayYear = timeFormat("%b %-d, %Y"),
+          formatMonthYear = timeFormat("%b %Y"),
           formatSecond = timeFormat(":%S"),
-          formatWeek = timeFormat("%b %d"),
           formatYear = timeFormat("%Y");
 
     /**
@@ -267,17 +298,29 @@ export default class Axis extends BaseClass {
     let labels, range, ticks;
 
     /**
+     * Calculates whether to show the parent level time label, such as
+     * "Jan 2020" in a monthly chart (where "Feb"-only would follow)
+     */
+    function neighborInInterval(d, comparitor, interval) {
+      return comparitor ? +interval.round(d) === +interval.round(d + Math.abs(comparitor - d))  : false;
+    }
+
+    /**
      * Constructs the tick formatter function.
      */
     const tickFormat = this._tickFormat ? this._tickFormat : d => {
       if (this._scale === "time") {
+
+        const labelIndex = labels.indexOf(d);
+        const c = labels[labelIndex + 1] || labels[labelIndex - 1];
+
         return (timeSecond(d) < d ? formatMillisecond
           : timeMinute(d) < d ? formatSecond
           : timeHour(d) < d ? formatMinute
-          : timeDay(d) < d ? formatHour
-          : timeMonth(d) < d ? timeWeek(d) < d ? formatDay : formatWeek
-          : timeYear(d) < d ? formatMonth
-          : formatYear)(d);
+          : timeDay(d) < d ? labelIndex === 0 ? formatMonthDayYear : formatHour
+          : timeMonth(d) < d ? labelIndex === 0 ? formatMonthDayYear : neighborInInterval(d, c, timeDay) ? formatMonthDay : formatDay
+          : timeYear(d) < d ? labelIndex === 0 ? formatMonthYear : neighborInInterval(d, c, timeMonth) ? formatMonthDay : formatMonth
+          : neighborInInterval(d, c, timeYear) ? formatMonthYear : formatYear)(d);
       }
       else if (["band", "ordinal", "point"].includes(this._scale)) {
         return d;
@@ -420,7 +463,7 @@ export default class Axis extends BaseClass {
       labels = (this._labels
         ? this._scale === "time" ? this._labels.map(date) : this._labels
         : (this._d3Scale ? this._d3Scale.ticks : this._d3ScaleNegative.ticks)
-          ? this._getTicks() : ticks).slice();
+          ? this._getLabels() : ticks).slice();
 
       if (this._scale === "log") {
         const tens = labels.filter((t, i) =>
@@ -612,12 +655,9 @@ export default class Axis extends BaseClass {
         return Object.assign(res, datum);
       });
 
-    this._rotateLabels = horizontal && this._labelRotation === undefined
-      ? textData.some(d => d.truncated) : this._labelRotation;
-
     const offsetEnabled = this._labelOffset && textData.some(d => d.truncated);
 
-    if (this._rotateLabels) {
+    if (this._labelRotation) {
       textData = textData
         .map(datum => {
           datum.rotate = true;
@@ -679,7 +719,7 @@ export default class Axis extends BaseClass {
 
       textData = textData
         .map(datum => {
-          datum.rotate = this._rotateLabels;
+          datum.rotate = this._labelRotation;
           datum.space = calculateSpace.bind(this)(datum, offsetEnabled ? 2 : 1);
           const res = calculateLabelSize.bind(this)(datum);
           return Object.assign(res, datum);
@@ -688,7 +728,7 @@ export default class Axis extends BaseClass {
     }
 
     const labelHeight = max(textData, t => t.height) || 0;
-    this._rotateLabels = horizontal && this._labelRotation === undefined
+    this._labelRotation = horizontal && this._labelRotation === undefined
       ? textData.some(datum => {
         const {i, height, position, truncated} = datum;
         const prev = textData[i - 1];
@@ -770,7 +810,7 @@ export default class Axis extends BaseClass {
               height: horizontal ? labelHeight : space
             },
           rotate: data ? data.rotate : false,
-          size: labels.includes(d) ? size : 0,
+          size: labels.includes(d) ? size : this._data && this._data.find(t => +t === d) ? Math.ceil(size / 2) : 0,
           text: labels.includes(d) ? tickFormat(d) : false,
           tick: ticks.includes(d),
           [x]: xPos + (this._scale === "band" ? this._d3Scale.bandwidth() / 2 : 0),
@@ -850,6 +890,16 @@ export default class Axis extends BaseClass {
   */
   barConfig(_) {
     return arguments.length ? (this._barConfig = Object.assign(this._barConfig, _), this) : this._barConfig;
+  }
+
+  /**
+      @memberof Axis
+      @desc An array of data points, which helps determine which ticks should be shown and which time resolution should be displayed.
+      @param {Array} [*value*]
+      @chainable
+  */
+  data(_) {
+    return arguments.length ? (this._data = _, this) : this._data;
   }
 
   /**
@@ -935,7 +985,7 @@ export default class Axis extends BaseClass {
   /**
       @memberof Axis
       @desc If *value* is specified, sets whether offsets will be used to position some labels further away from the axis in order to allow space for the text.
-      @param {Boolean} [*value* = true]
+      @param {Boolean} [*value* = false]
       @chainable
    */
   labelOffset(_) {
@@ -945,7 +995,7 @@ export default class Axis extends BaseClass {
   /**
       @memberof Axis
       @desc If *value* is specified, sets whether whether horizontal axis labels are rotated -90 degrees.
-      @param {Boolean}
+      @param {Boolean} [*value* = false]
       @chainable
    */
   labelRotation(_) {
