@@ -4,7 +4,7 @@
 */
 
 import {extent, max, min, range as d3Range, ticks as d3Ticks} from "d3-array";
-import {timeYear, timeMonth, timeWeek, timeDay, timeHour, timeMinute, timeSecond} from "d3-time";
+import {timeYear, timeMonth, timeDay, timeHour, timeMinute, timeSecond} from "d3-time";
 import {timeFormat, timeFormatDefaultLocale} from "d3-time-format";
 import * as scales from "d3-scale";
 import {select} from "d3-selection";
