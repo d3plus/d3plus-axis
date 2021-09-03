@@ -4,15 +4,14 @@
 */
 
 import {extent, max, min, range as d3Range, ticks as d3Ticks} from "d3-array";
-import {timeYear, timeMonth, timeDay, timeHour, timeMinute, timeSecond} from "d3-time";
-import {timeFormat, timeFormatDefaultLocale} from "d3-time-format";
+import {timeFormatDefaultLocale} from "d3-time-format";
 import * as scales from "d3-scale";
 import {select} from "d3-selection";
 import {transition} from "d3-transition";
 
 import {assign, attrize, BaseClass, closest, constant, elem} from "d3plus-common";
 import {colorDefaults} from "d3plus-color";
-import {formatAbbreviate, formatLocale} from "d3plus-format";
+import {formatAbbreviate, formatDate, formatLocale} from "d3plus-format";
 import * as shapes from "d3plus-shape";
 import {rtl as detectRTL, TextBox, textWrap} from "d3plus-text";
 
@@ -263,17 +262,6 @@ export default class Axis extends BaseClass {
     const timeLocale = this._timeLocale || locale[this._locale] || locale["en-US"];
     timeFormatDefaultLocale(timeLocale).format();
 
-    const formatDay = timeFormat("%-d"),
-          formatHour = timeFormat("%I %p"),
-          formatMillisecond = timeFormat(".%L"),
-          formatMinute = timeFormat("%I:%M"),
-          formatMonth = timeFormat("%b"),
-          formatMonthDay = timeFormat("%b %-d"),
-          formatMonthDayYear = timeFormat("%b %-d, %Y"),
-          formatMonthYear = timeFormat("%b %Y"),
-          formatSecond = timeFormat(":%S"),
-          formatYear = timeFormat("%Y");
-
     /**
      * Declares some commonly used variables.
      */
@@ -298,36 +286,14 @@ export default class Axis extends BaseClass {
     let labels, range, ticks;
 
     /**
-     * Calculates whether to show the parent level time label, such as
-     * "Jan 2020" in a monthly chart (where "Feb"-only would follow)
-     */
-    function neighborInInterval(d, comparitor, interval) {
-      return comparitor ? +interval.round(d) === +interval.round(d + Math.abs(comparitor - d))  : false;
-    }
-
-    /**
      * Constructs the tick formatter function.
      */
     const tickFormat = this._tickFormat ? this._tickFormat : d => {
-      if (this._scale === "time") {
-
-        const labelIndex = labels.indexOf(d);
-        const c = labels[labelIndex + 1] || labels[labelIndex - 1];
-
-        return (timeSecond(d) < d ? formatMillisecond
-          : timeMinute(d) < d ? formatSecond
-          : timeHour(d) < d ? formatMinute
-          : timeDay(d) < d ? labelIndex === 0 ? formatMonthDayYear : formatHour
-          : timeMonth(d) < d ? labelIndex === 0 ? formatMonthDayYear : neighborInInterval(d, c, timeDay) ? formatMonthDay : formatDay
-          : timeYear(d) < d ? labelIndex === 0 ? formatMonthYear : neighborInInterval(d, c, timeMonth) ? formatMonthDay : formatMonth
-          : neighborInInterval(d, c, timeYear) ? formatMonthYear : formatYear)(d);
-      }
-      else if (["band", "ordinal", "point"].includes(this._scale)) {
+      if (isNaN(d) || ["band", "ordinal", "point"].includes(this._scale)) {
         return d;
       }
-
-      if (isNaN(d)) {
-        return d;
+      else if (this._scale === "time") {
+        return formatDate(d, labels);
       }
       else if (this._scale === "linear" && this._tickSuffix === "smallest") {
         const locale = typeof this._locale === "object" ? this._locale : formatLocale[this._locale];
