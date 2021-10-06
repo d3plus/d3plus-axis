@@ -18,6 +18,7 @@ import {rtl as detectRTL, TextBox, textWrap} from "d3plus-text";
 import {default as date} from "./date";
 import {default as locale} from "./locale";
 
+const floorPow = d => Math.pow(10, Math.floor(Math.log10(d)));
 
 /**
  * Calculates ticks from a given scale (negative and/or positive)
@@ -67,6 +68,7 @@ export default class Axis extends BaseClass {
       "stroke": "#999",
       "stroke-width": 1
     };
+    this._data = [];
     this._domain = [0, 10];
     this._duration = 600;
     this._gridConfig = {
@@ -143,7 +145,7 @@ export default class Axis extends BaseClass {
       : this._scale === "point" ? this._d3Scale.step() * this._d3Scale.padding()
       : 0;
 
-    const sortedDomain = (this._d3Scale ? this._d3Scale.domain() : []).concat(this._d3ScaleNegative ? this._d3ScaleNegative.domain() : []);
+    const sortedDomain = (this._d3ScaleNegative ? this._d3ScaleNegative.domain() : []).concat(this._d3Scale ? this._d3Scale.domain() : []);
 
     bar
       .call(attrize, this._barConfig)
@@ -177,7 +179,7 @@ export default class Axis extends BaseClass {
       @private
   */
   _getPosition(d) {
-    return d < 0 && this._d3ScaleNegative ? this._d3ScaleNegative(d) : d === 0 ? this._d3Scale.range()[0] : this._d3Scale(d);
+    return this._scale === "log" && d === 0 ? (this._d3Scale || this._d3ScaleNegative).range()[this._d3Scale ? 0 : 1] : d < 0 ? this._d3ScaleNegative(d) : this._d3Scale(d);
   }
 
   /**
@@ -367,6 +369,7 @@ export default class Axis extends BaseClass {
        * previously defined range variable.
        */
       const scale = `scale${this._scale.charAt(0).toUpperCase()}${this._scale.slice(1)}`;
+
       this._d3Scale = scales[scale]()
         .domain(this._scale === "time" ? this._domain.map(date) : this._domain)
         .range(range);
@@ -383,13 +386,13 @@ export default class Axis extends BaseClass {
       if (this._scale === "log") {
         const domain = this._d3Scale.domain();
         if (domain[0] === 0) {
-          const smallestNumber = min([min(this._data), Math.abs(domain[domain.length - 1])]);
-          domain[0] = smallestNumber === 0 ? 1e-6 : smallestNumber <= 1 ? Math.pow(10, Math.floor(Math.log10(smallestNumber))) : 1;
-          if (domain[domain.length - 1] < 0) domain[0] *= -1;
+          const smallestNumber = min([min(this._data), Math.abs(domain[1])]);
+          domain[0] = smallestNumber === 0 || smallestNumber === 1 ? 1e-6 : smallestNumber <= 1 ? floorPow(smallestNumber) : 1;
+          if (domain[1] < 0) domain[0] *= -1;
         }
         else if (domain[domain.length - 1] === 0) {
           const smallestNumber = min([min(this._data), Math.abs(domain[0])]);
-          domain[domain.length - 1] = smallestNumber === 0 ? 1e-6 : smallestNumber <= 1 ? Math.pow(10, Math.floor(Math.log10(smallestNumber))) : 1;
+          domain[domain.length - 1] = smallestNumber === 0 || smallestNumber === 1 ? 1e-6 : smallestNumber <= 1 ? floorPow(smallestNumber) : 1;
           if (domain[0] < 0) domain[domain.length - 1] *= -1;
         }
         const range = this._d3Scale.range();
@@ -406,15 +409,20 @@ export default class Axis extends BaseClass {
         }
         else {
           const percentScale = scales.scaleLog().domain([1, domain[domain[1] > 0 ? 1 : 0]]).range([0, 1]);
-          const leftPercentage = percentScale(Math.abs(domain[domain[1] < 0 ? 1 : 0]));
+          const leftPercentage = percentScale(Math.abs(domain[domain[0] < 0 ? 1 : 0]));
           let zero = leftPercentage / (leftPercentage + 1) * (range[1] - range[0]);
+          const smallestPositive = min([min(this._data.filter(d => d >= 0)), domain[1]]);
+          const smallestNegative = max([max(this._data.filter(d => d <= -0)), domain[0]]);
+          const smallestPosPow = smallestPositive === 0 ? 1e-6 : smallestPositive <= 1 ? floorPow(smallestPositive) : 1;
+          const smallestNegPow = smallestNegative === 0 ? -1e-6 : smallestNegative >= -1 ? -floorPow(Math.abs(smallestNegative)) : -1;
+          const smallestNumber = min([smallestPosPow, -smallestNegPow]);
           if (domain[0] > 0) zero = range[1] - range[0] - zero;
           this._d3ScaleNegative = this._d3Scale.copy();
           (domain[0] < 0 ? this._d3Scale : this._d3ScaleNegative)
-            .domain([Math.sign(domain[1]), domain[1]])
+            .domain([smallestNumber, domain[1]])
             .range([range[0] + zero, range[1]]);
           (domain[0] < 0 ? this._d3ScaleNegative : this._d3Scale)
-            .domain([domain[0], Math.sign(domain[0])])
+            .domain([domain[0], -smallestNumber])
             .range([range[0], range[0] + zero]);
         }
       }
@@ -778,7 +786,7 @@ export default class Axis extends BaseClass {
               height: horizontal ? labelHeight : space
             },
           rotate: data ? data.rotate : false,
-          size: labels.includes(d) ? size : this._data && this._data.find(t => +t === d) ? Math.ceil(size / 2) : 0,
+          size: labels.includes(d) ? size : this._data.find(t => +t === d) ? Math.ceil(size / 2) : 0,
           text: labels.includes(d) ? tickFormat(d) : false,
           tick: ticks.includes(d),
           [x]: xPos + (this._scale === "band" ? this._d3Scale.bandwidth() / 2 : 0),
