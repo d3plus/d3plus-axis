@@ -145,7 +145,7 @@ export default class Axis extends BaseClass {
       : this._scale === "point" ? this._d3Scale.step() * this._d3Scale.padding()
       : 0;
 
-    const sortedDomain = (this._d3ScaleNegative ? this._d3ScaleNegative.domain() : []).concat(this._d3Scale ? this._d3Scale.domain() : []);
+    const sortedDomain = (this._d3ScaleNegative ? this._d3ScaleNegative.domain() : []).concat(this._d3Scale ? this._d3Scale.domain() : []).sort((a, b) => a - b);
 
     bar
       .call(attrize, this._barConfig)
@@ -408,21 +408,22 @@ export default class Axis extends BaseClass {
             .range(range);
         }
         else {
-          const percentScale = scales.scaleLog().domain([1, domain[domain[1] > 0 ? 1 : 0]]).range([0, 1]);
-          const leftPercentage = percentScale(Math.abs(domain[domain[0] < 0 ? 1 : 0]));
-          let zero = leftPercentage / (leftPercentage + 1) * (range[1] - range[0]);
-          const smallestPositive = min([min(this._data.filter(d => d >= 0)), domain[1]]);
-          const smallestNegative = max([max(this._data.filter(d => d <= -0)), domain[0]]);
+          const percentScale = scales.scaleLinear()
+            .domain(domain)
+            .range([0, 1]);
+          const leftPercentage = percentScale(0);
+          const zero = leftPercentage * (range[1] - range[0]);
+          const smallestPositive = min([min(this._data.filter(d => d >= 0)), Math.abs(domain[1])]);
+          const smallestNegative = min([min(this._data.filter(d => d <= -0)), Math.abs(domain[0])]);
           const smallestPosPow = smallestPositive === 0 ? 1e-6 : smallestPositive <= 1 ? floorPow(smallestPositive) : 1;
-          const smallestNegPow = smallestNegative === 0 ? -1e-6 : smallestNegative >= -1 ? -floorPow(Math.abs(smallestNegative)) : -1;
-          const smallestNumber = min([smallestPosPow, -smallestNegPow]);
-          if (domain[0] > 0) zero = range[1] - range[0] - zero;
+          const smallestNegPow = smallestNegative === 0 ? -1e-6 : smallestNegative <= 1 ? floorPow(smallestNegative) : 1;
+          const smallestNumber = min([smallestPosPow, smallestNegPow]);
           this._d3ScaleNegative = this._d3Scale.copy();
           (domain[0] < 0 ? this._d3Scale : this._d3ScaleNegative)
-            .domain([smallestNumber, domain[1]])
+            .domain([domain[0] < 0 ? smallestNumber : -smallestNumber, domain[1]])
             .range([range[0] + zero, range[1]]);
           (domain[0] < 0 ? this._d3ScaleNegative : this._d3Scale)
-            .domain([domain[0], -smallestNumber])
+            .domain([domain[0], domain[0] < 0 ? -smallestNumber : smallestNumber])
             .range([range[0], range[0] + zero]);
         }
       }
