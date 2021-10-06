@@ -177,7 +177,7 @@ export default class Axis extends BaseClass {
       @private
   */
   _getPosition(d) {
-    return d < 0 && this._d3ScaleNegative ? this._d3ScaleNegative(d) : this._d3Scale(d);
+    return d < 0 && this._d3ScaleNegative ? this._d3ScaleNegative(d) : d === 0 ? this._d3Scale.range()[0] : this._d3Scale(d);
   }
 
   /**
@@ -383,11 +383,13 @@ export default class Axis extends BaseClass {
       if (this._scale === "log") {
         const domain = this._d3Scale.domain();
         if (domain[0] === 0) {
-          domain[0] = Math.abs(domain[domain.length - 1]) <= 1 ? 1e-6 : 1;
+          const smallestNumber = min([min(this._data), Math.abs(domain[domain.length - 1])]);
+          domain[0] = smallestNumber === 0 ? 1e-6 : smallestNumber <= 1 ? Math.pow(10, Math.floor(Math.log10(smallestNumber))) : 1;
           if (domain[domain.length - 1] < 0) domain[0] *= -1;
         }
         else if (domain[domain.length - 1] === 0) {
-          domain[domain.length - 1] = Math.abs(domain[0]) <= 1 ? 1e-6 : 1;
+          const smallestNumber = min([min(this._data), Math.abs(domain[0])]);
+          domain[domain.length - 1] = smallestNumber === 0 ? 1e-6 : smallestNumber <= 1 ? Math.pow(10, Math.floor(Math.log10(smallestNumber))) : 1;
           if (domain[0] < 0) domain[domain.length - 1] *= -1;
         }
         const range = this._d3Scale.range();
