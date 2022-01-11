@@ -23,6 +23,16 @@ test("date", assert => {
   assert.equal(date("Mon Jan 01 100 00:00:00 GMT-0500 (EST)").getFullYear(),   100, "AD: datestring");
   assert.equal(date("Mon Jan 01 -100 00:00:00 GMT-0500 (EST)").getFullYear(), -100, "BC: datestring");
 
+  assert.equal(date("Q21987").getTime(), date("06/30/1987").getTime(), "Quarter: uppercase prefix");
+  assert.equal(date("Q2 1987").getTime(), date("06/30/1987").getTime(), "Quarter: uppercase prefix w/ space");
+  assert.equal(date("q21987").getTime(), date("06/30/1987").getTime(), "Quarter: lowercase prefix");
+  assert.equal(date("q2 1987").getTime(), date("06/30/1987").getTime(), "Quarter: lowercase prefix w/ space");
+
+  assert.equal(date("1987Q2").getTime(), date("06/30/1987").getTime(), "Quarter: uppercase suffix");
+  assert.equal(date("1987 Q2").getTime(), date("06/30/1987").getTime(), "Quarter: uppercase suffix w/ space");
+  assert.equal(date("1987q2").getTime(), date("06/30/1987").getTime(), "Quarter: lowercase suffix");
+  assert.equal(date("1987 q2").getTime(), date("06/30/1987").getTime(), "Quarter: lowercase suffix w/ space");
+
 });
 
 export default test;
