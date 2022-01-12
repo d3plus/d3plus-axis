@@ -39,7 +39,7 @@ export default function(d) {
   if (quarterPrefix || quarterSuffix) {
     const quarter = +(quarterPrefix ? quarterPrefix[1] : quarterSuffix[2]).toLowerCase().replace("q", "");
     const year = +(quarterPrefix ? quarterPrefix[2] : quarterSuffix[1]);
-    const date = new Date(year, quarter * 3, 0);
+    const date = new Date(year, quarter * 3 - 3, 1);
     date.setFullYear(year);
     return date;
   }
