@@ -15,46 +15,6 @@ If you use NPM, `npm install d3plus-axis`. Otherwise, download the [latest relea
 </script>
 ```
 
-[width]: 600
-[height]: 300
-
-## Creating an Axis
-
-The [d3plus-axis](https://github.com/d3plus/d3plus-axis) module expands on the ideas presented in [d3-axis](https://github.com/d3/d3-axis), most notably by adding grid lines and fitting the axis within the allotted space. To create a bottom aligned axis in an SVG group defined like this:
-
-```html
-<svg width=600 height=300>
-  <g id="my-axis"></g>
-</svg>
-```
-
-Here is the javascript needed:
-
-```js
-var bottom = new d3plus.AxisBottom()
-  .select("#my-axis")
-  .domain([0, 10])
-  .width(600)
-  .height(300)
-  .render();
-```
-
-All four orientations available as shorthand methods for the generalized [Axis](http://d3plus.org/docs/#Axis) class that they all extend. These axis classes are used to create the x/y plot in [d3plus-plot](https://github.com/d3plus/d3plus-plot) visualizations.
-
-
-[<kbd><img src="/example/getting-started.png" width="600px" /></kbd>](https://d3plus.org/examples/d3plus-axis/getting-started/)
-
-[Click here](https://d3plus.org/examples/d3plus-axis/getting-started/) to view this example live on the web.
-
-
-### More Examples
-
- * [Custom Axis Tick Formatting](http://d3plus.org/examples/d3plus-axis/tickFormat/)
- * [Hiding Specific Axis Ticks](http://d3plus.org/examples/d3plus-axis/ticks/)
- * [Changing Axis Orientation](http://d3plus.org/examples/d3plus-axis/axis-orient/)
- * [Hiding Specific Axis Labels](http://d3plus.org/examples/d3plus-axis/labels/)
- * [Axis w/ Time Scale](http://d3plus.org/examples/d3plus-axis/scale-time/)
-
 ## API Reference
 
 ##### 
@@ -476,7 +436,7 @@ Shorthand method for creating an axis where the ticks are drawn above the vertic
 <a name="date"></a>
 #### d3plus.**date**(*date*) [<>](https://github.com/d3plus/d3plus-axis/blob/master/src/date.js#L1)
 
-Returns a javascript Date object for a given a Number (representing either a 4-digit year or milliseconds since epoch) or a String that is in [valid dateString format](http://dygraphs.com/date-formats.html). Besides the 4-digit year parsing, this function is useful when needing to parse negative (BC) years, which the vanilla Date object cannot parse.
+Returns a javascript Date object for a given a Number (representing either a 4-digit year or milliseconds since epoch), a String representing a Quarter (ie. "Q2 1987", mapping to the last day in that quarter), or a String that is in [valid dateString format](http://dygraphs.com/date-formats.html). Besides the 4-digit year parsing, this function is useful when needing to parse negative (BC) years, which the vanilla Date object cannot parse.
 
 
 This is a global function.
@@ -485,4 +445,4 @@ This is a global function.
 
 
 
-###### <sub>Documentation generated on Fri, 08 Oct 2021 12:57:28 GMT</sub>
+###### <sub>Documentation generated on Wed, 12 Jan 2022 00:17:22 GMT</sub>
