@@ -34,8 +34,8 @@ export default function(d) {
   }
 
   // tests for quarterly formats (ie. "QX YYYY")
-  const quarterPrefix = new RegExp(/^([qQ]{1}[1-4]{1}|[1-4]{1}[qQ]{1})\s{0,1}(-*\d{1,4})$/g).exec(s);
-  const quarterSuffix = new RegExp(/^(-*\d{1,4})\s{0,1}([qQ]{1}[1-4]{1}|[1-4]{1}[qQ]{1})$/g).exec(s);
+  const quarterPrefix = new RegExp(/^([qQ]{1}[1-4]{1}|[1-4]{1}[qQ]{1})[\s|-]{0,1}(-*\d{1,4})$/g).exec(s);
+  const quarterSuffix = new RegExp(/^(-*\d{1,4})[\s|-]{0,1}([qQ]{1}[1-4]{1}|[1-4]{1}[qQ]{1})$/g).exec(s);
   if (quarterPrefix || quarterSuffix) {
     const quarter = +(quarterPrefix ? quarterPrefix[1] : quarterSuffix[2]).toLowerCase().replace("q", "");
     const year = +(quarterPrefix ? quarterPrefix[2] : quarterSuffix[1]);

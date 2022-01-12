@@ -25,13 +25,17 @@ test("date", assert => {
 
   assert.equal(date("Q21987").getTime(), date("04/01/1987").getTime(), "Quarter: uppercase prefix");
   assert.equal(date("Q2 1987").getTime(), date("04/01/1987").getTime(), "Quarter: uppercase prefix w/ space");
+  assert.equal(date("Q2-1987").getTime(), date("04/01/1987").getTime(), "Quarter: uppercase prefix w/ hyphen");
   assert.equal(date("q21987").getTime(), date("04/01/1987").getTime(), "Quarter: lowercase prefix");
   assert.equal(date("q2 1987").getTime(), date("04/01/1987").getTime(), "Quarter: lowercase prefix w/ space");
+  assert.equal(date("q2-1987").getTime(), date("04/01/1987").getTime(), "Quarter: lowercase prefix w/ hyphen");
 
   assert.equal(date("1987Q2").getTime(), date("04/01/1987").getTime(), "Quarter: uppercase suffix");
   assert.equal(date("1987 Q2").getTime(), date("04/01/1987").getTime(), "Quarter: uppercase suffix w/ space");
+  assert.equal(date("1987-Q2").getTime(), date("04/01/1987").getTime(), "Quarter: uppercase suffix w/ hyphen");
   assert.equal(date("1987q2").getTime(), date("04/01/1987").getTime(), "Quarter: lowercase suffix");
   assert.equal(date("1987 q2").getTime(), date("04/01/1987").getTime(), "Quarter: lowercase suffix w/ space");
+  assert.equal(date("1987-q2").getTime(), date("04/01/1987").getTime(), "Quarter: lowercase suffix w/ hyphen");
 
 });
 
