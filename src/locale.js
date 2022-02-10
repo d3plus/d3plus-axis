@@ -3,6 +3,7 @@ export default {
     dateTime: "%A, der %e. %B %Y, %X",
     date: "%d.%m.%Y",
     time: "%H:%M:%S",
+    quarter: "Q",
     periods: ["AM", "PM"],
     days: [
       "Sonntag",
@@ -47,6 +48,7 @@ export default {
     dateTime: "%a %e %b %X %Y",
     date: "%d/%m/%Y",
     time: "%H:%M:%S",
+    quarter: "Q",
     periods: ["AM", "PM"],
     days: [
       "Sunday",
@@ -91,6 +93,7 @@ export default {
     dateTime: "%x, %X",
     date: "%-m/%-d/%Y",
     time: "%-I:%M:%S %p",
+    quarter: "Q",
     periods: ["AM", "PM"],
     days: [
       "Sunday",
@@ -135,6 +138,7 @@ export default {
     dateTime: "%A, %e de %B de %Y, %X",
     date: "%d/%m/%Y",
     time: "%H:%M:%S",
+    quarter: "T",
     periods: ["AM", "PM"],
     days: [
       "domingo",
@@ -179,6 +183,7 @@ export default {
     dateTime: "%x, %X",
     date: "%d/%m/%Y",
     time: "%-I:%M:%S %p",
+    quarter: "T",
     periods: ["AM", "PM"],
     days: [
       "domingo",
@@ -223,6 +228,7 @@ export default {
     dateTime: "%A, le %e %B %Y, %X",
     date: "%d/%m/%Y",
     time: "%H:%M:%S",
+    quarter: "T",
     periods: ["AM", "PM"],
     days: [
       "dimanche",
@@ -267,6 +273,7 @@ export default {
     dateTime: "%A %e %B %Y, %X",
     date: "%d/%m/%Y",
     time: "%H:%M:%S",
+    quarter: "T",
     periods: ["AM", "PM"],
     days: [
       "Domenica",
@@ -311,6 +318,7 @@ export default {
     dateTime: "%A, %e de %B de %Y. %X",
     date: "%d/%m/%Y",
     time: "%H:%M:%S",
+    quarter: "T",
     periods: ["AM", "PM"],
     days: [
       "Domingo",
