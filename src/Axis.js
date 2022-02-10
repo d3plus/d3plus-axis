@@ -295,7 +295,7 @@ export default class Axis extends BaseClass {
         return d;
       }
       else if (this._scale === "time") {
-        return formatDate(d, labels.map(date)).replace(/^Q/g, timeLocale.quarter);
+        return formatDate(d, (this._data || labels).map(date)).replace(/^Q/g, timeLocale.quarter);
       }
       else if (this._scale === "linear" && this._tickSuffix === "smallest") {
         const locale = typeof this._locale === "object" ? this._locale : formatLocale[this._locale];
