@@ -179,7 +179,9 @@ export default class Axis extends BaseClass {
       @private
   */
   _getPosition(d) {
-    return this._scale === "log" && d === 0 ? (this._d3Scale || this._d3ScaleNegative).range()[this._d3Scale ? 0 : 1] : (this._scale === "log" && d < 0 ? this._d3ScaleNegative : this._d3Scale)(d);
+    return this._scale === "log" && d === 0
+      ? (this._d3Scale || this._d3ScaleNegative).range()[this._d3Scale ? 0 : 1]
+      : (this._scale === "log" && d < 0 ? this._d3ScaleNegative || (() => 0) : this._d3Scale)(d);
   }
 
   /**
