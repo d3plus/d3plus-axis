@@ -1,4 +1,4 @@
-import {default as Axis} from "./Axis";
+import {default as Axis} from "./Axis.js";
 
 /**
     @class AxisLeft

@@ -15,8 +15,8 @@ import {formatAbbreviate, formatDate, formatLocale} from "d3plus-format";
 import * as shapes from "d3plus-shape";
 import {rtl as detectRTL, TextBox, textWrap} from "d3plus-text";
 
-import {default as date} from "./date";
-import {default as locale} from "./locale";
+import {default as date} from "./date.js";
+import {default as locale} from "./locale.js";
 
 const floorPow = d => Math.pow(10, Math.floor(Math.log10(d)));
 
@@ -416,7 +416,7 @@ export default class Axis extends BaseClass {
           const leftPercentage = percentScale(0);
           const zero = leftPercentage * (range[1] - range[0]);
           const smallestPositive = min([min(this._data.filter(d => d >= 0)), Math.abs(domain[1])]);
-          const smallestNegative = min([min(this._data.filter(d => d <= -0)), Math.abs(domain[0])]);
+          const smallestNegative = min([min(this._data.filter(d => d < 0 || Object.is(d, -0))), Math.abs(domain[0])]);
           const smallestPosPow = smallestPositive === 0 ? 1e-6 : smallestPositive <= 1 ? floorPow(smallestPositive) : 1;
           const smallestNegPow = smallestNegative === 0 ? -1e-6 : smallestNegative <= 1 ? floorPow(smallestNegative) : 1;
           const smallestNumber = min([smallestPosPow, smallestNegPow]);
@@ -586,9 +586,10 @@ export default class Axis extends BaseClass {
       const wrap = textWrap()
         .fontFamily(fF)
         .fontSize(fS)
-        .lineHeight(this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : undefined)
-        [w](horizontal ? space : wSize - hBuff - p - this._margin.left - this._margin.right)
-        [h](horizontal ? hSize - hBuff - p - this._margin.top - this._margin.bottom : space);
+        .lineHeight(this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : undefined);
+        
+      wrap[w](horizontal ? space : wSize - hBuff - p - this._margin.left - this._margin.right);
+      wrap[h](horizontal ? hSize - hBuff - p - this._margin.top - this._margin.bottom : space);
 
       const res = wrap(tickFormat(d));
       res.lines = res.lines.filter(d => d !== "");
