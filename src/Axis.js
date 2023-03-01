@@ -44,7 +44,11 @@ function calculateTicks(scale, useData = false) {
     const newStep = Math.round((dataExtent[1] - dataExtent[0]) / distance);
     step = useData ? min([step * 2, newStep]) : min([step, newStep]);
   }
-  return scale.ticks(step);
+  const ticks = scale.ticks(step);
+  const domain = scale.domain();
+  if (!ticks.find(d => +d === +domain[0])) ticks.unshift(domain[0]);
+  if (!ticks.find(d => +d === +domain[1])) ticks.push(domain[1]);
+  return ticks;
 }
 
 /**
@@ -808,7 +812,7 @@ export default class Axis extends BaseClass {
         return dupe;
       }));
     }
-
+    
     new shapes[this._shape]()
       .data(tickData)
       .duration(this._duration)
