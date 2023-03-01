@@ -220,6 +220,7 @@ export default class Axis extends BaseClass {
       @private
   */
   _getTicks() {
+    if (this._data && this._data.length < this._width / 4) return this._scale === "time" ? this._data.map(date) : this._data;
     let ticks = [];
     if (this._d3ScaleNegative) ticks = ticks.concat(calculateTicks.bind(this)(this._d3ScaleNegative, true));
     if (this._d3Scale) ticks = ticks.concat(calculateTicks.bind(this)(this._d3Scale, true));
@@ -354,9 +355,6 @@ export default class Axis extends BaseClass {
         const tickScale = scales.scaleSqrt().domain([10, 400]).range([10, 50]);
         const domain = this._scale === "time" ? this._domain.map(date) : this._domain;
         const scaleTicks = d3Ticks(domain[0], domain[1], Math.floor(sizeInner / tickScale(sizeInner)));
-        ticks = (this._ticks
-          ? this._scale === "time" ? this._ticks.map(date) : this._ticks
-          : scaleTicks).slice();
 
         labels = (this._labels
           ? this._scale === "time" ? this._labels.map(date) : this._labels
