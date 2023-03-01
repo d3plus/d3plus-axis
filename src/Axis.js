@@ -220,7 +220,9 @@ export default class Axis extends BaseClass {
       @private
   */
   _getTicks() {
-    if (this._data && this._data.length < this._width / 4) return this._scale === "time" ? this._data.map(date) : this._data;
+    if (["band", "ordinal", "point", "time"].includes(this._scale) && this._data && this._data.length < this._width / 4) {
+      return this._scale === "time" ? this._data.map(date) : this._data;
+    }
     let ticks = [];
     if (this._d3ScaleNegative) ticks = ticks.concat(calculateTicks.bind(this)(this._d3ScaleNegative, true));
     if (this._d3Scale) ticks = ticks.concat(calculateTicks.bind(this)(this._d3Scale, true));
