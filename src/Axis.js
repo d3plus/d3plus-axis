@@ -103,7 +103,7 @@ export default class Axis extends BaseClass {
         fontSize: constant(14),
         padding: 0,
         textAnchor: () => {
-          const rtl = detectRTL();
+          const rtl = detectRTL(this._select.node());
           return this._orient === "left" ? rtl ? "start" : "end"
             : this._orient === "right" ? rtl ? "end" : "start"
             : this._labelRotation ? this._orient === "bottom" ? "end" : "start" : "middle";
