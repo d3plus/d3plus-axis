@@ -45,9 +45,16 @@ function calculateTicks(scale, useData = false) {
     step = useData ? min([step * 2, newStep]) : min([step, newStep]);
   }
   const ticks = scale.ticks(step);
-  const domain = scale.domain();
-  if (!ticks.find(d => +d === +domain[0])) ticks.unshift(domain[0]);
-  if (!ticks.find(d => +d === +domain[1])) ticks.push(domain[1]);
+  const domain = useData ? extent(this._data) : scale.domain();
+  const diff = ticks[1] - ticks[0];
+  if (!ticks.find(d => +d === +domain[0])) {
+    if (ticks[0] - domain[0] < diff) ticks.shift();
+    ticks.unshift(domain[0]);
+  }
+  if (!ticks.find(d => +d === +domain[1])) {
+    if (domain[1] - ticks[ticks.length - 1] < diff) ticks.pop();
+    ticks.push(domain[1]);
+  }
   return ticks;
 }
 
