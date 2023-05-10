@@ -45,11 +45,11 @@ function calculateTicks(scale, useData = false) {
     step = useData ? min([step * 2, newStep]) : min([step, newStep]);
   }
   let ticks = scale.ticks(step);
-  if (this._data) {
+  if (this._data.length) {
     const dataNumbers = this._data.map(Number);
     ticks = ticks.filter(t => dataNumbers.includes(+t));
   }
-  const domain = this._data ? extent(this._data) : scale.domain();
+  const domain = this._data.length ? extent(this._data) : scale.domain();
   const diff = ticks[1] - ticks[0];
   if (!ticks.find(d => +d === +domain[0])) {
     if (ticks[0] - domain[0] < diff) ticks.shift();
