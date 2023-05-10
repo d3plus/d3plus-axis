@@ -44,8 +44,12 @@ function calculateTicks(scale, useData = false) {
     const newStep = Math.round((dataExtent[1] - dataExtent[0]) / distance);
     step = useData ? min([step * 2, newStep]) : min([step, newStep]);
   }
-  const ticks = scale.ticks(step);
-  const domain = useData ? extent(this._data) : scale.domain();
+  let ticks = scale.ticks(step);
+  if (this._data) {
+    const dataNumbers = this._data.map(Number);
+    ticks = ticks.filter(t => dataNumbers.includes(+t));
+  }
+  const domain = this._data ? extent(this._data) : scale.domain();
   const diff = ticks[1] - ticks[0];
   if (!ticks.find(d => +d === +domain[0])) {
     if (ticks[0] - domain[0] < diff) ticks.shift();
