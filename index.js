@@ -6,3 +6,4 @@ export {default as AxisRight} from "./src/AxisRight.js";
 export {default as AxisTop} from "./src/AxisTop.js";
 
 export {default as date} from "./src/date.js";
+export {default as locale} from "./src/locale.js";
