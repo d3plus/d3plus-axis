@@ -9,7 +9,7 @@ import * as scales from "d3-scale";
 import {select} from "d3-selection";
 import {transition} from "d3-transition";
 
-import {assign, attrize, BaseClass, closest, constant, elem} from "d3plus-common";
+import {assign, attrize, configPrep, BaseClass, closest, constant, elem} from "d3plus-common";
 import {colorDefaults} from "d3plus-color";
 import {formatAbbreviate, formatDate, formatLocale} from "d3plus-format";
 import * as shapes from "d3plus-shape";
@@ -832,7 +832,7 @@ export default class Axis extends BaseClass {
         rotate: d => d.rotate ? -90 : 0
       })
       .select(elem("g.ticks", {parent: group}).node())
-      .config(this._shapeConfig)
+      .config(configPrep.bind(this)(this._shapeConfig))
       .render();
 
     const bar = group.selectAll("line.bar").data([null]);
@@ -856,7 +856,7 @@ export default class Axis extends BaseClass {
       .width(range[range.length - 1] - range[0])
       .x(horizontal ? range[0] : this._orient === "left" ? bounds.x + margin.left / 2 - (range[range.length - 1] - range[0]) / 2 : bounds.x + bounds.width - margin.right / 2 - (range[range.length - 1] - range[0]) / 2)
       .y(horizontal ? this._orient === "bottom" ? bounds.y + bounds.height - margin.bottom : bounds.y : range[0] + (range[range.length - 1] - range[0]) / 2 - margin[this._orient] / 2)
-      .config(this._titleConfig)
+      .config(configPrep.bind(this)(this._titleConfig))
       .render();
 
     this._lastScale = this._getPosition.bind(this);
