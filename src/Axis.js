@@ -50,12 +50,15 @@ function calculateTicks(scale, useData = false) {
     ticks = ticks.filter(t => dataNumbers.includes(+t));
   }
   const domain = this._data.length ? extent(this._data) : scale.domain();
-  const diff = ticks[1] - ticks[0];
-  if (!ticks.find(d => +d === +domain[0])) {
+  const diff = ticks.reduce((n, d, i, arr) => {
+    if (i && n < d - arr[i - 1]) n = d;
+    return n;
+  }, 0);
+  if (!ticks.map(Number).includes(+domain[0])) {
     if (ticks[0] - domain[0] < diff) ticks.shift();
     ticks.unshift(domain[0]);
   }
-  if (!ticks.find(d => +d === +domain[1])) {
+  if (!ticks.map(Number).includes(+domain[1])) {
     if (domain[1] - ticks[ticks.length - 1] < diff) ticks.pop();
     ticks.push(domain[1]);
   }
@@ -458,7 +461,7 @@ export default class Axis extends BaseClass {
         ? this._scale === "time" ? this._labels.map(date) : this._labels
         : (this._d3Scale ? this._d3Scale.ticks : this._d3ScaleNegative.ticks)
           ? this._getLabels() : ticks).slice();
-
+          
       if (this._scale === "log") {
         const tens = labels.filter((t, i) =>
           !i || i === labels.length - 1 ||
