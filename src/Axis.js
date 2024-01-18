@@ -4,7 +4,7 @@
 */
 
 import {extent, max, min, range as d3Range, ticks as d3Ticks} from "d3-array";
-import {timeFormatDefaultLocale} from "d3-time-format";
+import {timeFormat, timeFormatDefaultLocale} from "d3-time-format";
 import * as scales from "d3-scale";
 import {select} from "d3-selection";
 import {transition} from "d3-transition";
@@ -318,7 +318,7 @@ export default class Axis extends BaseClass {
         return d;
       }
       else if (this._scale === "time") {
-        return formatDate(d, (this._data || labels).map(date)).replace(/^Q/g, timeLocale.quarter);
+        return formatDate(d, (this._data || labels).map(date), timeFormat).replace(/^Q/g, timeLocale.quarter);
       }
       else if (this._scale === "linear" && this._tickSuffix === "smallest") {
         const locale = typeof this._locale === "object" ? this._locale : formatLocale[this._locale];
