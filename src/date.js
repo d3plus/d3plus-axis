@@ -5,9 +5,9 @@
     @param {Number|String} *date*
 */
 export default function(d) {
-
-  // returns if already Date object
-  if (d.constructor === Date) return d;
+  
+  // returns if falsey or already Date object
+  if ([false, undefined, NaN].includes(d) || d.constructor === Date) return d;
   // detects if milliseconds
   else if (d.constructor === Number && `${d}`.length > 5 && d % 1 === 0) return new Date(d);
 

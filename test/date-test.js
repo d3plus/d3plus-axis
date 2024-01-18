@@ -4,6 +4,10 @@ import it from "./jsdom.js";
 
 it("date", () => {
 
+  assert.strictEqual(date(false),         false, "Fails gracefully with false value");
+  assert.strictEqual(date(undefined), undefined, "Fails gracefully with undefined value");
+  assert.strictEqual(date(NaN),             NaN, "Fails gracefully with NaN value");
+
   assert.strictEqual(date(1234).getFullYear(),   1234, "AD: 4-digit year");
   assert.strictEqual(date(123).getFullYear(),     123, "AD: 3-digit year");
   assert.strictEqual(date(12).getFullYear(),       12, "AD: 2-digit year");
