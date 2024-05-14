@@ -27,7 +27,7 @@ const floorPow = d => Math.pow(10, Math.floor(Math.log10(d)));
  */
 function calculateTicks(scale, useData = false) {
 
-  const tickScale = scales.scaleSqrt().domain([10, 400]).range([10, 50]);
+  const tickScale = scales.scaleSqrt().domain([10, 390]).range([10, 50]);
   const negativeRange = scale.range();
   const size = Math.abs(negativeRange[1] - negativeRange[0]);
   let step = Math.floor(size / tickScale(size));
@@ -115,7 +115,7 @@ export default class Axis extends BaseClass {
         fontFamily: new TextBox().fontFamily(),
         fontResize: false,
         fontSize: constant(14),
-        padding: 0,
+        padding: 5,
         textAnchor: () => {
           const rtl = detectRTL(this._select.node());
           return this._orient === "left" ? rtl ? "start" : "end"
@@ -456,12 +456,12 @@ export default class Axis extends BaseClass {
         ? this._scale === "time" ? this._ticks.map(date) : this._ticks
         : (this._d3Scale ? this._d3Scale.ticks : this._d3ScaleNegative.ticks)
           ? this._getTicks() : this._domain).slice();
-
+          
       labels = (this._labels
         ? this._scale === "time" ? this._labels.map(date) : this._labels
         : (this._d3Scale ? this._d3Scale.ticks : this._d3ScaleNegative.ticks)
           ? this._getLabels() : ticks).slice();
-          
+
       if (this._scale === "log") {
         const tens = labels.filter((t, i) =>
           !i || i === labels.length - 1 ||
@@ -570,31 +570,13 @@ export default class Axis extends BaseClass {
     if (typeof wBuff === "function") wBuff = max(ticks.map(wBuff));
     if (this._shape !== "Circle") wBuff /= 2;
 
-    const {fontFamily, fontSize} = this._shapeConfig.labelConfig;
-
-    /**
-     * Calculates the space each label would take up, given
-     * the provided this._space size.
-     */
-    let textData = labels
-      .map((d, i) => {
-
-        const fF = typeof fontFamily === "function" ? fontFamily(d, i) : fontFamily,
-              fS = typeof fontSize === "function" ? fontSize(d, i) : fontSize,
-              position = this._getPosition(d);
-
-        const lineHeight = this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : fS * 1.4;
-        return {d, i, fF, fS, lineHeight, position};
-
-      });
-
     /**
      * Calculates the text wrapping and size of a given textData object.
      * @param {Object} datum
      */
     function calculateLabelSize(datum) {
-      const {d, i, fF, fS, rotate, space} = datum;
-
+      const {d, i, fF, fP, fS, rotate, space} = datum;
+      
       const h = rotate ? "width" : "height",
             w = rotate ? "height" : "width";
 
@@ -612,11 +594,9 @@ export default class Axis extends BaseClass {
       const res = wrap(tickFormat(d));
       res.lines = res.lines.filter(d => d !== "");
 
-      res.width = res.lines.length ? Math.ceil(max(res.widths)) + fS / 4 : 0;
-      if (res.width % 2) res.width++;
+      res.width = res.lines.length ? Math.ceil(max(res.widths)) : 0;
 
-      res.height = res.lines.length ? Math.ceil(res.lines.length * wrap.lineHeight()) + fS / 4 : 0;
-      if (res.height % 2) res.height++;
+      res.height = res.lines.length ? Math.ceil(res.lines.length * wrap.lineHeight()) + fP : 0;
 
       return res;
 
@@ -645,84 +625,81 @@ export default class Axis extends BaseClass {
       });
     }
 
-    textData = textData
-      .map(datum => {
-        datum.rotate = this._labelRotation;
-        datum.space = calculateSpace.bind(this)(datum);
-        const res = calculateLabelSize.bind(this)(datum);
-        return Object.assign(res, datum);
+    let textData = [];
+    function createTextData(offset = 1) {
+
+      const {fontFamily, fontSize} = this._shapeConfig.labelConfig;
+      const fontPadding = this._shapeConfig.labelConfig.padding;
+  
+      /**
+       * Calculates the space each label would take up, given
+       * the provided this._space size.
+       */
+      textData = labels
+        .map((d, i) => {
+  
+          const fF = typeof fontFamily === "function" ? fontFamily(d, i) : fontFamily,
+                fP = typeof fontPadding === "function" ? fontPadding(d, i) : fontPadding,
+                fS = typeof fontSize === "function" ? fontSize(d, i) : fontSize,
+                position = this._getPosition(d);
+  
+          const lineHeight = this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : fS * 1.4;
+          const datum = {d, i, fF, fP, fS, lineHeight, position, rotate: this._labelRotation};
+          return datum;
+  
+        });
+
+      textData.forEach(datum => {
+        datum.space = calculateSpace.bind(this)(datum, offset);
       });
+      
+      const minSpace = min(textData, (d, i) => !i || i === textData.length - 1 ? Infinity : d.space);
 
+      textData = textData
+        .map(datum => {
+          if (this._scale === "time") datum.space = minSpace;
+          const res = calculateLabelSize.bind(this)(datum);
+          return Object.assign(res, datum);
+        });
+
+      if (offset > 1) calculateOffset.bind(this)(textData);
+
+    }
+
+    createTextData.bind(this)();
     const offsetEnabled = this._labelOffset && textData.some(d => d.truncated);
-
-    if (this._labelRotation) {
-      textData = textData
-        .map(datum => {
-          datum.rotate = true;
-          const res = calculateLabelSize.bind(this)(datum);
-          return Object.assign(datum, res);
-        });
-    }
-    else if (offsetEnabled) {
-
-      textData = textData
-        .map(datum => {
-
-          datum.space = calculateSpace.bind(this)(datum, 2);
-          const res = calculateLabelSize.bind(this)(datum);
-          return Object.assign(datum, res);
-        });
-
-      calculateOffset.bind(this)(textData);
-
-    }
+    if (offsetEnabled) createTextData.bind(this)(2);
 
     /**
      * "spillover" will contain the pixel spillover of the first and last label,
      * and then adjust the scale range accordingly.
      */
-    const spillover = [0, 0];
-    for (let index = 0; index < 2; index++) {
-      const datum = textData[index ? textData.length - 1 : 0];
-      if (!datum) break;
-      const {height, position, rotate, width} = datum;
-      const compPosition = index ? rangeOuter[1] : rangeOuter[0];
-      const halfSpace = (rotate || !horizontal ? height : width) / 2;
-      const spill = index ? position + halfSpace - compPosition : position - halfSpace - compPosition;
-      spillover[index] = spill;
-    }
+    const spillovers = [0, 1]
+      .map(index => {
+        const datum = textData[index ? textData.length - 1 : 0];
+        if (!datum) return 0;
+        const {height, fP, position, rotate, width} = datum;
+        const compPosition = index ? rangeOuter[1] : rangeOuter[0];
+        const halfSpace = (rotate || !horizontal ? height : width) / 2;
+        const spill = index 
+          ? position + halfSpace - compPosition + (fP * 2) 
+          : position - halfSpace + compPosition - (fP * 2);
+        return spill;
+      });
+    const spillover = min(spillovers, d => Math.abs(d));
 
     const first = range[0];
     const last = range[range.length - 1];
-    const newRange = [first - spillover[0], last - spillover[1]];
+    const newRange = [first - spillover, last + spillover];
+    
     if (this._range) {
       if (this._range[0] !== undefined) newRange[0] = this._range[0];
       if (this._range[this._range.length - 1] !== undefined) newRange[1] = this._range[this._range.length - 1];
     }
-
+    
     if (newRange[0] !== first || newRange[1] !== last) {
       setScale.bind(this)(newRange);
-
-      textData = labels
-        .map((d, i) => {
-
-          const fF = typeof fontFamily === "function" ? fontFamily(d, i) : fontFamily,
-                fS = typeof fontSize === "function" ? fontSize(d, i) : fontSize,
-                position = this._getPosition(d);
-
-          const lineHeight = this._shapeConfig.lineHeight ? this._shapeConfig.lineHeight(d, i) : fS * 1.4;
-          return {d, i, fF, fS, lineHeight, position};
-
-        });
-
-      textData = textData
-        .map(datum => {
-          datum.rotate = this._labelRotation;
-          datum.space = calculateSpace.bind(this)(datum, offsetEnabled ? 2 : 1);
-          const res = calculateLabelSize.bind(this)(datum);
-          return Object.assign(res, datum);
-        });
-      calculateOffset.bind(this)(textData);
+      createTextData.bind(this)(offsetEnabled ? 2 : 1);
     }
 
     const labelHeight = max(textData, t => t.height) || 0;
@@ -784,6 +761,7 @@ export default class Axis extends BaseClass {
         const space = data ? data.space : 0;
         const lines = data ? data.lines.length : 1;
         const lineHeight = data ? data.lineHeight : 1;
+        const fP = data ? data.fP : 0;
 
         const labelOffset = data && this._labelOffset ? data.offset : 0;
 
@@ -798,12 +776,12 @@ export default class Axis extends BaseClass {
           labelBounds: rotated && data
             ? {
               x: -data.width / 2 + data.fS / 4,
-              y: this._orient === "bottom" ? size + p + (data.width - lineHeight * lines) / 2 : size - p * 2 - (data.width + lineHeight * lines) / 2,
+              y: this._orient === "bottom" ? size + (data.width - lineHeight * lines) / 2 + fP : size * 2 - (data.width + lineHeight * lines) / 2 + fP,
               width: data.width,
               height: data.height
             } : {
               x: horizontal ? -space / 2 : this._orient === "left" ? -labelWidth - p + size : size + p,
-              y: horizontal ? this._orient === "bottom" ? size + p : size - p - labelHeight : -space / 2,
+              y: horizontal ? this._orient === "bottom" ? size + fP : size - labelHeight - fP : -space / 2,
               width: horizontal ? space : labelWidth,
               height: horizontal ? labelHeight : space
             },
@@ -836,6 +814,7 @@ export default class Axis extends BaseClass {
       })
       .select(elem("g.ticks", {parent: group}).node())
       .config(configPrep.bind(this)(this._shapeConfig))
+      .labelConfig({padding: 0})
       .render();
 
     const bar = group.selectAll("line.bar").data([null]);
