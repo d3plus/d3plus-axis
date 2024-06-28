@@ -475,10 +475,9 @@ export default class Axis extends BaseClass {
 
 
       if (this._rounding !== "none") {
-        
         const roundDomain = () => {
           const zeroLength = d => `${Math.round(Math.abs(d))}`.length;
-          const zeros = Math.min(zeroLength(initialDomain[0]), zeroLength(initialDomain[1])) - 1;
+          const zeros = Math.max(zeroLength(initialDomain[0]), zeroLength(initialDomain[1])) - 1;
           const factor = +`1${Array(zeros).fill(0).join("")}`;
           const inverted = initialDomain[1] < initialDomain[0];
           const newDomain = [
