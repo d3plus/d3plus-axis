@@ -80,7 +80,7 @@ function calculateTicks(scale, minorTicks = false) {
   
   if (!minorTicks && this._scale === "log") {
     const inverted = domain[1] < domain[0];
-    const roundDomain = domain.map((d, i) => Math.log10(d) % 1 === 0 ? d : (inverted ? ceilPow : floorPow)(d));
+    const roundDomain = domain.map(d => Math.log10(d) % 1 === 0 ? d : (inverted ? ceilPow : floorPow)(d));
     const invertedRound = roundDomain[1] < roundDomain[0];
     const powers = roundDomain
       .map(d => (isNegative(d) ? -1 : 1) * ([-1, 1].includes(d) ? 1 : Math.log10(Math.abs(d))));
