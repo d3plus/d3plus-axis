@@ -18,8 +18,20 @@ import {rtl as detectRTL, TextBox, textWrap} from "d3plus-text";
 import {default as date} from "./date.js";
 import {default as locale} from "./locale.js";
 
-const floorPow = d => Math.pow(10, Math.floor(Math.log10(Math.abs(d)))) * Math.pow(-1, d < 0);
-const ceilPow = d => Math.pow(10, Math.ceil(Math.log10(Math.abs(d)))) * Math.pow(-1, d < 0);
+/* catches for -0 and less */
+const isNegative = d => d < 0 || Object.is(d, -0);
+
+const floorPow = d => Math.pow(10, Math.floor(Math.log10(Math.abs(d)))) * Math.pow(-1, isNegative(d));
+const ceilPow = d => Math.pow(10, Math.ceil(Math.log10(Math.abs(d)))) * Math.pow(-1, isNegative(d));
+const fixFloat = d => {
+  const str = `${d}`;
+  if (str.includes("e-") || str === "0") return 0;
+  const nineMatch = str.match(/(-*[0-9]+\.[0]*)([0-8])9{3,}[0-9]+$/);
+  if (nineMatch) return +`${nineMatch[1]}${+nineMatch[2] + 1}`;
+  const zeroMatch = str.match(/(-*[0-9]+\.[0]*)([1-9])0*[0-9]*0{3,}[0-9]+$/);
+  if (zeroMatch) return +`${zeroMatch[1]}${+zeroMatch[2]}`;
+  return d;
+}
 
 /**
  * Calculates ticks from a given scale (negative and/or positive)
@@ -67,17 +79,20 @@ function calculateTicks(scale, minorTicks = false) {
   const domain = this._data.length ? extent(this._data) : scale.domain();
   
   if (!minorTicks && this._scale === "log") {
-    const roundDomain = domain.map(d => Math.log10(d) % 1 === 0 ? d : floorPow(d));
+    const inverted = domain[1] < domain[0];
+    const roundDomain = domain.map((d, i) => Math.log10(d) % 1 === 0 ? d : (inverted ? ceilPow : floorPow)(d));
+    const invertedRound = roundDomain[1] < roundDomain[0];
     const powers = roundDomain
-      .map(d => (d < 0 ? -1 : 1) * Math.log10(Math.abs(d)));
-    const powMod = Math.ceil((Math.abs(powers[1] - powers[0]) + 1) / (step * 0.75));
-    ticks = powers.every(d => !d) 
-      ? scale.ticks(step) 
+      .map(d => (isNegative(d) ? -1 : 1) * ([-1, 1].includes(d) ? 1 : Math.log10(Math.abs(d))));
+    const powMod = Math.ceil((Math.abs(powers[1] - powers[0]) + 1) / (step * 0.65));
+
+    ticks = (powMod <= 1 && powers[0] === powers[1]) || invertedRound !== inverted
+      ? scale.ticks(step).filter(d => +`${d}`.replace("0.", "") % 2 === 0)
       : d3Range(powers[0], powers[1], powers[1] < powers[0] ? -1 : 1)
         .concat([powers[1]])
         .filter(d => Math.abs(d) % powMod === 0)
         .map(d => 
-          +`${(d < 0 ? -1 : 1) * (d ? Math.pow(10, Math.abs(d)) : Math.sign(1 / d) > 0 ? 1 : -1)}`
+          +`${(isNegative(d) ? -1 : 1) * (d ? Math.pow(10, Math.abs(d)) : Math.sign(1 / d) > 0 ? 1 : -1)}`
             .replace(/9+/g, "1")
         );
   }
@@ -85,52 +100,31 @@ function calculateTicks(scale, minorTicks = false) {
 
     ticks = scale.ticks(step);
     if (!minorTicks && !["log", "time"].includes(this._scale) && ticks.length > 1) {
-      const majorDiff = (ticks[1] - ticks[0]) * 2;
-      ticks = ticks.filter(d => d % majorDiff === 0);
+      let majorDiff = Math.abs(fixFloat(ticks[1] - ticks[0]) * 2);
+      ticks = ticks.filter(d => {
+        const mod = Math.abs(d) % majorDiff;
+        const modFloat = fixFloat(mod);
+        if (modFloat !== mod) {
+          return !modFloat || modFloat === majorDiff;
+        }
+        return mod === 0;
+      });
     }
 
   }
       
-  if (minorTicks) {
-    if (!ticks.map(Number).includes(+domain[0])) {
-      ticks.unshift(domain[0]);
-    }
-    if (!ticks.map(Number).includes(+domain[1])) {
-      ticks.push(domain[1]);
-    }
+  // forces min/max into ticks, if not present
+  if (!ticks.map(Number).includes(+domain[0])) {
+    ticks.unshift(domain[0]);
   }
-  else if (this._scale === "time") {
-    if (!ticks.map(Number).includes(+domain[0])) {
-      ticks[0] = domain[0];
-    }
-    if (!ticks.map(Number).includes(+domain[1])) {
-      ticks[ticks.length - 1] = domain[1];
-    }
-  }
-  else if (this._scale !== "log") {
-
-    const diff = ticks.reduce((n, d, i, arr) => {
-      if (i && n < d - arr[i - 1]) n = d;
-      return n;
-    }, 0);
-    if (!ticks.map(Number).includes(+domain[0])) {
-      if ((ticks[0] - domain[0]) > diff * 0.5) {
-        ticks.unshift(domain[0]);
-      }
-    }
-    if (!ticks.map(Number).includes(+domain[1])) {
-      if ((domain[1] - ticks[ticks.length - 1]) > diff * 0.5) {
-        ticks.push(domain[1]);
-      }
-    }
-
+  if (!ticks.map(Number).includes(+domain[1])) {
+    ticks.push(domain[1]);
   }
 
   // if data array has been provided, filter out ticks that are not in the array
   if (this._data.length) {
     const dataNumbers = this._data.map(Number);
     ticks = ticks.filter(t => dataNumbers.includes(+t));
-  }
 
   return ticks;
 }
@@ -270,7 +264,7 @@ export default class Axis extends BaseClass {
   _getPosition(d) {
     return this._scale === "log" && d === 0
       ? (this._d3Scale || this._d3ScaleNegative).range()[this._d3Scale ? 0 : 1]
-      : (this._scale === "log" && d < 0 ? this._d3ScaleNegative || (() => 0) : this._d3Scale)(d);
+      : (this._scale === "log" && isNegative(d) ? this._d3ScaleNegative || (() => 0) : this._d3Scale)(d);
   }
 
   /**
@@ -296,7 +290,16 @@ export default class Axis extends BaseClass {
     let labels = [];
     if (this._d3ScaleNegative) labels = labels.concat(calculateTicks.bind(this)(this._d3ScaleNegative, false));
     if (this._d3Scale) labels = labels.concat(calculateTicks.bind(this)(this._d3Scale, false));
-    if (this._scale === "log" && labels.includes(-1) && labels.includes(1)) labels.splice(labels.indexOf(-1), 1);
+    if (this._scale === "log") {
+      // add 1 if it does not exist, and should
+      if (labels[0] < 1 && labels[labels.length - 1] > 1 && !labels.includes(1)) {
+        labels.splice(labels.findIndex(d => d > 1), 0, 1);
+      }
+      // remove -1 if 1 also exists
+      if (labels.includes(-1) && labels.includes(1)) {
+        labels.splice(labels.indexOf(-1), 1);
+      }
+    }
     return labels;
   }
 
@@ -476,19 +479,32 @@ export default class Axis extends BaseClass {
 
       if (this._rounding !== "none") {
         const roundDomain = () => {
-          const zeroLength = d => `${Math.round(Math.abs(d))}`.length;
-          const zeros = Math.max(zeroLength(initialDomain[0]), zeroLength(initialDomain[1])) - 1;
-          const factor = +`1${Array(zeros).fill(0).join("")}`;
+          const zeroLength = d => {
+            if (!d) return 0;
+            if (Math.abs(d) < 1) {
+              const m = `${d}`.match(/0\.(0*)/);
+              if (m) return +`0.${Array(m[1].length).fill(0).join("")}1`;
+            }
+            return `${Math.round(Math.abs(d))}`.length
+          };
+          const zeroArray = [zeroLength(initialDomain[0]), zeroLength(initialDomain[1])].filter(Boolean).sort();
+          const zeros = zeroArray.length === 1 ? zeroArray[0] : zeroArray[0] + ((zeroArray[1] - zeroArray[0]) / 2);
+          let factor = zeros < 1 ? fixFloat(zeros) : +`1${Array(Math.floor(fixFloat(zeros)) - 1).fill(0).join("")}`;
+          if (factor >= Math.abs(initialDomain[1] - initialDomain[0])) factor /= 2;
           const inverted = initialDomain[1] < initialDomain[0];
           const newDomain = [
             Math[this._rounding === "outside" ? inverted ? "ceil" : "floor" : inverted ? "floor" : "ceil"](
               initialDomain[0] / factor
             ) * factor,
             Math[this._rounding === "outside" ? inverted ? "floor" : "ceil" : inverted ? "ceil" : "floor"](
-              initialDomain[initialDomain.length - 1] / factor
+              initialDomain[1] / factor
             ) * factor
           ];
-          this._d3Scale.domain(newDomain);
+          if (this._scale === "log") {
+            if (newDomain[0] === 0) newDomain[0] = initialDomain[0];
+            if (newDomain[1] === 0) newDomain[1] = initialDomain[1];
+          }
+          this._d3Scale.domain(newDomain.map(fixFloat));
         }
         
         if (this._scale === "linear") {
@@ -498,14 +514,15 @@ export default class Axis extends BaseClass {
           const powDomain = [];
           const inverted = initialDomain[1] < initialDomain[0];
           powDomain[0] = (this._rounding === "outside" 
-            ? initialDomain[0] < 0 ? inverted ? floorPow : ceilPow : inverted ? ceilPow : floorPow 
-            : initialDomain[0] < 0 ? inverted ? ceilPow : floorPow : inverted ? floorPow : ceilPow
+            ? isNegative(initialDomain[0]) ? inverted ? floorPow : ceilPow : inverted ? ceilPow : floorPow 
+            : isNegative(initialDomain[0]) ? inverted ? ceilPow : floorPow : inverted ? floorPow : ceilPow
             )(initialDomain[0]);
           powDomain[1] = (this._rounding === "inside" 
-            ? initialDomain[1] < 0 ? inverted ? floorPow : ceilPow : inverted ? ceilPow : floorPow 
-            : initialDomain[1] < 0 ? inverted ? ceilPow : floorPow : inverted ? floorPow : ceilPow
+            ? isNegative(initialDomain[1]) ? inverted ? floorPow : ceilPow : inverted ? ceilPow : floorPow 
+            : isNegative(initialDomain[1]) ? inverted ? ceilPow : floorPow : inverted ? floorPow : ceilPow
             )(initialDomain[1]);
-          if (powDomain[0] !== powDomain[1] && powDomain.some(d => Math.abs(d) > 1)) {
+          const powInverted = powDomain[1] < powDomain[0];
+          if (powDomain[0] !== powDomain[1] && powDomain.some(d => Math.abs(d) > 1) && powInverted === inverted) {
             this._d3Scale.domain(powDomain);
           }
           else {
@@ -529,17 +546,17 @@ export default class Axis extends BaseClass {
         if (domain[0] === 0) {
           const smallestNumber = min([min(this._data), Math.abs(domain[1])]);
           domain[0] = smallestNumber === 0 || smallestNumber === 1 ? 1e-6 : smallestNumber <= 1 ? floorPow(smallestNumber) : 1;
-          if (domain[1] < 0) domain[0] *= -1;
+          if (isNegative(domain[1])) domain[0] *= -1;
         }
         else if (domain[domain.length - 1] === 0) {
           const smallestNumber = min([min(this._data), Math.abs(domain[0])]);
           domain[domain.length - 1] = smallestNumber === 0 || smallestNumber === 1 ? 1e-6 : smallestNumber <= 1 ? floorPow(smallestNumber) : 1;
-          if (domain[0] < 0) domain[domain.length - 1] *= -1;
+          if (isNegative(domain[0])) domain[domain.length - 1] *= -1;
         }
         const range = this._d3Scale.range();
 
         // all negatives
-        if (domain[0] < 0 && domain[domain.length - 1] < 0) {
+        if (isNegative(domain[0]) && isNegative(domain[domain.length - 1])) {
           this._d3ScaleNegative = this._d3Scale.copy()
             .domain(domain)
             .range(range);
@@ -559,17 +576,17 @@ export default class Axis extends BaseClass {
           const zero = leftPercentage * (range[1] - range[0]);
 
           const minPositive = min([min(this._data.filter(d => d >= 0)), Math.abs(domain[1])]);
-          const minNegative = min([min(this._data.filter(d => d < 0 || Object.is(d, -0))), Math.abs(domain[0])]);
+          const minNegative = min([min(this._data.filter(isNegative)), Math.abs(domain[0])]);
           const minPosPow = minPositive === 0 ? 1e-6 : minPositive <= 1 ? floorPow(minPositive) : 1;
           const minNegPow = minNegative === 0 ? -1e-6 : minNegative <= 1 ? floorPow(minNegative) : 1;
           const minValue = min([minPosPow, minNegPow]);
 
           this._d3ScaleNegative = this._d3Scale.copy();
-          (domain[0] < 0 ? this._d3Scale : this._d3ScaleNegative)
-            .domain([domain[0] < 0 ? minValue : -minValue, domain[1]])
+          (isNegative(domain[0]) ? this._d3Scale : this._d3ScaleNegative)
+            .domain([isNegative(domain[0]) ? minValue : -minValue, domain[1]])
             .range([range[0] + zero, range[1]]);
-          (domain[0] < 0 ? this._d3ScaleNegative : this._d3Scale)
-            .domain([domain[0], domain[0] < 0 ? -minValue : minValue])
+          (isNegative(domain[0]) ? this._d3ScaleNegative : this._d3Scale)
+            .domain([domain[0], isNegative(domain[0]) ? -minValue : minValue])
             .range([range[0], range[0] + zero]);
         }
 
@@ -633,35 +650,6 @@ export default class Axis extends BaseClass {
 
     }
     setScale.bind(this)();
-
-    /**
-     * Calculates the space available for a given label.
-     * @param {Object} datum
-     */
-    function calculateSpace(datum, diff = 1) {
-      const {i, position} = datum;
-      if (this._scale === "band") {
-        return this._d3Scale.bandwidth();
-      }
-      else {
-
-        const prevPosition = i - diff < 0 
-          ? textData.length === 1
-            ? rangeOuter[0] 
-            : position - (textData[i + diff].position - position)
-          : position - (position - textData[i - diff].position);
-        const prevSpace = Math.abs(position - prevPosition);
-
-        const nextPosition = i + diff > textData.length - 1 
-          ? textData.length === 1
-            ? rangeOuter[1] 
-            : position + (position - textData[i - diff].position)
-          : position - (position - textData[i + diff].position);
-        const nextSpace = Math.abs(position - nextPosition);
-        
-        return min([prevSpace, nextSpace]);
-      }
-    }
 
     /**
      * Pre-calculates the size of the title, if defined, in order
@@ -770,18 +758,46 @@ export default class Axis extends BaseClass {
   
         });
 
-      textData.forEach(datum => {
-        datum.space = calculateSpace.bind(this)(datum, offset);
-      });
-      
-      const minSpace = min(textData, (d, i) => !i || i === textData.length - 1 ? Infinity : d.space);
+      const maxSpace = this._scale === "band"
+        ? this._d3Scale.bandwidth()
+        : textData.reduce((s, d, i) => {
+          const {position} = d;
+          const prevPosition = !i 
+            ? textData.length === 1
+              ? rangeOuter[0] 
+              : position - (textData[i + 1].position - position)
+            : position - (position - textData[i - 1].position);
+          const prevSpace = Math.abs(position - prevPosition);
 
-      textData = textData
-        .map(datum => {
-          if (this._scale === "time") datum.space = minSpace;
-          const res = calculateLabelSize.bind(this)(datum);
-          return Object.assign(res, datum);
-        });
+          const nextPosition = i == textData.length - 1
+            ? textData.length === 1
+              ? rangeOuter[1] 
+              : position + (position - textData[i - 1].position)
+            : position - (position - textData[i + 1].position);
+          const nextSpace = Math.abs(position - nextPosition);
+          const mod = this._scale === "point" ? 1 : 2;
+          return max([max([prevSpace, nextSpace]) * mod, s]);
+        }, 0);
+
+      textData = textData.map(datum => {
+        datum.space = maxSpace - datum.fP * 2;
+        const res = calculateLabelSize.bind(this)(datum);
+        return Object.assign(res, datum);
+      });
+
+      const reverseTextData = textData.slice().reverse();
+      textData.forEach(datum => {
+        const {fP, i, position} = datum;
+        const sizeName = horizontal ? "width" : "height";
+        let prev = i ? reverseTextData.find((t) => t.i < i && !t.truncated) : false;
+        if (i === textData.length - 1) {
+          while (prev && position - datum[sizeName] / 2 - fP < prev.position + prev[sizeName] / 2) {
+            prev.truncated = true;
+            prev = reverseTextData.find((t) => t.i < i && !t.truncated);
+          }
+        }
+        datum.truncated = prev ? position - datum[sizeName] / 2 - fP < prev.position + prev[sizeName] / 2 : false;
+      });
 
       if (offset > 1) calculateOffset.bind(this)(textData);
 
@@ -817,13 +833,6 @@ export default class Axis extends BaseClass {
     if (newRange[0] !== first || newRange[1] !== last) {
       setScale.bind(this)(newRange);
       createTextData.bind(this)(offsetEnabled ? 2 : 1);
-    }
-
-    // try forcing start/end ticks if closest tick is also truncated
-    if (textData.some(d => d.truncated) && textData.length > 1) {
-      if (textData[0].truncated && textData[1].truncated) labels.splice(1, 1);
-      if (textData[textData.length - 1].truncated && textData[textData.length - 2].truncated) labels.splice(textData.length - 2, 1);
-      if (textData.length !== labels.length) createTextData.bind(this)();
     }
 
     const labelHeight = max(textData, t => t.height) || 0;
@@ -911,7 +920,7 @@ export default class Axis extends BaseClass {
             },
           rotate: data ? data.rotate : false,
           size: labels.includes(d) || (this._scale === "log" && Math.log10(Math.abs(d)) % 1 === 0) ? size : ticks.includes(d) ? Math.ceil(size / 2) : this._data.find(t => +t === d) ? Math.ceil(size / 4) : 0,
-          text: labels.includes(d) ? tickFormat(d) : false,
+          text: !(data || {}).truncated && labels.includes(d) ? tickFormat(d) : false,
           tick: ticks.includes(d),
           [x]: xPos + (this._scale === "band" ? this._d3Scale.bandwidth() / 2 : 0),
           [y]: yPos
