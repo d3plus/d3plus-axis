@@ -125,6 +125,7 @@ function calculateTicks(scale, minorTicks = false) {
   if (this._data.length) {
     const dataNumbers = this._data.map(Number);
     ticks = ticks.filter(t => dataNumbers.includes(+t));
+  }
 
   return ticks;
 }
