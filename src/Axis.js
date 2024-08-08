@@ -539,7 +539,7 @@ export default class Axis extends BaseClass {
             : isNegative(initialDomain[1]) ? inverted ? ceilPow : floorPow : inverted ? floorPow : ceilPow
             )(initialDomain[1]);
           const powInverted = powDomain[1] < powDomain[0];
-          if (powDomain[0] !== powDomain[1] && powDomain.some(d => Math.abs(d) > 1) && powInverted === inverted) {
+          if (powDomain[0] !== powDomain[1] && powDomain.some(d => Math.abs(d) > 10) && powInverted === inverted) {
             this._d3Scale.domain(powDomain);
           }
           else {
