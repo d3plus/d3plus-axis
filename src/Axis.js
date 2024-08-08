@@ -409,7 +409,9 @@ export default class Axis extends BaseClass {
         return `${number}${separator}${suff}`;
       }
       else {
-        return formatAbbreviate(d, this._locale);
+        const prefix = this._rounding === "inside" && ticks.indexOf(d) === 0 ? "< " : "";
+        const suffix = this._rounding === "inside" && ticks.indexOf(d) === ticks.length - 1 ? "+" : "";
+        return `${prefix}${formatAbbreviate(d, this._locale)}${suffix}`;
       }
     };
 
