@@ -267,9 +267,11 @@ export default class Axis extends BaseClass {
       @private
   */
   _getPosition(d) {
-    return this._scale === "log" && d === 0
-      ? (this._d3Scale || this._d3ScaleNegative).range()[this._d3Scale ? 0 : 1]
-      : (this._scale === "log" && isNegative(d) ? this._d3ScaleNegative || (() => 0) : this._d3Scale)(d);
+    if (this._scale === "log") {
+      if (d === 0) return (this._d3Scale || this._d3ScaleNegative).range()[this._d3Scale ? 0 : 1];
+      return (isNegative(d) ? this._d3ScaleNegative || (() => 0) : this._d3Scale)(d);
+    }
+    return this._d3Scale(d);
   }
 
   /**
@@ -296,13 +298,17 @@ export default class Axis extends BaseClass {
     if (this._d3ScaleNegative) labels = labels.concat(calculateTicks.bind(this)(this._d3ScaleNegative, false));
     if (this._d3Scale) labels = labels.concat(calculateTicks.bind(this)(this._d3Scale, false));
     if (this._scale === "log") {
-      // add 1 if it does not exist, and should
-      if (labels[0] < 1 && labels[labels.length - 1] > 1 && !labels.includes(1)) {
-        labels.splice(labels.findIndex(d => d > 1), 0, 1);
-      }
-      // remove -1 if 1 also exists
-      if (labels.includes(-1) && labels.includes(1)) {
-        labels.splice(labels.indexOf(-1), 1);
+      const diverging = labels[0] < 0 && labels[labels.length - 1] > 0;
+      if (diverging) {
+        const minValue = min([Math.abs(this._d3ScaleNegative.domain()[1]), this._d3Scale.domain()[0]]);
+        // add minValue if it does not exist, and should
+        if (!labels.includes(minValue)) {
+          labels.splice(labels.findIndex(d => d > minValue), 0, minValue);
+        }
+        // remove -minValue if minValue also exists
+        if (labels.includes(-minValue) && labels.includes(minValue)) {
+          labels.splice(labels.indexOf(-minValue), 1);
+        }
       }
     }
     return labels;
@@ -588,12 +594,14 @@ export default class Axis extends BaseClass {
         // crosses zero
         else {
           
-          const powers = domain.map(d => Math.log10(Math.abs(d)));
+          const powers = domain.map(d => Math.log10(Math.abs(d))).map(d => d || -1e-6);
           const leftPercentage = powers[0] / sum(powers);
           const zero = leftPercentage * (range[1] - range[0]);
 
-          const minPositive = min([min(this._data.filter(d => d >= 0)), Math.abs(domain[1])]);
-          const minNegative = min([min(this._data.filter(isNegative)), Math.abs(domain[0])]);
+          let minPositive = min([min(this._data.filter(d => d >= 0)), Math.abs(domain[1])]);
+          if (minPositive === 1) minPositive = 1e-6;
+          let minNegative = min([min(this._data.filter(isNegative)), Math.abs(domain[0])]);
+          if (minNegative === 1) minNegative = 1e-6;
           const minPosPow = minPositive === 0 ? 1e-6 : minPositive <= 1 ? floorPow(minPositive) : 1;
           const minNegPow = minNegative === 0 ? -1e-6 : minNegative <= 1 ? floorPow(minNegative) : 1;
           const minValue = min([minPosPow, minNegPow]);
