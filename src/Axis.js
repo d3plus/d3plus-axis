@@ -409,8 +409,11 @@ export default class Axis extends BaseClass {
         return `${number}${separator}${suff}`;
       }
       else {
-        const prefix = this._rounding === "inside" && ticks.indexOf(d) === 0 ? "< " : "";
-        const suffix = this._rounding === "inside" && ticks.indexOf(d) === ticks.length - 1 ? "+" : "";
+        const inverted = ticks[1] < ticks[0];
+        const minTick = inverted ? ticks.length - 1 : 0;
+        const maxTick = inverted ? 0 : ticks.length - 1;
+        const prefix = this._rounding === "inside" && ticks.indexOf(d) === minTick ? "< " : "";
+        const suffix = this._rounding === "inside" && ticks.indexOf(d) === maxTick ? "+" : "";
         return `${prefix}${formatAbbreviate(d, this._locale)}${suffix}`;
       }
     };
