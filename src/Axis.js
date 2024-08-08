@@ -168,6 +168,10 @@ export default class Axis extends BaseClass {
     this._paddingInner = 0.1;
     this._paddingOuter = 0.1;
     this._rounding = "none";
+    this._roundingInsideMinPrefix = "< ";
+    this._roundingInsideMinSuffix = "";
+    this._roundingInsideMaxPrefix = "";
+    this._roundingInsideMaxSuffix = "+";
     this._scale = "linear";
     this._scalePadding = 0.5;
     this._shape = "Line";
@@ -412,8 +416,14 @@ export default class Axis extends BaseClass {
         const inverted = ticks[1] < ticks[0];
         const minTick = inverted ? ticks.length - 1 : 0;
         const maxTick = inverted ? 0 : ticks.length - 1;
-        const prefix = this._rounding === "inside" && ticks.indexOf(d) === minTick ? "< " : "";
-        const suffix = this._rounding === "inside" && ticks.indexOf(d) === maxTick ? "+" : "";
+        const prefix = this._rounding === "inside" 
+          ? ticks.indexOf(d) === minTick ? this._roundingInsideMinPrefix 
+          : ticks.indexOf(d) === maxTick ? this._roundingInsideMaxPrefix
+          : "" : "";
+        const suffix = this._rounding === "inside" 
+          ? ticks.indexOf(d) === minTick ? this._roundingInsideMinSuffix 
+          : ticks.indexOf(d) === maxTick ? this._roundingInsideMaxSuffix
+          : "" : "";
         return `${prefix}${formatAbbreviate(d, this._locale)}${suffix}`;
       }
     };
@@ -1224,6 +1234,46 @@ export default class Axis extends BaseClass {
   */
   rounding(_) {
     return arguments.length ? (this._rounding = _, this) : this._rounding;
+  }
+
+  /**
+      @memberof Axis
+      @desc Sets the prefix used for the minimum value of "inside" rounding scales.
+      @param {String} [*value* = "< "]
+      @chainable
+  */
+  roundingInsideMinPrefix(_) {
+    return arguments.length ? (this._roundingInsideMinPrefix = _, this) : this._roundingInsideMinPrefix;
+  }
+
+  /**
+      @memberof Axis
+      @desc Sets the suffix used for the minimum value of "inside" rounding scales.
+      @param {String} [*value* = ""]
+      @chainable
+  */
+  roundingInsideMinSuffix(_) {
+    return arguments.length ? (this._roundingInsideMinSuffix = _, this) : this._roundingInsideMinSuffix;
+  }
+
+  /**
+      @memberof Axis
+      @desc Sets the prefix used for the maximum value of "inside" rounding scales.
+      @param {String} [*value* = ""]
+      @chainable
+  */
+  roundingInsideMaxPrefix(_) {
+    return arguments.length ? (this._roundingInsideMaxPrefix = _, this) : this._roundingInsideMaxPrefix;
+  }
+
+  /**
+      @memberof Axis
+      @desc Sets the suffix used for the maximum value of "inside" rounding scales.
+      @param {String} [*value* = ""]
+      @chainable
+  */
+  roundingInsideMaxSuffix(_) {
+    return arguments.length ? (this._roundingInsideMaxSuffix = _, this) : this._roundingInsideMaxSuffix;
   }
 
   /**
