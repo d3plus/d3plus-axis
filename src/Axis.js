@@ -489,7 +489,8 @@ export default class Axis extends BaseClass {
             return `${Math.round(Math.abs(d))}`.length
           };
           const zeroArray = [zeroLength(initialDomain[0]), zeroLength(initialDomain[1])].filter(Boolean).sort();
-          const zeros = zeroArray.length === 1 ? zeroArray[0] : zeroArray[0] + ((zeroArray[1] - zeroArray[0]) / 2);
+          const zeros = zeroArray.length === 1 ? zeroArray[0] 
+            : this._rounding === "outside" ? zeroArray[0] + ((zeroArray[1] - zeroArray[0]) / 2) : max(zeroArray);
           let factor = zeros < 1 ? fixFloat(zeros) : +`1${Array(Math.floor(fixFloat(zeros)) - 1).fill(0).join("")}`;
           if (factor >= Math.abs(initialDomain[1] - initialDomain[0])) factor /= 2;
           const inverted = initialDomain[1] < initialDomain[0];
