@@ -76,16 +76,16 @@ function calculateTicks(scale, minorTicks = false) {
 
   let ticks = [];
   const step = calculateStep.bind(this)(scale, minorTicks);
-  const domain = this._data.length ? extent(this._data) : scale.domain();
+  const domain = scale.domain();
+  const inverted = domain[1] < domain[0];
   
   if (!minorTicks && this._scale === "log") {
-    const inverted = domain[1] < domain[0];
     const roundDomain = domain.map(d => Math.log10(d) % 1 === 0 ? d : (inverted ? ceilPow : floorPow)(d));
     const invertedRound = roundDomain[1] < roundDomain[0];
     const powers = roundDomain
-      .map(d => (isNegative(d) ? -1 : 1) * ([-1, 1].includes(d) ? 1 : Math.log10(Math.abs(d))));
+      .map(d => (isNegative(d) ? -1 : 1) * ([-1, 1].includes(d) || Math.abs(d) < 1 ? 1 : Math.log10(Math.abs(d))));
     const powMod = Math.ceil((Math.abs(powers[1] - powers[0]) + 1) / (step * 0.65));
-
+    
     ticks = (powMod <= 1 && powers[0] === powers[1]) || invertedRound !== inverted
       ? scale.ticks(step).filter(d => +`${d}`.replace("0.", "") % 2 === 0)
       : d3Range(powers[0], powers[1], powers[1] < powers[0] ? -1 : 1)
@@ -112,17 +112,22 @@ function calculateTicks(scale, minorTicks = false) {
     }
 
   }
-      
+  
   // forces min/max into ticks, if not present
-  if (!ticks.map(Number).includes(+domain[0])) {
-    ticks.unshift(domain[0]);
+  if (!this._d3ScaleNegative || isNegative(domain[inverted ? 1 : 0]) === ticks.some(d => isNegative(d))) {
+    if (!ticks.map(Number).includes(+domain[0])) {
+      ticks.unshift(domain[0]);
+    }
   }
-  if (!ticks.map(Number).includes(+domain[1])) {
-    ticks.push(domain[1]);
+  if (!this._d3ScaleNegative || isNegative(domain[inverted ? 0 : 1]) === ticks.some(d => isNegative(d))) {
+    if (!ticks.map(Number).includes(+domain[1])) {
+      ticks.push(domain[1]);
+    }
   }
+  
 
-  // if data array has been provided, filter out ticks that are not in the array
-  if (this._data.length) {
+  // for time scale, if data array has been provided, filter out ticks that are not in the array
+  if (this._scale === "time" && this._data.length) {
     const dataNumbers = this._data.map(Number);
     ticks = ticks.filter(t => dataNumbers.includes(+t));
   }
@@ -298,9 +303,9 @@ export default class Axis extends BaseClass {
     if (this._d3ScaleNegative) labels = labels.concat(calculateTicks.bind(this)(this._d3ScaleNegative, false));
     if (this._d3Scale) labels = labels.concat(calculateTicks.bind(this)(this._d3Scale, false));
     if (this._scale === "log") {
-      const diverging = labels[0] < 0 && labels[labels.length - 1] > 0;
+      const diverging = labels.some(d => isNegative(d)) && labels.some(d => d > 0);
       if (diverging) {
-        const minValue = min([Math.abs(this._d3ScaleNegative.domain()[1]), this._d3Scale.domain()[0]]);
+        const minValue = min([...this._d3ScaleNegative.domain().map(Math.abs), ...this._d3Scale.domain()]);
         // add minValue if it does not exist, and should
         if (!labels.includes(minValue)) {
           labels.splice(labels.findIndex(d => d > minValue), 0, minValue);
@@ -604,8 +609,7 @@ export default class Axis extends BaseClass {
           if (minNegative === 1) minNegative = 1e-6;
           const minPosPow = minPositive === 0 ? 1e-6 : minPositive <= 1 ? floorPow(minPositive) : 1;
           const minNegPow = minNegative === 0 ? -1e-6 : minNegative <= 1 ? floorPow(minNegative) : 1;
-          const minValue = min([minPosPow, minNegPow]);
-
+          const minValue = min([Math.abs(minPosPow), Math.abs(minNegPow)]);
           this._d3ScaleNegative = this._d3Scale.copy();
           (isNegative(domain[0]) ? this._d3Scale : this._d3ScaleNegative)
             .domain([isNegative(domain[0]) ? minValue : -minValue, domain[1]])
@@ -636,7 +640,7 @@ export default class Axis extends BaseClass {
       }
       ticks = ticks.sort((a, b) => this._getPosition(a) - this._getPosition(b));
       labels = labels.sort((a, b) => this._getPosition(a) - this._getPosition(b));
-
+      
       /**
        * Get the smallest suffix.
        */
