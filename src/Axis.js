@@ -508,12 +508,11 @@ export default class Axis extends BaseClass {
 
         const roundDomain = () => {
           const zeroLength = d => {
-            if (!d) return 0;
             if (Math.abs(d) < 1) {
               const m = `${d}`.match(/0\.(0*)/);
               if (m) return +`0.${Array(m[1].length).fill(0).join("")}1`;
             }
-            return `${Math.round(Math.abs(d))}`.length
+            return `${Math.round(Math.abs(d))}`.length;
           };
           const zeroArray = [zeroLength(initialDomain[0]), zeroLength(initialDomain[1])].filter(Boolean).sort();
           const diverging = initialDomain.some(d => isNegative(d)) && initialDomain.some(d => d > 0);
