@@ -26,9 +26,9 @@ const ceilPow = d => Math.pow(10, Math.ceil(Math.log10(Math.abs(d)))) * Math.pow
 const fixFloat = d => {
   const str = `${d}`;
   if (str.includes("e-") || str === "0") return 0;
-  const nineMatch = str.match(/(-*[0-9]+\.[0]*)([0-8])9{3,}[0-9]+$/);
+  const nineMatch = str.match(/(-*[0-9]+\.[0]*)([0-8]+)9{3,}[0-9]+$/);
   if (nineMatch) return +`${nineMatch[1]}${+nineMatch[2] + 1}`;
-  const zeroMatch = str.match(/(-*[0-9]+\.[0]*)([1-9])0*[0-9]*0{3,}[0-9]+$/);
+  const zeroMatch = str.match(/(-*[0-9]+\.[0]*)([1-9]+)0*[0-9]*0{3,}[0-9]+$/);
   if (zeroMatch) return +`${zeroMatch[1]}${+zeroMatch[2]}`;
   return d;
 }
@@ -508,13 +508,14 @@ export default class Axis extends BaseClass {
 
         const roundDomain = () => {
           const zeroLength = d => {
-            if (Math.abs(d) < 1) {
+            if (smallScale) {
               if (!d) return 0;
               const m = `${d}`.match(/0\.(0*)/);
               if (m) return +`0.${Array(m[1].length + 1).fill(0).join("")}1`;
             }
             return `${Math.round(Math.abs(d))}`.length;
           };
+          const smallScale = initialDomain.every(d => Math.abs(d) < 1);
           const zeroArray = [zeroLength(initialDomain[0]), zeroLength(initialDomain[1])].filter(Boolean).sort();
           const diverging = initialDomain.some(d => isNegative(d)) && initialDomain.some(d => d > 0);
           const zeros = zeroArray.length === 1 ? zeroArray[0] 
