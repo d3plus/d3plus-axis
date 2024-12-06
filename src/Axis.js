@@ -509,8 +509,9 @@ export default class Axis extends BaseClass {
         const roundDomain = () => {
           const zeroLength = d => {
             if (Math.abs(d) < 1) {
+              if (!d) return 0;
               const m = `${d}`.match(/0\.(0*)/);
-              if (m) return +`0.${Array(m[1].length).fill(0).join("")}1`;
+              if (m) return +`0.${Array(m[1].length + 1).fill(0).join("")}1`;
             }
             return `${Math.round(Math.abs(d))}`.length;
           };
