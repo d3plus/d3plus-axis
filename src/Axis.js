@@ -125,12 +125,7 @@ function calculateTicks(scale, minorTicks = false) {
     }
   }
   
-
-  // for time scale, if data array has been provided, filter out ticks that are not in the array
-  if (this._scale === "time" && this._data.length) {
-    const dataNumbers = this._data.map(Number);
-    ticks = ticks.filter(t => dataNumbers.includes(+t));
-  }
+  if (this._scale === "time" && this._data.length) ticks = this._data;
 
   return ticks;
 }
