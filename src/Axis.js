@@ -33,6 +33,8 @@ const fixFloat = d => {
   return d;
 }
 
+const maxTimezoneOffset = 1000 * 60 * 60 * 26;
+
 /**
  * Calculates ticks from a given scale (negative and/or positive)
  * @param {scale} scale A d3-scale object
@@ -73,33 +75,59 @@ function calculateStep(scale, minorTicks = false) {
  * @private
  */
 function calculateTicks(scale, minorTicks = false) {
-
   let ticks = [];
-  const step = calculateStep.bind(this)(scale, minorTicks);
-  const domain = scale.domain();
-  const inverted = domain[1] < domain[0];
-  
-  if (!minorTicks && this._scale === "log") {
-    const roundDomain = domain.map(d => Math.log10(d) % 1 === 0 ? d : (inverted ? ceilPow : floorPow)(d));
-    const invertedRound = roundDomain[1] < roundDomain[0];
-    const powers = roundDomain
-      .map(d => (isNegative(d) ? -1 : 1) * ([-1, 1].includes(d) || Math.abs(d) < 1 ? 1 : Math.log10(Math.abs(d))));
-    const powMod = Math.ceil((Math.abs(powers[1] - powers[0]) + 1) / (step * 0.65));
-    
-    ticks = (powMod <= 1 && powers[0] === powers[1]) || invertedRound !== inverted
-      ? scale.ticks(step).filter(d => +`${d}`.replace("0.", "") % 2 === 0)
-      : d3Range(powers[0], powers[1], powers[1] < powers[0] ? -1 : 1)
-        .concat([powers[1]])
-        .filter(d => Math.abs(d) % powMod === 0)
-        .map(d => 
-          +`${(isNegative(d) ? -1 : 1) * (d ? Math.pow(10, Math.abs(d)) : Math.sign(1 / d) > 0 ? 1 : -1)}`
-            .replace(/9+/g, "1")
-        );
-  }
-  else {
 
-    ticks = scale.ticks(step);
-    if (!minorTicks && !["log", "time"].includes(this._scale) && ticks.length > 1) {
+  const scaleClone = scale.copy();
+  if (this._scale === "time" && this._data.length) {
+    const newDomain = extent(this._data);
+    const range = newDomain.map(scale);
+    scaleClone.domain(newDomain).range(range);
+  }
+
+  const domain = scaleClone.domain();
+  const inverted = domain[1] < domain[0];
+  const step = calculateStep.bind(this)(scaleClone, minorTicks);
+
+  if (!minorTicks && this._scale === "log") {
+    const roundDomain = domain.map(d =>
+      Math.log10(d) % 1 === 0 ? d : (inverted ? ceilPow : floorPow)(d)
+    );
+    const invertedRound = roundDomain[1] < roundDomain[0];
+    const powers = roundDomain.map(
+      d =>
+        (isNegative(d) ? -1 : 1) *
+        ([-1, 1].includes(d) || Math.abs(d) < 1 ? 1 : Math.log10(Math.abs(d)))
+    );
+    const powMod = Math.ceil(
+      (Math.abs(powers[1] - powers[0]) + 1) / (step * 0.65)
+    );
+
+    ticks =
+      (powMod <= 1 && powers[0] === powers[1]) || invertedRound !== inverted
+        ? scaleClone
+            .ticks(step)
+            .filter(d => +`${d}`.replace("0.", "") % 2 === 0)
+        : d3Range(powers[0], powers[1], powers[1] < powers[0] ? -1 : 1)
+            .concat([powers[1]])
+            .filter(d => Math.abs(d) % powMod === 0)
+            .map(
+              d =>
+                +`${
+                  (isNegative(d) ? -1 : 1) *
+                  (d
+                    ? Math.pow(10, Math.abs(d))
+                    : Math.sign(1 / d) > 0
+                    ? 1
+                    : -1)
+                }`.replace(/9+/g, "1")
+            );
+  } else {
+    ticks = scaleClone.ticks(step);
+    if (
+      !minorTicks &&
+      !["log", "time"].includes(this._scale) &&
+      ticks.length > 1
+    ) {
       let majorDiff = Math.abs(fixFloat(ticks[1] - ticks[0]) * 2);
       ticks = ticks.filter(d => {
         const mod = Math.abs(d) % majorDiff;
@@ -110,22 +138,36 @@ function calculateTicks(scale, minorTicks = false) {
         return mod === 0;
       });
     }
-
   }
-  
+
+  // for time scale, if data array has been provided, filter out ticks that are not in the array
+  if (this._scale === "time" && this._data.length) {
+    const dataNumbers = this._data.map(Number);
+    ticks = ticks.filter(t => {
+      const tn = +t;
+      return dataNumbers.find(
+        n => n >= tn - maxTimezoneOffset && n <= tn + maxTimezoneOffset
+      );
+    });
+  }
+
   // forces min/max into ticks, if not present
-  if (!this._d3ScaleNegative || isNegative(domain[inverted ? 1 : 0]) === ticks.some(d => isNegative(d))) {
+  if (
+    !this._d3ScaleNegative ||
+    isNegative(domain[inverted ? 1 : 0]) === ticks.some(d => isNegative(d))
+  ) {
     if (!ticks.map(Number).includes(+domain[0])) {
       ticks.unshift(domain[0]);
     }
   }
-  if (!this._d3ScaleNegative || isNegative(domain[inverted ? 0 : 1]) === ticks.some(d => isNegative(d))) {
+  if (
+    !this._d3ScaleNegative ||
+    isNegative(domain[inverted ? 0 : 1]) === ticks.some(d => isNegative(d))
+  ) {
     if (!ticks.map(Number).includes(+domain[1])) {
       ticks.push(domain[1]);
     }
   }
-  
-  if (this._scale === "time" && this._data.length) ticks = this._data;
 
   return ticks;
 }
